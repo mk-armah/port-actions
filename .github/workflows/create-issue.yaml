@@ -19,7 +19,7 @@ jobs:
       uses: atlassian/gajira-create@v3
       with:
         project: PORT
-        issuetype: Build
+        issuetype: Task
         summary: Build completed for ${{ github.repository }}
         description: Compare branch
         fields: '{"customfield_10171": "test"}'
