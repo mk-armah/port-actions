@@ -22,7 +22,7 @@ jobs:
         issuetype: Task
         summary: Build completed for ${{ github.repository }}
         description: Compare branch
-        fields: '{"customfield_10171": "test"}'
+        fields: '{"description": "Show an example of how to create jira issue using github action"}'
       
     - name: Log created issue
       run: echo "Issue ${{ steps.create.outputs.issue }} was created"
