@@ -34,7 +34,7 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: "${{ github.event.inputs.project }}"
-          issuetype: "${{fromJson(inputs.port_payload).context.task}}"
+          issuetype: "${{ github.event.inputs.issuetype }}"
           summary: "${{ github.event.inputs.summary }}"
           description: "${{ github.event.inputs.description }}"
           fields: ${{fromJson(${{github.event.inputs.fields }}}} 
