@@ -39,13 +39,13 @@ jobs:
           description: "${{ github.event.inputs.description }}"
           fields: ${{ fromJson(github.event.inputs.fields) }}
 
-      - name: Get Created Issue
-        id: get_issue
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: 'https://${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/${{ steps.create.outputs.id }}'
-          method: 'GET'
-          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
+      # - name: Get Created Issue
+      #   id: get_issue
+      #   uses: fjogeleit/http-request-action@v1
+      #   with:
+      #     url: 'https://${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/${{ steps.create.outputs.id }}'
+      #     method: 'GET'
+      #     customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
               
       # - name: UPSERT Entity
       #   uses: port-labs/port-github-action@v1
@@ -93,4 +93,4 @@ jobs:
           runId: ${{fromJson(inputs.port_payload).context.runId}}
           logMessage: |
             Get Response for created issue
-            ${{ steps.get_issue.outputs }}
+            ${{ steps.create.outputs }}
