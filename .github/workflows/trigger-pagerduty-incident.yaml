@@ -73,4 +73,4 @@ jobs:
           runId: ${{fromJson(inputs.port_payload).context.runId}}
           logMessage: |
              PagerDuty incident triggered! ✅
-             The incident id is: ${{ steps.trigger.outputs}}
+             "The incident id is: ${{ steps.trigger.outputs}}"
