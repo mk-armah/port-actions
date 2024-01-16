@@ -33,11 +33,11 @@ jobs:
         id: create
         uses: atlassian/gajira-create@v3
         with:
-          project: ${{fromJson(inputs.port_payload).context.project}}
-          issuetype: ${{fromJson(inputs.port_payload).context.task}}
-          summary: ${{fromJson(inputs.port_payload).context.summary}}
-          description: ${{fromJson(inputs.port_payload).context.description}}
-          fields: ${{fromJson(inputs.port_payload).context.fields}} 
+          project: "${{ github.event.inputs.project }}"
+          issuetype: "${{fromJson(inputs.port_payload).context.task}}"
+          summary: "${{ github.event.inputs.summary }}"
+          description: "${{ github.event.inputs.description }}"
+          fields: ${{fromJson(${{github.event.inputs.fields }}}} 
 
       # - name: UPSERT Entity
       #   uses: port-labs/port-github-action@v1
