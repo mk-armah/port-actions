@@ -43,7 +43,7 @@ jobs:
         id: get_issue
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'http://${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/${{ steps.create.outputs.id }}'
+          url: 'https://${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/${{ steps.create.outputs.id }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
               
