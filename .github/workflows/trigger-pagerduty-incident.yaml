@@ -63,6 +63,7 @@ jobs:
       #     runId: ${{fromJson(inputs.port_payload).context.runId}}
           
       - name: Create a log message
+        id: log-response
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
