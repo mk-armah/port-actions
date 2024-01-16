@@ -1,0 +1,38 @@
+name: Create PagerDuty Service
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Name of the PagerDuty Service'
+        required: true
+        type: string
+      service_description:
+        description: 'Description of the PagerDuty Service'
+        required: true
+        type: string
+      escalation_policy_id:
+        description: 'Escalation Policy ID for the service'
+        required: true
+        type: string
+
+jobs:
+  create-pagerduty-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Service in PagerDuty
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/services'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
+          data: >-
+            {
+              "service": {
+                "name": "${{ github.event.inputs.service_name }}",
+                "description": "${{ github.event.inputs.service_description }}",
+                "escalation_policy": {
+                  "id": "${{ github.event.inputs.escalation_policy_id }}",
+                  "type": "escalation_policy_reference"
+                }
+              }
+            }
