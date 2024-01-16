@@ -17,6 +17,32 @@ jobs:
   create-entity-in-port-and-update-run:
     runs-on: ubuntu-latest
     steps:
+      - name: Send Event to PagerDuty
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://events.pagerduty.com/v2/enqueue'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
+          data: >
+            {
+              "payload": {
+                "summary": "DISK at 99% on machine prod-datapipe03.example.com",
+                "timestamp": "2015-07-17T08:42:58.315+0000",
+                "severity": "critical",
+                "source": "prod-datapipe03.example.com",
+                "component": "mysql",
+                "group": "prod-datapipe",
+                "class": "disk",
+                "custom_details": {
+                  "free space": "1%",
+                  "ping time": "1500ms",
+                  "load avg": 0.75
+                }
+              },
+              "event_action": "trigger",
+              "routing_key": "e93facc04764012d7bfb002500d5d1a6"
+            }
+            
       - name: Deploy Stage
         uses: fjogeleit/http-request-action@v1
         with:
