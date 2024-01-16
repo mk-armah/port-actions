@@ -1,28 +1,85 @@
-on: push
-
-name: Jira Example
-
+name: UPSERT workflow
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        type: string
+      issuetype:
+        type: string
+      summary:
+        type: string
+      description:
+        type: string
+      fields:
+        type: string
+      port_payload:
+        required: true
+        description: Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+        type: string
 jobs:
-  build:
+  create-entity-in-port-and-update-run:
     runs-on: ubuntu-latest
-    name: Jira Example
     steps:
-    - name: Login
-      uses: atlassian/gajira-login@v3
-      env:
-        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: some_identifier
+          title: Some Title
+          team: "[]"
+          icon: DefaultBlueprint
+          blueprint: jiraIssue
+          properties: |-
+            {
+              "url": "https://example.com",
+              "status": "string",
+              "issueType": "string",
+              "components": [],
+              "assignee": "string",
+              "reporter": "string",
+              "creator": "string",
+              "priority": "string",
+              "created": "2024-01-15T22:18:43.781Z",
+              "updated": "2024-01-15T22:18:43.781Z"
+            }
+          relations: |-
+            {
+              "parentIssue": "related_entity_identifier",
+              "project": "related_entity_identifier",
+              "subtasks": [
+                "related_entity_identifier",
+                "another_related_entity_identifier"
+              ]
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{fromJson(inputs.port_payload).context.runId}}
+
+      - name: Login
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         
-    - name: Create
-      id: create
-      uses: atlassian/gajira-create@v3
-      with:
-        project: PORT
-        issuetype: Task
-        summary: Build completed for ${{ github.repository }}
-        description: Compare branch
-        fields: '{"description": "Show an example of how to create jira issue using github action"}'
+      - name: Create
+        id: create
+        uses: atlassian/gajira-create@v3
+        with:
+          project: ${{fromJson(inputs.port_payload).context.project}}
+          issuetype: ${{fromJson(inputs.port_payload).context.task}}
+          summary: ${{fromJson(inputs.port_payload).context.summary}}
+          description: ${{fromJson(inputs.port_payload).context.description}}
+          fields: ${{fromJson(inputs.port_payload).context.fields}} 
       
-    - name: Log created issue
-      run: echo "Issue ${{ steps.create.outputs.issue }} was created"
+      - name: Create a log message
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_payload).context.runId}}
+          logMessage: An example of a log message
