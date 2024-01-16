@@ -40,9 +40,10 @@ jobs:
           fields: ${{ fromJson(github.event.inputs.fields) }}
 
       - name: Get Created Issue
+        id: get_issue
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'http:// ${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/ ${{ steps.create.outputs.id }}'
+          url: 'http://${{ secrets.JIRA_BASE_URL }}/jira/rest/api/2/issue/${{ steps.create.outputs.id }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
               
@@ -90,4 +91,6 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_payload).context.runId}}
-          logMessage: An example of a log message
+          logMessage: |
+            Get Response for created issue
+            ${{ steps.get_issue.outputs }}
