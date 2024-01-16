@@ -71,4 +71,6 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_payload).context.runId}}
-          logMessage: ${{ steps.trigger.outputs.message }}
+          logMessage: |
+             PagerDuty incident triggered! ✅
+             The incident id is: ${{ steps.trigger.outputs}}
