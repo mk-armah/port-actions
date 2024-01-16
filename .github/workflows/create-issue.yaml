@@ -37,7 +37,7 @@ jobs:
           issuetype: "${{ github.event.inputs.issuetype }}"
           summary: "${{ github.event.inputs.summary }}"
           description: "${{ github.event.inputs.description }}"
-          fields: ${{fromJson(${{github.event.inputs.fields }}}} 
+          fields: ${{fromJson( github.event.inputs.fields )}} 
 
       # - name: UPSERT Entity
       #   uses: port-labs/port-github-action@v1
