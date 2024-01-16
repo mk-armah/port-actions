@@ -16,34 +16,8 @@ on:
 jobs:
   create-entity-in-port-and-update-run:
     runs-on: ubuntu-latest
-    steps:
+    steps:       
       - name: Send Event to PagerDuty
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: 'https://events.pagerduty.com/v2/enqueue'
-          method: 'POST'
-          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
-          data: >
-            {
-              "payload": {
-                "summary": "DISK at 99% on machine prod-datapipe03.example.com",
-                "timestamp": "2015-07-17T08:42:58.315+0000",
-                "severity": "critical",
-                "source": "prod-datapipe03.example.com",
-                "component": "mysql",
-                "group": "prod-datapipe",
-                "class": "disk",
-                "custom_details": {
-                  "free space": "1%",
-                  "ping time": "1500ms",
-                  "load avg": 0.75
-                }
-              },
-              "event_action": "trigger",
-              "routing_key": "e93facc04764012d7bfb002500d5d1a6"
-            }
-            
-      - name: Deploy Stage
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://events.pagerduty.com/v2/enqueue'
@@ -55,43 +29,43 @@ jobs:
               "event_action": "${{ github.event.inputs.event_action }}",
               "routing_key": "${{ github.event.inputs.routing_key }}"
             }
-        
-      # - name: UPSERT Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     identifier: some_identifier
-      #     title: Some Title
-      #     team: "[]"
-      #     icon: DefaultBlueprint
-      #     blueprint: pagerdutyIncident
-      #     properties: |-
-      #       {
-      #         "status": "triggered",
-      #         "url": "https://example.com",
-      #         "urgency": "high",
-      #         "responder": "string",
-      #         "escalation_policy": "string",
-      #         "created_at": "2024-01-16T06:10:02.951Z",
-      #         "updated_at": "2024-01-16T06:10:02.951Z"
-      #       }
-      #     relations: |-
-      #       {
-      #         "pagerdutyService": [
-      #           "related_entity_identifier",
-      #           "another_related_entity_identifier"
-      #         ]
-      #       }
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: UPSERT
-      #     runId: ${{fromJson(inputs.port_payload).context.runId}}
-      # - name: Create a log message
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(inputs.port_payload).context.runId}}
-      #     logMessage: An example of a log message
+            
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: some_identifier
+          title: Some Title
+          team: "[]"
+          icon: DefaultBlueprint
+          blueprint: pagerdutyIncident
+          properties: |-
+            {
+              "status": "triggered",
+              "url": "https://example.com",
+              "urgency": "high",
+              "responder": "string",
+              "escalation_policy": "string",
+              "created_at": "2024-01-16T06:10:02.951Z",
+              "updated_at": "2024-01-16T06:10:02.951Z"
+            }
+          relations: |-
+            {
+              "pagerdutyService": [
+                "related_entity_identifier",
+                "another_related_entity_identifier"
+              ]
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{fromJson(inputs.port_payload).context.runId}}
+      - name: Create a log message
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_payload).context.runId}}
+          logMessage: An example of a log message
