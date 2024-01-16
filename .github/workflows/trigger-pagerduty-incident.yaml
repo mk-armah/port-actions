@@ -71,4 +71,4 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_payload).context.runId}}
-          logMessage: ${{ steps.trigger.outputs }}
+          logMessage: ${{ steps.trigger.outputs.message }}
