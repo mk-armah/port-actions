@@ -23,7 +23,12 @@ jobs:
           url: 'https://events.pagerduty.com/v2/enqueue'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json"}'
-          data: '{"payload": ${{github.event.inputs.payload}}, "event_action": ${{github.event.inputs.event_action}}, "routing_key": ${{github.event.inputs.routing_key}}}'
+          data: >-
+            {
+              "payload": ${{ toJson(github.event.inputs.payload) }},
+              "event_action": "${{ github.event.inputs.event_action }}",
+              "routing_key": "${{ github.event.inputs.routing_key }}"
+            }
         
       # - name: UPSERT Entity
       #   uses: port-labs/port-github-action@v1
