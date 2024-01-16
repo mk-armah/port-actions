@@ -1,4 +1,4 @@
-name: UPSERT workflow
+name: Create Jira Issue
 on:
   workflow_dispatch:
     inputs:
@@ -21,42 +21,7 @@ jobs:
   create-entity-in-port-and-update-run:
     runs-on: ubuntu-latest
     steps:
-      - name: UPSERT Entity
-        uses: port-labs/port-github-action@v1
-        with:
-          identifier: some_identifier
-          title: Some Title
-          team: "[]"
-          icon: DefaultBlueprint
-          blueprint: jiraIssue
-          properties: |-
-            {
-              "url": "https://example.com",
-              "status": "string",
-              "issueType": "string",
-              "components": [],
-              "assignee": "string",
-              "reporter": "string",
-              "creator": "string",
-              "priority": "string",
-              "created": "2024-01-15T22:18:43.781Z",
-              "updated": "2024-01-15T22:18:43.781Z"
-            }
-          relations: |-
-            {
-              "parentIssue": "related_entity_identifier",
-              "project": "related_entity_identifier",
-              "subtasks": [
-                "related_entity_identifier",
-                "another_related_entity_identifier"
-              ]
-            }
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: UPSERT
-          runId: ${{fromJson(inputs.port_payload).context.runId}}
-
+    
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
@@ -73,7 +38,43 @@ jobs:
           summary: ${{fromJson(inputs.port_payload).context.summary}}
           description: ${{fromJson(inputs.port_payload).context.description}}
           fields: ${{fromJson(inputs.port_payload).context.fields}} 
-      
+
+      # - name: UPSERT Entity
+      #   uses: port-labs/port-github-action@v1
+      #   with:
+      #     identifier: some_identifier
+      #     title: Some Title
+      #     team: "[]"
+      #     icon: DefaultBlueprint
+      #     blueprint: jiraIssue
+      #     properties: |-
+      #       {
+      #         "url": "https://example.com",
+      #         "status": "string",
+      #         "issueType": "string",
+      #         "components": [],
+      #         "assignee": "string",
+      #         "reporter": "string",
+      #         "creator": "string",
+      #         "priority": "string",
+      #         "created": "2024-01-15T22:18:43.781Z",
+      #         "updated": "2024-01-15T22:18:43.781Z"
+      #       }
+      #     relations: |-
+      #       {
+      #         "parentIssue": "related_entity_identifier",
+      #         "project": "related_entity_identifier",
+      #         "subtasks": [
+      #           "related_entity_identifier",
+      #           "another_related_entity_identifier"
+      #         ]
+      #       }
+      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+      #     baseUrl: https://api.getport.io
+      #     operation: UPSERT
+      #     runId: ${{fromJson(inputs.port_payload).context.runId}}
+          
       - name: Create a log message
         uses: port-labs/port-github-action@v1
         with:
