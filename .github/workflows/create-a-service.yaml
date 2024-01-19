@@ -88,11 +88,11 @@ jobs:
           team: '[]'
           icon: pagerduty
           blueprint: pagerdutyService
-          properties: >-
+          properties: |-
             {
-              "status": "${{ fromJson(steps.create_service_request.outputs.response).service.status }}",
-              "url": "${{ fromJson(steps.create_service_request.outputs.response).service.html_url }}",
-              "oncall": "${{ fromJson(steps.fetch_oncalls).oncalls }}"
+              "status": 'active'  #"${{ fromJson(steps.create_service_request.outputs.response).service.status }}",
+              "url": 'https.getport.io'# "${{ fromJson(steps.create_service_request.outputs.response).service.html_url }}",
+              "oncall": []# "${{ fromJson(steps.fetch_oncalls).oncalls }}"
             }
           relations: '{}'
           clientId: '${{ secrets.PORT_CLIENT_ID }}'
