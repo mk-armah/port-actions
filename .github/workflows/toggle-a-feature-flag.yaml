@@ -58,7 +58,7 @@ jobs:
           timestamp="${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
           epoch_seconds=$(($timestamp / 1000))
           formatted_date=$(date -u -d "@${epoch_seconds}" +"%Y-%m-%dT%H:%M:%SZ")
-          echo "formatted_date=${formatted_date}" >> $GITHUB_ENV
+          echo "formatted_date=${formatted_date}" >> $GITHUB_OUTPUT
           echo "formatted_date=${formatted_date}" # For logging purposes
 
       - name: Log Before Upserting Entity
@@ -79,7 +79,7 @@ jobs:
           blueprint: launchDarklyFeatureFlag
           properties: |-
             {
-              "kind": "${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }}",
+              "kind": ${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }},
               "description": "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}",
               "creationDate": "${{ steps.format_date.outputs.formatted_date }}",
               "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
@@ -89,7 +89,7 @@ jobs:
               "maintainer": ${{ fromJson(steps.toggle_feature_flag.outputs.response)._maintainer }},
               "environments": ${{ fromJson(steps.toggle_feature_flag.outputs.response).environments }}
               "variations": ${{ fromJson(steps.toggle_feature_flag.outputs.response).variations }},
-              "customProperties": "${{ fromJson(steps.toggle_feature_flag.outputs.response).customProperties }}"
+              "customProperties": ${{ fromJson(steps.toggle_feature_flag.outputs.response).customProperties }}
               "archived": ${{ fromJson(steps.toggle_feature_flag.outputs.response).archived }},
               "projectKey": "${{ github.event.inputs.project_key }}"
             }
