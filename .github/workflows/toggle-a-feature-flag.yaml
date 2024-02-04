@@ -69,14 +69,14 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Moving on to upsert updates to Port - ${{ steps.format_date.outputs }}"
+          logMessage: "Moving on to upsert updates to Port"
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
           identifier: "${{ fromJson(steps.toggle_feature_flag.outputs.response).key }}"
-          title: ${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}
-          blueprint: launchDarklyFeatureFlag
+          title: "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}"
+          blueprint: "launchDarklyFeatureFlag"
           properties: |-
             {
               "kind": ${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }},
