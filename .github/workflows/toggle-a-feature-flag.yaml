@@ -43,8 +43,8 @@ jobs:
         with:
           url: 'https://app.launchdarkly.com/api/v2/flags/${{ github.event.inputs.project_key }}/${{ github.event.inputs.feature_flag_key }}'
           method: 'PATCH'
-          headers: '{"Authorization": "api-${{ secrets.LAUNCHDARKLY_ACCESS_TOKEN }}", "Content-Type": "application/json"}'
-          body: >-
+          customHeaders: '{"Authorization": "api-${{ secrets.LAUNCHDARKLY_ACCESS_TOKEN }}", "Content-Type": "application/json"}'
+          data: >-
             [{
               "op": "replace",
               "path": "/environments/${{ github.event.inputs.environment_key }}/on",
