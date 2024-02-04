@@ -1,0 +1,36 @@
+name: Toggle LaunchDarkly Feature Flag
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature_flag_key:
+        description: 'LaunchDarkly Feature Flag Key'
+        required: true
+        type: string
+      environment_key:
+        description: 'LaunchDarkly Environment Key where the flag exists'
+        required: true
+        type: string
+      flag_state:
+        description: 'Desired state of the feature flag (true for enabled, false for disabled)'
+        required: true
+        type: boolean
+
+jobs:
+  toggle-feature-flag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Toggle Feature Flag in LaunchDarkly
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://app.launchdarkly.com/api/v2/flags/default/${{ github.event.inputs.feature_flag_key }}/environments/${{ github.event.inputs.environment_key }}/on'
+          method: 'PATCH'
+          headers: '{"Authorization": "api-${{ secrets.LAUNCHDARKLY_ACCESS_TOKEN }}", "Content-Type": "application/json"}'
+          body: >-
+            [{
+              "op": "replace",
+              "path": "/value",
+              "value": ${{ github.event.inputs.flag_state }}
+            }]
+      - name: Log Success Message
+        run: echo "Feature flag '${{ github.event.inputs.feature_flag_key }}' state toggled successfully in LaunchDarkly."
