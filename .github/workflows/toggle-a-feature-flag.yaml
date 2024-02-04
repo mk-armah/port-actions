@@ -60,7 +60,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: ${{ fromJson(steps.toggle_feature_flag.outputs)}}
+          logMessage: "${{ fromJson(steps.toggle_feature_flag.outputs)}}"
 
       - name: Convert createdOn to desired format
         id: format_date
