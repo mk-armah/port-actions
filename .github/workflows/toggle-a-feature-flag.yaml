@@ -74,7 +74,7 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{ fromJson(steps.toggle_feature_flag.outputs.response).key }}
+          identifier: "${{ fromJson(steps.toggle_feature_flag.outputs.response).key }}"
           title: ${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}
           blueprint: launchDarklyFeatureFlag
           properties: |-
