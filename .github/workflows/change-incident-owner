@@ -1,0 +1,48 @@
+name: Change PagerDuty Incident Owner
+
+on:
+  workflow_dispatch:
+    inputs:
+      incident_id:
+        description: 'ID of the PagerDuty Incident'
+        required: true
+        type: string
+      new_owner_user_id:
+        description: 'PagerDuty User ID of the new owner'
+        required: true
+        type: string
+
+jobs:
+  change-incident-owner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Change Incident Owner in PagerDuty
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/incidents/${{ github.event.inputs.incident_id }}'
+          method: 'PUT'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
+          data: >-
+            {
+              "incident": {
+                "type": "incident_reference",
+                "assignments": [
+                  {
+                    "assignee": {
+                      "id": "${{ github.event.inputs.new_owner_user_id }}",
+                      "type": "user_reference"
+                    }
+                  }
+                ]
+              }
+            }
+
+      - name: Create a log message for successful owner change
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.client_payload.port_payload).context.runId}}
+          logMessage: 'PagerDuty incident owner changed successfully ✅'
