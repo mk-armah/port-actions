@@ -84,13 +84,13 @@ jobs:
               "creationDate": "${{ steps.format_date.outputs.formatted_date }}",
               "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
               "clientSideAvailability": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability }},
-              "temporary": "${{ fromJson(steps.toggle_feature_flag.outputs.response).temporary }}",
-              "tags": "${{ fromJson(steps.toggle_feature_flag.outputs.response).tags }}",
-              "maintainer": "${{ fromJson(steps.toggle_feature_flag.outputs.response)._maintainer }}",
+              "temporary": ${{ fromJson(steps.toggle_feature_flag.outputs.response).temporary }},
+              "tags": ${{ fromJson(steps.toggle_feature_flag.outputs.response).tags }},
+              "maintainer": ${{ fromJson(steps.toggle_feature_flag.outputs.response)._maintainer }},
               "environments": ${{ fromJson(steps.toggle_feature_flag.outputs.response).environments }}
               "variations": ${{ fromJson(steps.toggle_feature_flag.outputs.response).variations }},
               "customProperties": "${{ fromJson(steps.toggle_feature_flag.outputs.response).customProperties }}"
-              "archived": "${{ fromJson(steps.toggle_feature_flag.outputs.response).achieved }}",
+              "archived": ${{ fromJson(steps.toggle_feature_flag.outputs.response).archived }},
               "projectKey": "${{ github.event.inputs.project_key }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
