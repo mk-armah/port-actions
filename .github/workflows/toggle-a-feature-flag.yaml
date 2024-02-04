@@ -58,7 +58,6 @@ jobs:
           original_date=z"${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
           formatted_date=$(date -d "${original_date}" -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "formatted_date=${formatted_date}" >> $GITHUB_OUTPUT
-          echo ${{ fromJson(steps.toggle_feature_flag.outputs)}}
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
