@@ -39,6 +39,7 @@ jobs:
           logMessage: "Attempting to toggle feature flag '${{ github.event.inputs.feature_flag_key }}' in '${{ github.event.inputs.environment_key }}' environment to ${{ github.event.inputs.flag_state }}."
 
       - name: Toggle Feature Flag in LaunchDarkly
+        id: "toggle_feature_flag"
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://app.launchdarkly.com/api/v2/flags/${{ github.event.inputs.project_key }}/${{ github.event.inputs.feature_flag_key }}'
@@ -51,6 +52,61 @@ jobs:
               "value": ${{ github.event.inputs.flag_state }}
             }]
 
+      - name: Log After Toggling
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: ${{ fromJson(steps.toggle_feature_flag.outputs)}}
+
+      - name: Convert createdOn to desired format
+        id: format_date
+        run: |
+          original_date=z"${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
+          formatted_date=$(date -d "${original_date}" -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "formatted_date=${formatted_date}" >> $GITHUB_OUTPUT  
+
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Moving on to upsert updates to Port"
+          
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: ${{ fromJson(steps.toggle_feature_flag.outputs.response).key }}
+          title: ${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}
+          blueprint: launchDarklyFeatureFlag
+          properties: |-
+            {
+              "kind": "${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }}",
+              "description": "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}",
+              "creationDate": "${{ steps.format_date.outputs.formatted_date }}",
+              "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
+              "clientSideAvailability": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability }},
+              "temporary": "${{ fromJson(steps.toggle_feature_flag.outputs.response).temporary }}",
+              "tags": "${{ fromJson(steps.toggle_feature_flag.outputs.response).tags }}",
+              "maintainer": "${{ fromJson(steps.toggle_feature_flag.outputs.response)._maintainer }}",
+              "environments": ${{ fromJson(steps.toggle_feature_flag.outputs.response).environments }}
+              "variations": ${{ fromJson(steps.toggle_feature_flag.outputs.response).variations }},
+              "customProperties": "${{ fromJson(steps.toggle_feature_flag.outputs.response).customProperties }}"
+              "archived": "${{ fromJson(steps.toggle_feature_flag.outputs.response).achieved }}",
+              "projectKey": "${{ github.event.inputs.project_key }}"
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          
       - name: Log After Toggling
         uses: port-labs/port-github-action@v1
         with:
