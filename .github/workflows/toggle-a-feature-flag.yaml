@@ -55,7 +55,7 @@ jobs:
       - name: Convert createdOn to desired format
         id: format_date
         run: |
-          timestamp=z"${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
+          timestamp="${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
           epoch_seconds=$(($timestamp / 1000))
           formatted_date=$(date -d "${epoch_seconds}" -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "formatted_date=${formatted_date}" >> $GITHUB_OUTPUT
