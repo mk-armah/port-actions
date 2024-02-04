@@ -52,16 +52,6 @@ jobs:
               "value": ${{ github.event.inputs.flag_state }}
             }]
 
-      # - name: Log After Toggling
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "${{ fromJson(steps.toggle_feature_flag.outputs)}}"
-
       - name: Convert createdOn to desired format
         id: format_date
         run: |
