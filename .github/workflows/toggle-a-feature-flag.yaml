@@ -58,8 +58,8 @@ jobs:
           timestamp="${{ fromJson(steps.toggle_feature_flag.outputs.response).creationDate }}"
           epoch_seconds=$(($timestamp / 1000))
           formatted_date=$(date -u -d "@${epoch_seconds}" +"%Y-%m-%dT%H:%M:%SZ")
-          echo "formatted_date=${formatted_date}" >> $GITHUB_OUTPUT
-          echo "formatted_date=${formatted_date}" # For logging purposes
+          echo "creationDate=${formatted_date}" >> $GITHUB_OUTPUT
+          echo "creationDate=${formatted_date}"
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -69,7 +69,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Moving on to upsert updates to Port"
+          logMessage: "Moving on to upsert updates to Port - ${{ steps.format_date.outputs }}"
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -81,7 +81,7 @@ jobs:
             {
               "kind": ${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }},
               "description": "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}",
-              "creationDate": "${{ steps.format_date.outputs.formatted_date }}",
+              "creationDate": "${{ steps.format_date.outputs.creationDate }}",
               "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
               "clientSideAvailability": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability }},
               "temporary": ${{ fromJson(steps.toggle_feature_flag.outputs.response).temporary }},
