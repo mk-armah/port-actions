@@ -1,0 +1,27 @@
+name: Ingest DORA Metrics
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: Repository or service to calculate metrics on
+        required: false
+        type: string
+      organization:
+        description: User account/organization name
+        required: false
+        type: string
+      timeframe:
+        description: Time frame calculate the metrics on
+        required: false
+        type: date
+jobs:
+  compute-dora-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Frequency
+        uses: DeveloperMetrics/deployment-frequency@main
+        with:
+          workflows: 'CI/CD'
+          owner-repo: "${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
+          pat-token: "${{ secrets.PATTOKEN }}"
