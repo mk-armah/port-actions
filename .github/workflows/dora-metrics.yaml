@@ -3,25 +3,60 @@ name: Ingest DORA Metrics
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: Repository or service to calculate metrics on
-        required: false
-        type: string
-      organization:
-        description: User account/organization name
-        required: false
-        type: string
-      timeframe:
-        description: Time frame calculate the metrics on
-        required: false
-        type: date
+      repositories:
+        description: 'Comma-separated list of repositories to analyze'
+        required: true
+      timeFrame:
+        description: 'Last X weeks'
+        required: true
+        default: '4'  # Default to the last 4 weeks
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ${{ fromJson('["' + join(split(github.event.inputs.repositories, ','), '","') + '"]') }}
+    
     steps:
+      - name: Setup GH CLI
+        run: |
+          sudo apt update
+          sudo apt install -y jq
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+          
       - name: Deployment Frequency
         uses: DeveloperMetrics/deployment-frequency@main
         with:
           workflows: 'CI/CD'
           owner-repo: "${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
           pat-token: "${{ secrets.PATTOKEN }}"
+          
+      - name: Lead Time For Changes
+        uses: DeveloperMetrics/lead-time-for-changes@main
+        with:
+          workflows: 'CI/CD'
+          owner-repo: "${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
+          pat-token: "${{ secrets.PATTOKEN }}"
+          
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyGithub datetime
+
+      - name: Calculate PR Metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}  # Your PAT with repo access
+          REPOSITORY: ${{ matrix.repo }}
+          TIME_FRAME: ${{ github.event.inputs.timeFrame }}
+        run: python calculate_pr_metrics.py
