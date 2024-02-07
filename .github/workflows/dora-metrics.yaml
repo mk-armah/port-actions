@@ -10,12 +10,13 @@ on:
         description: 'Last X weeks'
         required: true
         default: '4'  # Default to the last 4 weeks
+
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: "${{ fromJson('["' + join(split(github.event.inputs.repositories, ','), '","') + '"]') }}"
+        repo: ${{ fromJson('[' + join(split(github.event.inputs.repositories, ','), ',') + ']') }}
     
     steps:
       - name: Setup GH CLI
@@ -31,15 +32,15 @@ jobs:
         uses: DeveloperMetrics/deployment-frequency@main
         with:
           workflows: 'CI/CD'
-          owner-repo: "${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
-          pat-token: "${{ secrets.PATTOKEN }}"
+          owner-repo: ${{ github.repository_owner }}/${{ matrix.repo }}
+          pat-token: ${{ secrets.PATTOKEN }}
           
       - name: Lead Time For Changes
         uses: DeveloperMetrics/lead-time-for-changes@main
         with:
           workflows: 'CI/CD'
-          owner-repo: "${{ github.event.inputs.organization }}/${{ github.event.inputs.repository }}"
-          pat-token: "${{ secrets.PATTOKEN }}"
+          owner-repo: ${{ github.repository_owner }}/${{ matrix.repo }}
+          pat-token: ${{ secrets.PATTOKEN }}
           
       - name: Checkout code
         uses: actions/checkout@v2
@@ -56,7 +57,7 @@ jobs:
 
       - name: Calculate PR Metrics
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}  # Your PAT with repo access
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ matrix.repo }}
           TIME_FRAME: ${{ github.event.inputs.timeFrame }}
         run: python calculate_pr_metrics.py
