@@ -81,7 +81,7 @@ jobs:
       - name: Get Incident Object from Response
         id: incident
         run: |
-          incident=${{ toJson(fromJson(steps.change_owner.outputs.response).incident) }}
+          incident="${{ fromJson(steps.change_owner.outputs.response).incident }}"
           echo "incident=${incident}" >> $GITHUB_OUTPUT
           echo "incident=${incident}"
 
