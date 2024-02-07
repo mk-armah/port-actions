@@ -27,7 +27,6 @@ jobs:
     steps:
       
       - name: Log Executing Request to Change Owner
-        id: change_owner
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -38,6 +37,7 @@ jobs:
           logMessage: "About to make a request to pagerduty..."
 
       - name: Change Incident Owner in PagerDuty
+        id: change_owner
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.pagerduty.com/incidents/${{ github.event.inputs.incident_id }}'
