@@ -83,7 +83,10 @@ jobs:
               "description": "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}",
               "creationDate": "${{ steps.format_date.outputs.creationDate }}",
               "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
-              "clientSideAvailability": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability }},
+              "clientSideAvailability": {
+                    "usingMobileKey": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability.usingMobileKey }},
+                    "usingEnvironmentId": ${{ fromJson(steps.toggle_feature_flag.outputs.response).clientSideAvailability.usingEnvironmentId }}
+              },
               "temporary": ${{ fromJson(steps.toggle_feature_flag.outputs.response).temporary }},
               "tags": ${{ fromJson(steps.toggle_feature_flag.outputs.response).tags }},
               "maintainer": ${{ fromJson(steps.toggle_feature_flag.outputs.response)._maintainer }},
