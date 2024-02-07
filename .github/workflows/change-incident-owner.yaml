@@ -41,12 +41,12 @@ jobs:
               }
             }
 
-      - name: Create a log message for successful owner change
+      - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.client_payload.port_payload).context.runId}}
-          logMessage: 'PagerDuty incident owner changed successfully ✅'
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "PagerDuty incident owner changed successfully ✅"
