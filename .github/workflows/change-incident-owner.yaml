@@ -15,6 +15,11 @@ on:
         description: The email address of a valid user associated with the account making the request.
         required: true
         type: string
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
 
 jobs:
   change-incident-owner:
