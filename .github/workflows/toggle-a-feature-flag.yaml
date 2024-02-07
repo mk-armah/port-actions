@@ -79,7 +79,7 @@ jobs:
           blueprint: "launchDarklyFeatureFlag"
           properties: |-
             {
-              "kind": ${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }},
+              "kind": "${{ fromJson(steps.toggle_feature_flag.outputs.response).kind }}",
               "description": "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}",
               "creationDate": "${{ steps.format_date.outputs.creationDate }}",
               "includeInSnippet": ${{ fromJson(steps.toggle_feature_flag.outputs.response).includeInSnippet }},
