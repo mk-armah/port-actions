@@ -66,24 +66,12 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Request was successful ✅..."
-          
-      - name: Log Before Processing Response
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Getting incident object from response recieved ..."
 
       - name: Get Incident Object from Response
         id: incident
         run: |
-          incident="${{ fromJson(steps.change_owner.outputs.response).incident }}"
-          echo "incident=${incident}" >> $GITHUB_OUTPUT
-          echo "incident=${incident}"
+          echo "incident=${{ toJson(steps.change_owner.outputs.response.incident) }}" >> $GITHUB_ENV
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
