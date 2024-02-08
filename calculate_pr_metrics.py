@@ -1,6 +1,6 @@
 import os
 from github import Github
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 
 # Initialize GitHub client with your PAT
 g = Github(os.getenv('GITHUB_TOKEN'))
