@@ -10,6 +10,9 @@ repo_name = os.getenv('REPOSITORY')
 time_frame = int(os.getenv('TIME_FRAME'))
 
 # Fetch the repository
+print("Repository Name", repo_name)
+print("TimeFrame",time_frame)
+
 repo = g.get_repo(repo_name)
 
 # Calculate the start date for the time frame
