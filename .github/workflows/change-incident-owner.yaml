@@ -97,7 +97,7 @@ jobs:
               "responder": "${{ fromJson(steps.change_owner.outputs.response).incident.assignments[0].assignee.summary}}",
               "escalation_policy": "${{ fromJson(steps.change_owner.outputs.response).incident.escalation_policy.summary }}",
               "created_at": "${{ fromJson(steps.change_owner.outputs.response).incident.created_at }}",
-              "updated_at": "${{ fromJson(steps.change_owner.outputs.response).incidet.updated_at }}"
+              "updated_at": "${{ fromJson(steps.change_owner.outputs.response).incident.updated_at }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
