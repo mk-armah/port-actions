@@ -58,7 +58,7 @@ jobs:
               }
             }
 
-      - name: Log Executing Request to Change Owner
+      - name: Log Before Processing Incident Response
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -71,7 +71,7 @@ jobs:
       - name: Get Incident Object from Response
         id: incident
         run: |
-          echo "incident=${{ toJson(steps.change_owner.outputs.response.incident) }}" >> $GITHUB_ENV
+          echo "incident=${{ toJson(steps.change_owner.outputs.response) }}" >> $GITHUB_ENV
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
