@@ -92,7 +92,7 @@ jobs:
           properties: |-
             {
               "status": "${{ fromJson(steps.change_owner.outputs.response).incident.status }}",
-              "url": "${{ fromJson(steps.change_owner.outputs.response).incident.urgency }}",
+              "url": "${{ fromJson(steps.change_owner.outputs.response).incident.self }}",
               "urgency": "${{ fromJson(steps.change_owner.outputs.response).incident.urgency }}",
               "responder": "${{ fromJson(steps.change_owner.outputs.response).incident.assignments[0].assignee.summary}}",
               "escalation_policy": "${{ fromJson(steps.change_owner.outputs.response).incident.escalation_policy.summary }}",
