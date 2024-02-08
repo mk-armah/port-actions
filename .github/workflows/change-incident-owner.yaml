@@ -71,7 +71,7 @@ jobs:
       - name: Get Incident Object from Response
         id: incident
         run: |
-          echo "incident=${{ toJson(steps.change_owner.outputs.response) }}" >> $GITHUB_ENV
+          echo "incident=${{ from(steps.change_owner.outputs.response).incident }}" >> $GITHUB_ENV
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
