@@ -13,7 +13,7 @@ time_frame = int(os.getenv('TIME_FRAME'))
 print("Repository Name", repo_name)
 print("TimeFrame",time_frame)
 
-repo = g.get_repo(repo_name)
+repo = g.get_repo(f"mk-armah/{repo_name}")
 
 # Calculate the start date for the time frame
 start_date = datetime.now() - timedelta(weeks=time_frame)
