@@ -16,7 +16,7 @@ print("TimeFrame",time_frame)
 repo = g.get_repo(f"mk-armah/{repo_name}")
 
 # Calculate the start date for the time frame
-start_date = datetime.now() - timedelta(weeks=time_frame)
+start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(weeks=time_frame)
 
 def calculate_pr_metrics():
     prs = repo.get_pulls(state='all', sort='updated', direction='desc')
