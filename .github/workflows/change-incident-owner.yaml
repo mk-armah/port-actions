@@ -86,18 +86,18 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.toggle_feature_flag.outputs.response).key }}"
-          title: "${{ fromJson(steps.toggle_feature_flag.outputs.response).description }}"
-          blueprint: "launchDarklyFeatureFlag"
+          identifier: "${{ fromJson(steps.change_owner.outputs.response).incident.id }}"
+          title: "${{ fromJson(steps.change_owner.outputs.response).incident.title }}"
+          blueprint: "pagerdutyIncident"
           properties: |-
             {
-              "status": "${steps.incident.outputs.status}",
-              "url": "${steps.incident.outputs.self}",
-              "urgency": "${steps.incident.outputs.urgency}",
-              "responder": "${{ fromJson(steps.incident.outputs.assignments)[0].assignee.summary}}",
-              "escalation_policy": "${{ fromJson(steps.incident.outputs.escalation_policy).summary }}",
-              "created_at": "${steps.incident.outputs.created_at}",
-              "updated_at": "${steps.incident.outputs.updated_at}"
+              "status": "${{ fromJson(steps.change_owner.outputs.response).incident.status }}",
+              "url": "${{ fromJson(steps.change_owner.outputs.response).incident.urgency }}",
+              "urgency": "${{ fromJson(steps.change_owner.outputs.response).incident.urgency }}",
+              "responder": "${{ fromJson(steps.change_owner.outputs.response).incident.assignments[0].assignee.summary}}",
+              "escalation_policy": "${{ fromJson(steps.change_owner.outputs.response).incident.escalation_policy.summary }}",
+              "created_at": "${{ fromJson(steps.change_owner.outputs.response).incident.created_at }}",
+              "updated_at": "${{ fromJson(steps.change_owner.outputs.response).incidet.updated_at }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
