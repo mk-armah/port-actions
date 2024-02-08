@@ -33,6 +33,7 @@ def calculate_pr_metrics():
 
     for pr in prs:
         if pr.created_at < start_date:
+            print(f"Time >> {created_at} < {start_date}")
             break  # Stop iterating once we are outside the time frame
 
         prs_opened += 1
