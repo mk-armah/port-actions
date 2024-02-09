@@ -53,7 +53,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install PyGithub datetime
+          pip install PyGithub datetime httpx
 
       - name: Calculate PR Metrics
         env:
