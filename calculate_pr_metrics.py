@@ -137,11 +137,17 @@ class RepositoryMetrics:
         aggregated = {'total_open_to_close_time': timedelta(0), 'total_time_to_first_review': timedelta(0),
                       'total_time_to_approval': timedelta(0), 'prs_opened': 0, 'prs_merged': 0,
                       'total_reviews': 0, 'total_commits': 0, 'total_loc_changed': 0}
-
+    
         for result in results:
-            for key in aggregated.keys():
-                aggregated[key] += result[key.replace('total_', '')]
-
+            aggregated['total_open_to_close_time'] += result['open_to_close_time']
+            aggregated['total_time_to_first_review'] += result['time_to_first_review']
+            aggregated['total_time_to_approval'] += result['time_to_approval']
+            aggregated['prs_opened'] += result['prs_opened']
+            aggregated['prs_merged'] += result['prs_merged']
+            aggregated['total_reviews'] += result['total_reviews']
+            aggregated['total_commits'] += result['total_commits']
+            aggregated['total_loc_changed'] += result['total_loc_changed']
+    
         return aggregated
 
     def print_metrics(self, metrics):
