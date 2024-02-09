@@ -47,8 +47,12 @@ jobs:
           pip install httpx
 
       - name: Calculate PR Metrics
+        id: metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ matrix.repo }}
           TIME_FRAME: ${{ github.event.inputs.timeFrame }}
         run: python calculate_pr_metrics.py
+      
+      - name: Calculated Metrics
+        run: echo "Metrics: ${{ steps.metrics.outputs.metrics }}"
