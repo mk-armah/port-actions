@@ -18,15 +18,19 @@ class RepositoryMetrics:
     async def fetch_paginated_data(self, client, url):
         items = []
         while url:
-            response = await client.get(url, headers=self.headers)
-            page_items = response.json()
-            if page_items:
-                items.extend(page_items)
-                if "next" in response.links:
-                    url = response.links["next"]["url"]
+            response = await client.get(url)
+            if response.status_code == 200:
+                page_items = response.json()
+                if page_items:
+                    items.extend(page_items)
+                    if 'next' in response.links:
+                        url = response.links['next']['url']
+                    else:
+                        break
                 else:
                     break
             else:
+                print(f"Failed to fetch data: {response.status_code}")
                 break
         return items
 
