@@ -95,64 +95,72 @@ class RepositoryMetrics:
         self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(weeks=self.time_frame)
         self.repo = self.g.get_repo(f"port-labs/{self.repo_name}")
 
-        # Metric counters
-        self.total_open_to_close_time = timedelta(0)
-        self.total_time_to_first_review = timedelta(0)
-        self.total_time_to_approval = timedelta(0)
-        self.prs_opened = 0
-        self.prs_merged = 0
-        self.total_reviews = 0
-        self.total_commits = 0
-        self.total_loc_changed = 0
-
     def calculate_pr_metrics(self):
         prs = self.repo.get_pulls(state='all', sort='updated', direction='desc')
-        
+        results = []
+
         with ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.process_pr, pr) for pr in prs if pr.created_at >= self.start_date]
-
             for future in as_completed(futures):
-                future.result()  # Wait for all futures to complete
+                results.append(future.result())
 
-        # Calculate averages
-        avg_open_to_close_time = self.total_open_to_close_time / self.prs_opened if self.prs_opened else timedelta(0)
-        avg_time_to_first_review = self.total_time_to_first_review / self.prs_opened if self.prs_opened else timedelta(0)
-        avg_time_to_approval = self.total_time_to_approval / self.prs_opened if self.prs_opened else timedelta(0)
-        avg_reviews_per_week = self.total_reviews / self.time_frame if self.time_frame else 0
-        avg_commits_per_pr = self.total_commits / self.prs_opened if self.prs_opened else 0
-        avg_loc_per_pr = self.total_loc_changed / self.prs_opened if self.prs_opened else 0
+        # Aggregate results
+        metrics = self.aggregate_results(results)
 
         # Output metrics
+        self.print_metrics(metrics)
+
+    def process_pr(self, pr):
+        pr_metrics = {'open_to_close_time': timedelta(0), 'time_to_first_review': timedelta(0),
+                      'time_to_approval': timedelta(0), 'prs_opened': 1, 'prs_merged': 0,
+                      'total_reviews': 0, 'total_commits': 0, 'total_loc_changed': 0}
+
+        if pr.merged:
+            pr_metrics['prs_merged'] = 1
+            pr_metrics['open_to_close_time'] = pr.merged_at - pr.created_at
+            pr_metrics['total_commits'] = pr.get_commits().totalCount
+            pr_metrics['total_loc_changed'] = sum(file.additions + file.deletions for file in pr.get_files())
+
+            reviews = pr.get_reviews()
+            if reviews.totalCount > 0:
+                first_review = reviews[0]
+                pr_metrics['time_to_first_review'] = first_review.submitted_at - pr.created_at
+                for review in reviews:
+                    if review.state == "APPROVED":
+                        pr_metrics['time_to_approval'] = review.submitted_at - pr.created_at
+                        break
+                pr_metrics['total_reviews'] = reviews.totalCount
+
+        return pr_metrics
+
+    def aggregate_results(self, results):
+        aggregated = {'total_open_to_close_time': timedelta(0), 'total_time_to_first_review': timedelta(0),
+                      'total_time_to_approval': timedelta(0), 'prs_opened': 0, 'prs_merged': 0,
+                      'total_reviews': 0, 'total_commits': 0, 'total_loc_changed': 0}
+
+        for result in results:
+            for key in aggregated.keys():
+                aggregated[key] += result[key.replace('total_', '')]
+
+        return aggregated
+
+    def print_metrics(self, metrics):
+        avg_open_to_close_time = metrics['total_open_to_close_time'] / metrics['prs_opened'] if metrics['prs_opened'] else timedelta(0)
+        avg_time_to_first_review = metrics['total_time_to_first_review'] / metrics['prs_opened'] if metrics['prs_opened'] else timedelta(0)
+        avg_time_to_approval = metrics['total_time_to_approval'] / metrics['prs_opened'] if metrics['prs_opened'] else timedelta(0)
+        avg_reviews_per_week = metrics['total_reviews'] / self.time_frame if self.time_frame else 0
+        avg_commits_per_pr = metrics['total_commits'] / metrics['prs_opened'] if metrics['prs_opened'] else 0
+        avg_loc_per_pr = metrics['total_loc_changed'] / metrics['prs_opened'] if metrics['prs_opened'] else 0
+
         print(f"Repository: {self.repo_name}")
         print(f"Average PR open to close time: {avg_open_to_close_time}")
         print(f"Average time to first review: {avg_time_to_first_review}")
         print(f"Average time to approval: {avg_time_to_approval}")
-        print(f"PRs opened: {self.prs_opened}")
-        print(f"Weekly PRs merged: {self.prs_merged / self.time_frame}")
+        print(f"PRs opened: {metrics['prs_opened']}")
+        print(f"Weekly PRs merged: {metrics['prs_merged'] / self.time_frame}")
         print(f"Average PRs reviewed/week: {avg_reviews_per_week}")
         print(f"Average commits per PR: {avg_commits_per_pr}")
         print(f"Avg LOC changed per PR: {avg_loc_per_pr}")
-
-    def process_pr(self, pr):
-        self.prs_opened += 1
-        if pr.merged:
-            self.prs_merged += 1
-            self.total_open_to_close_time += pr.merged_at - pr.created_at
-            commits = pr.get_commits()
-            self.total_commits += commits.totalCount
-            for file in pr.get_files():
-                self.total_loc_changed += file.additions + file.deletions
-
-            reviews = pr.get_reviews()
-            for review in reviews:
-                if review.state == "APPROVED":
-                    self.total_time_to_approval += review.submitted_at - pr.created_at
-                    break  # Only consider the time to the first approval
-
-            if reviews.totalCount > 0:
-                first_review = reviews[0]
-                self.total_time_to_first_review += first_review.submitted_at - pr.created_at
-                self.total_reviews += reviews.totalCount
 
 def main():
     repo_name = os.getenv('REPOSITORY')
