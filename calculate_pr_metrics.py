@@ -135,7 +135,7 @@ class RepositoryMetrics:
             "total_time_to_approval": aggregated["total_time_to_approval"],
             "prs_merged": aggregated["prs_merged"],
             "total_reviews": aggregated["total_reviews"],
-            "total_commits": aggregated["total_metrics"],
+            "total_commits": aggregated["total_commits"],
             "total_loc_changed": aggregated["total_loc_changed"],
             "average_open_to_close_time": (
                 aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
