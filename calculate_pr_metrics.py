@@ -1,6 +1,7 @@
 import os
 import asyncio
 import httpx
+import json
 from datetime import datetime, timedelta, timezone
 
 
@@ -23,8 +24,8 @@ class RepositoryMetrics:
                 page_items = response.json()
                 if page_items:
                     items.extend(page_items)
-                    if 'next' in response.links:
-                        url = response.links['next']['url']
+                    if "next" in response.links:
+                        url = response.links["next"]["url"]
                     else:
                         break
                 else:
@@ -49,7 +50,7 @@ class RepositoryMetrics:
 
             results = await asyncio.gather(*[self.process_pr(client, pr) for pr in prs])
             metrics = self.aggregate_results(results)
-            self.print_metrics(metrics)
+            return metrics
 
     async def process_pr(self, client, pr):
         pr_metrics = {
@@ -126,47 +127,51 @@ class RepositoryMetrics:
             aggregated["total_reviews"] += result["reviews"]
             aggregated["total_commits"] += result["commits"]
             aggregated["total_loc_changed"] += result["loc_changed"]
-        return aggregated
 
-    def print_metrics(self, metrics):
-        avg_open_to_close_time = (
-            metrics["total_open_to_close_time"] / metrics["prs_opened"]
-            if metrics["prs_opened"]
-            else timedelta(0)
-        )
-        avg_time_to_first_review = (
-            metrics["total_time_to_first_review"] / metrics["prs_opened"]
-            if metrics["prs_opened"]
-            else timedelta(0)
-        )
-        avg_time_to_approval = (
-            metrics["total_time_to_approval"] / metrics["prs_opened"]
-            if metrics["prs_opened"]
-            else timedelta(0)
-        )
-        avg_reviews_per_week = (
-            metrics["total_reviews"] / self.time_frame if self.time_frame else 0
-        )
-        avg_commits_per_pr = (
-            metrics["total_commits"] / metrics["prs_opened"]
-            if metrics["prs_opened"]
-            else 0
-        )
-        avg_loc_per_pr = (
-            metrics["total_loc_changed"] / metrics["prs_opened"]
-            if metrics["prs_opened"]
-            else 0
-        )
+        metrics = {
+            "repository": self.repo_name,
+            "total_open_to_close_time": aggregated["total_open_to_close_time"],
+            "total_time_to_first_review": aggregated["total_time_to_first_review"],
+            "total_time_to_approval": aggregated["total_time_to_approval"],
+            "prs_merged": aggregated["prs_merged"],
+            "total_reviews": aggregated["total_reviews"],
+            "total_commits": aggregated["total_metrics"],
+            "total_loc_changed": aggregated["total_loc_changed"],
+            "average_open_to_close_time": (
+                aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
+                if aggregated["prs_merged"]
+                else timedelta(0)
+            ),
+            "average_time_to_first_review": (
+                aggregated["total_time_to_first_review"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else timedelta(0)
+            ),
+            "average_time_to_approval": (
+                aggregated["total_time_to_approval"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else timedelta(0)
+            ),
+            "prs_opened": aggregated["prs_opened"],
+            "weekly_prs_merged": aggregated["prs_merged"] / self.time_frame,
+            "average_reviews_per_pr": (
+                aggregated["total_reviews"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+            "average_commits_per_pr": (
+                aggregated["total_commits"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+            "average_loc_changed_per_pr": (
+                aggregated["total_loc_changed"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+        }
 
-        print(f"Repository: {self.repo_name}")
-        print(f"Average PR open to close time: {avg_open_to_close_time}")
-        print(f"Average time to first review: {avg_time_to_first_review}")
-        print(f"Average time to approval: {avg_time_to_approval}")
-        print(f"PRs opened: {metrics['prs_opened']}")
-        print(f"Weekly PRs merged: {metrics['prs_merged'] / self.time_frame}")
-        print(f"Average reviews per PR: {avg_reviews_per_week}")
-        print(f"Average commits per PR: {avg_commits_per_pr}")
-        print(f"Avg LOC changed per PR: {avg_loc_per_pr}")
+        return metrics
 
 
 async def main():
@@ -175,8 +180,10 @@ async def main():
     print("Repository Name", repo_name)
     print("TimeFrame", time_frame)
 
-    metrics = RepositoryMetrics(repo_name, time_frame)
-    await metrics.calculate_pr_metrics()
+    repo_metrics = RepositoryMetrics(repo_name, time_frame)
+    metrics = await repo_metrics.calculate_pr_metrics()
+    metrics_json = json.dumps(metrics)
+    print(f"::set-output name=metrics::{metrics_json}")
 
 
 if __name__ == "__main__":
