@@ -137,17 +137,17 @@ class RepositoryMetrics:
             "total_reviews": aggregated["total_reviews"],
             "total_commits": aggregated["total_commits"],
             "total_loc_changed": aggregated["total_loc_changed"],
-            "average_open_to_close_time": (
+            "average_open_to_close_time": str(
                 aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
                 if aggregated["prs_merged"]
                 else timedelta(0)
             ),
-            "average_time_to_first_review": (
+            "average_time_to_first_review": str(
                 aggregated["total_time_to_first_review"] / aggregated["prs_opened"]
                 if aggregated["prs_opened"]
                 else timedelta(0)
             ),
-            "average_time_to_approval": (
+            "average_time_to_approval": str(
                 aggregated["total_time_to_approval"] / aggregated["prs_opened"]
                 if aggregated["prs_opened"]
                 else timedelta(0)
