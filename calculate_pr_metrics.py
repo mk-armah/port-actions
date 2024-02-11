@@ -130,9 +130,9 @@ class RepositoryMetrics:
 
         metrics = {
             "repository": self.repo_name,
-            "total_open_to_close_time": aggregated["total_open_to_close_time"],
-            "total_time_to_first_review": aggregated["total_time_to_first_review"],
-            "total_time_to_approval": aggregated["total_time_to_approval"],
+            "total_open_to_close_time": str(aggregated["total_open_to_close_time"]),
+            "total_time_to_first_review": str(aggregated["total_time_to_first_review"]),
+            "total_time_to_approval": str(aggregated["total_time_to_approval"]),
             "prs_merged": aggregated["prs_merged"],
             "total_reviews": aggregated["total_reviews"],
             "total_commits": aggregated["total_commits"],
