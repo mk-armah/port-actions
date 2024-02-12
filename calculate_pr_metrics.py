@@ -16,45 +16,45 @@ class RepositoryMetrics:
             "Accept": "application/vnd.github.v3+json",
         }
 
-    # async def fetch_paginated_data(self, client, url):
-    #     items = []
-    #     while url:
-    #         print("URL >>> ",url)
-    #         response = await client.get(url)
-    #         if response.status_code == 200:
-    #             page_items = response.json()
-    #             if page_items:
-    #                 items.extend(page_items)
-    #                 if "next" in response.links:
-    #                     url = response.links["next"]["url"]
-    #                 else:
-    #                     break
-    #             else:
-    #                 break
-    #         else:
-    #             print(f"Failed to fetch data: {response.status_code}")
-                
-    #             break
-    #     return items
-
-    import time
-
     async def fetch_paginated_data(self, client, url):
         items = []
         while url:
-            response = await client.get(url, headers=self.headers)
+            print("URL >>> ",url)
+            response = await client.get(url)
             if response.status_code == 200:
                 page_items = response.json()
-                items.extend(page_items)
-                url = response.links.get("next", {}).get("url")
-            elif response.status_code == 403 and 'Retry-After' in response.headers:
-                retry_after = int(response.headers['Retry-After'])
-                print(f"Rate limit exceeded for {url}. Retrying after {retry_after} seconds.")
-                time.sleep(retry_after)
+                if page_items:
+                    items.extend(page_items)
+                    if "next" in response.links:
+                        url = response.links["next"]["url"]
+                    else:
+                        break
+                else:
+                    break
             else:
                 print(f"Failed to fetch data: {response.status_code}")
+                
                 break
         return items
+
+    # import time
+
+    # async def fetch_paginated_data(self, client, url):
+    #     items = []
+    #     while url:
+    #         response = await client.get(url, headers=self.headers)
+    #         if response.status_code == 200:
+    #             page_items = response.json()
+    #             items.extend(page_items)
+    #             url = response.links.get("next", {}).get("url")
+    #         elif response.status_code == 403 and 'Retry-After' in response.headers:
+    #             retry_after = int(response.headers['Retry-After'])
+    #             print(f"Rate limit exceeded for {url}. Retrying after {retry_after} seconds.")
+    #             time.sleep(retry_after)
+    #         else:
+    #             print(f"Failed to fetch data: {response.status_code}")
+    #             break
+    #     return items
 
     async def calculate_pr_metrics(self):
         async with httpx.AsyncClient() as client:
