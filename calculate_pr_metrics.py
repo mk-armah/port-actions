@@ -58,7 +58,7 @@ class RepositoryMetrics:
 
     async def calculate_pr_metrics(self):
         async with httpx.AsyncClient() as client:
-            prs_url = f"{self.base_url}/repos/{self.repo_name}/pulls?state=all&sort=updated&direction=desc&per_page=100"
+            prs_url = f"{self.base_url}/repos/{self.repo_name}/pulls?state=all&sort=created&direction=desc&per_page=100"
             prs = await self.fetch_paginated_data(client, prs_url)
             prs = [
                 pr
