@@ -1,6 +1,7 @@
 import os
 import asyncio
 import httpx
+from port_ocean.utils import http_async_client
 import json
 from datetime import datetime, timedelta, timezone
 
@@ -11,11 +12,16 @@ class RepositoryMetrics:
         self.repo_name = repo_name
         self.time_frame = int(time_frame)
         self.start_date = datetime.now(timezone.utc) - timedelta(weeks=self.time_frame)
-        self.headers = {
+        self.client = http_async_client
+        self.client.headers.update(self.api_auth_header)
+
+        @property
+        def api_auth_header(self) -> dict[str, Any]:
+            return {
             "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
             "Accept": "application/vnd.github.v3+json",
         }
-
+        
     # async def fetch_paginated_data(self, client, url):
     #     items = []
     #     while url:
@@ -39,10 +45,10 @@ class RepositoryMetrics:
 
     import time
 
-    async def fetch_paginated_data(self, client, url):
+    async def fetch_paginated_data(self, url):
         items = []
         while url:
-            response = await client.get(url, headers=self.headers)
+            response = await self.client.get(url, headers=self.headers)
             if response.status_code == 200:
                 page_items = response.json()
                 items.extend(page_items)
@@ -57,23 +63,22 @@ class RepositoryMetrics:
         return items
 
     async def calculate_pr_metrics(self):
-        async with httpx.AsyncClient() as client:
-            prs_url = f"{self.base_url}/repos/{self.repo_name}/pulls?state=all&sort=updated&direction=desc&per_page=100"
-            prs = await self.fetch_paginated_data(client, prs_url)
-            prs = [
-                pr
-                for pr in prs
-                if datetime.strptime(pr["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc
-                )
-                >= self.start_date
-            ]
+        prs_url = f"{self.base_url}/repos/{self.repo_name}/pulls?state=all&sort=updated&direction=desc&per_page=100"
+        prs = await self.fetch_paginated_data(prs_url)
+        prs = [
+            pr
+            for pr in prs
+            if datetime.strptime(pr["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(
+                tzinfo=timezone.utc
+            )
+            >= self.start_date
+        ]
 
-            results = await asyncio.gather(*[self.process_pr(client, pr) for pr in prs])
-            metrics = self.aggregate_results(results)
-            return metrics
+        results = await asyncio.gather(*[self.process_pr(pr) for pr in prs])
+        metrics = self.aggregate_results(results)
+        return metrics
 
-    async def process_pr(self, client, pr):
+    async def process_pr(self, pr):
         pr_metrics = {
             "open_to_close_time": timedelta(0),
             "time_to_first_review": timedelta(0),
@@ -94,17 +99,17 @@ class RepositoryMetrics:
                 tzinfo=timezone.utc
             )
             commits_url = pr["commits_url"]
-            commits = await self.fetch_paginated_data(client, commits_url)
+            commits = await self.fetch_paginated_data(commits_url)
             pr_metrics["commits"] = len(commits)
 
             files_url = pr["_links"]["self"]["href"] + "/files"
-            files = await self.fetch_paginated_data(client, files_url)
+            files = await self.fetch_paginated_data(files_url)
             pr_metrics["loc_changed"] = sum(
                 file["additions"] + file["deletions"] for file in files
             )
 
             reviews_url = pr["_links"]["self"]["href"] + "/reviews"
-            reviews = await self.fetch_paginated_data(client, reviews_url)
+            reviews = await self.fetch_paginated_data(reviews_url)
             pr_metrics["reviews"] = len(reviews)
             if reviews:
                 first_review = reviews[0]
