@@ -93,7 +93,7 @@ class RepositoryMetrics:
         self.repo_name = repo_name
         self.time_frame = int(time_frame)
         self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(weeks=self.time_frame)
-        self.repo = self.g.get_repo(f"port-labs/{self.repo_name}")
+        self.repo = self.g.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
         prs = self.repo.get_pulls(state='all', sort='updated', direction='desc')
