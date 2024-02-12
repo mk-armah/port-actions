@@ -1,5 +1,3 @@
-stable
-
 # import os
 # from github import Github
 # from datetime import datetime, timedelta,timezone
