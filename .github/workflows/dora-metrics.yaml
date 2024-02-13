@@ -20,13 +20,18 @@ jobs:
     
     steps:
       - name: Deployment Frequency
+        id: deploymemnt_frequency
         uses: DeveloperMetrics/deployment-frequency@main
         with:
           workflows: 'CI/CD'
-          owner-repo: ${{ matrix.repo }}
+          owner-repo: '${{ matrix.repo }}'
           pat-token: ${{ secrets.PATTOKEN }}
+      
+      - name: Results for Deployment Frequency
+        run: echo '${{ steps.deploymemnt_frequency.outputs}}'
           
       - name: Lead Time For Changes
+        id: lead_time_for_changes
         uses: DeveloperMetrics/lead-time-for-changes@main
         with:
           workflows: 'CI/CD'
