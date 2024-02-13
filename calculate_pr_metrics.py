@@ -49,6 +49,7 @@ class RepositoryMetrics:
         return pr_metrics
 
     def aggregate_results(self, results):
+        
         aggregated = {'total_open_to_close_time': timedelta(0), 'total_time_to_first_review': timedelta(0),
                       'total_time_to_approval': timedelta(0), 'prs_opened': 0, 'prs_merged': 0,
                       'total_reviews': 0, 'total_commits': 0, 'total_loc_changed': 0}
@@ -62,51 +63,51 @@ class RepositoryMetrics:
             aggregated['total_reviews'] += result['total_reviews']
             aggregated['total_commits'] += result['total_commits']
             aggregated['total_loc_changed'] += result['total_loc_changed']
-
-      metrics = {
-        "repository": self.repo_name,
-        "total_open_to_close_time": str(aggregated["total_open_to_close_time"]),
-        "total_time_to_first_review": str(aggregated["total_time_to_first_review"]),
-        "total_time_to_approval": str(aggregated["total_time_to_approval"]),
-        "prs_merged": aggregated["prs_merged"],
-        "total_reviews": aggregated["total_reviews"],
-        "total_commits": aggregated["total_commits"],
-        "total_loc_changed": aggregated["total_loc_changed"],
-        "average_open_to_close_time": str(
-            aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
-            if aggregated["prs_merged"]
-            else timedelta(0)
-        ),
-        "average_time_to_first_review": str(
-            aggregated["total_time_to_first_review"] / aggregated["prs_opened"]
-            if aggregated["prs_opened"]
-            else timedelta(0)
-        ),
-        "average_time_to_approval": str(
-            aggregated["total_time_to_approval"] / aggregated["prs_opened"]
-            if aggregated["prs_opened"]
-            else timedelta(0)
-        ),
-        "prs_opened": aggregated["prs_opened"],
-        "weekly_prs_merged": aggregated["prs_merged"] / self.time_frame,
-        "average_reviews_per_pr": (
-            aggregated["total_reviews"] / aggregated["prs_opened"]
-            if aggregated["prs_opened"]
-            else 0
-        ),
-        "average_commits_per_pr": (
-            aggregated["total_commits"] / aggregated["prs_opened"]
-            if aggregated["prs_opened"]
-            else 0
-        ),
-        "average_loc_changed_per_pr": (
-            aggregated["total_loc_changed"] / aggregated["prs_opened"]
-            if aggregated["prs_opened"]
-            else 0
-        ),
-    }
-
-    return metrics
+        
+        metrics = {
+            "repository": self.repo_name,
+            "total_open_to_close_time": str(aggregated["total_open_to_close_time"]),
+            "total_time_to_first_review": str(aggregated["total_time_to_first_review"]),
+            "total_time_to_approval": str(aggregated["total_time_to_approval"]),
+            "prs_merged": aggregated["prs_merged"],
+            "total_reviews": aggregated["total_reviews"],
+            "total_commits": aggregated["total_commits"],
+            "total_loc_changed": aggregated["total_loc_changed"],
+            "average_open_to_close_time": str(
+                aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
+                if aggregated["prs_merged"]
+                else timedelta(0)
+            ),
+            "average_time_to_first_review": str(
+                aggregated["total_time_to_first_review"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else timedelta(0)
+            ),
+            "average_time_to_approval": str(
+                aggregated["total_time_to_approval"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else timedelta(0)
+            ),
+            "prs_opened": aggregated["prs_opened"],
+            "weekly_prs_merged": aggregated["prs_merged"] / self.time_frame,
+            "average_reviews_per_pr": (
+                aggregated["total_reviews"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+            "average_commits_per_pr": (
+                aggregated["total_commits"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+            "average_loc_changed_per_pr": (
+                aggregated["total_loc_changed"] / aggregated["prs_opened"]
+                if aggregated["prs_opened"]
+                else 0
+            ),
+        }
+        
+        return metrics
 
     def print_metrics(self, metrics):
         avg_open_to_close_time = metrics['total_open_to_close_time'] / metrics['prs_opened'] if metrics['prs_opened'] else timedelta(0)
