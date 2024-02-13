@@ -160,8 +160,7 @@ class RepositoryMetrics:
             'prs_merged': int(pr.merged),
             'total_reviews': 0,
             'total_commits': 0,
-            'total_loc_changed': 0,
-            'review_dates': []
+            'total_loc_changed': 0
         }
 
         if pr.merged:
@@ -179,7 +178,6 @@ class RepositoryMetrics:
             if pr_metrics['time_to_first_review'] == timedelta(0):  # Capture time to first review
                 pr_metrics['time_to_first_review'] = review.submitted_at - pr.created_at
             pr_metrics['total_reviews'] += 1
-            pr_metrics['review_dates'].append(review.submitted_at)
 
         return pr_metrics
 
@@ -192,8 +190,7 @@ class RepositoryMetrics:
             'prs_merged': 0,
             'total_reviews': 0,
             'total_commits': 0,
-            'total_loc_changed': 0,
-            'review_dates': []
+            'total_loc_changed': 0
         }
 
         for result in results:
@@ -205,24 +202,22 @@ class RepositoryMetrics:
             aggregated['total_reviews'] += result['total_reviews']
             aggregated['total_commits'] += result['total_commits']
             aggregated['total_loc_changed'] += result['total_loc_changed']
-            aggregated['review_dates'].extend(result['review_dates'])
-
-        review_weeks = {review_date.isocalendar()[1] for review_date in aggregated['review_dates']}
-        average_prs_reviewed_per_week = len(review_weeks) / self.time_frame if self.time_frame > 0 else 0
 
         metrics = {
-            'average_open_to_close_time': aggregated['total_open_to_close_time'] / aggregated['prs_merged'] if aggregated['prs_merged'] else timedelta(0),
-            'average_time_to_first_review': aggregated['total_time_to_first_review'] / aggregated['prs_opened'] if aggregated['prs_opened'] else timedelta(0),
-            'average_time_to_approval': aggregated['total_time_to_approval'] / aggregated['prs_opened'] if aggregated['prs_opened'] else timedelta(0),
+            'average_open_to_close_time': self.timedelta_to_decimal_hours(aggregated['total_open_to_close_time'] / aggregated['prs_merged']) if aggregated['prs_merged'] else 0,
+            'average_time_to_first_review': self.timedelta_to_decimal_hours(aggregated['total_time_to_first_review'] / aggregated['prs_opened']) if aggregated['prs_opened'] else 0,
+            'average_time_to_approval': self.timedelta_to_decimal_hours(aggregated['total_time_to_approval'] / aggregated['prs_opened']) if aggregated['prs_opened'] else 0,
             'prs_opened': aggregated['prs_opened'],
             'weekly_prs_merged': aggregated['prs_merged'] / self.time_frame,
             'average_reviews_per_pr': aggregated['total_reviews'] / aggregated['prs_opened'] if aggregated['prs_opened'] else 0,
             'average_commits_per_pr': aggregated['total_commits'] / aggregated['prs_opened'] if aggregated['prs_opened'] else 0,
-            'average_loc_changed_per_pr': aggregated['total_loc_changed'] / aggregated['prs_opened'] if aggregated['prs_opened'] else 0,
-            'average_prs_reviewed_per_week': average_prs_reviewed_per_week
+            'average_loc_changed_per_pr': aggregated['total_loc_changed'] / aggregated['prs_opened'] if aggregated['prs_opened'] else 0
         }
 
         return metrics
+
+    def timedelta_to_decimal_hours(self, td):
+        return td.total_seconds() / 3600
 
 def main():
     repo_name = os.getenv('REPOSITORY')
