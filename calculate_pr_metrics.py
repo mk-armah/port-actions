@@ -134,7 +134,7 @@ def main():
     print("TimeFrame", time_frame)
     
     repo_metrics = RepositoryMetrics(repo_name, time_frame)
-    metrics = metrics.calculate_pr_metrics()
+    metrics = repo_metrics.calculate_pr_metrics()
 
     metrics_json = json.dumps(metrics)
     print(f"::set-output name=metrics::{metrics_json}")
