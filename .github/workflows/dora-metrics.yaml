@@ -23,14 +23,14 @@ jobs:
         uses: DeveloperMetrics/deployment-frequency@main
         with:
           workflows: 'CI/CD'
-          owner-repo: ${{ github.repository_owner }}/${{ matrix.repo }}
+          owner-repo: ${{ matrix.repo }}
           pat-token: ${{ secrets.PATTOKEN }}
           
       - name: Lead Time For Changes
         uses: DeveloperMetrics/lead-time-for-changes@main
         with:
           workflows: 'CI/CD'
-          owner-repo: ${{ github.repository_owner }}/${{ matrix.repo }}
+          owner-repo: ${{ matrix.repo }}
           pat-token: ${{ secrets.PATTOKEN }}
           
       - name: Checkout code
