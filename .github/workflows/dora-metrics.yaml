@@ -24,7 +24,7 @@ jobs:
         uses: DeveloperMetrics/deployment-frequency@main
         with:
           workflows: 'CI/CD'
-          owner-repo: '${{ matrix.repo }}'
+          owner-repo: 'mk-armah/jira-actions'
           pat-token: ${{ secrets.PATTOKEN }}
       
       - name: Results for Deployment Frequency
