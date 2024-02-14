@@ -84,9 +84,9 @@ jobs:
         id: users
         with:
           cmd: 'jq  [.users[].summary] "${{ fromJson(steps.new_schedule.outputs.response).schedule}}" -r'
-      
+          
       - name: Show users
-        run: 'echo "users ${{ steps.users }}"'
+        run: 'echo "users ${{ steps.users.outputs }}"'
 
       # - name: Log Before Upserting Schedule to Port
       #   uses: port-labs/port-github-action@v1
@@ -125,4 +125,4 @@ jobs:
       #     baseUrl: https://api.getport.io
       #     operation: PATCH_RUN
       #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Entity upserting was successful ✅"
+          # logMessage: "Entity upserting was successful ✅"
