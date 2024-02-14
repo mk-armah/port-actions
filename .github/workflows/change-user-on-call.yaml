@@ -83,7 +83,7 @@ jobs:
         run: 'echo ${{ steps.new_schedule.outputs.response}} >> schedule.json'
 
       - name: Show users
-        run: 'cat @schedule.json'
+        run: 'cat schedule.json'
         
       - name: Extract Users From New Schedule
         uses: sergeysova/jq-action@v2
