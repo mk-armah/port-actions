@@ -1,5 +1,4 @@
-name: Change PagerDuty Incident Owner
-
+name: Change On Call User In PagerDuty
 on:
   workflow_dispatch:
     inputs:
