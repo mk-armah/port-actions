@@ -1,1 +1,129 @@
+name: Change PagerDuty Incident Owner
 
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: The start time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z)
+        required: true
+        type: string
+      end:
+        description: The end time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z).
+        required: true
+        type: string
+      schedule_id:
+        description: The ID of the schedule you're modifying
+        required: true
+        type: string
+      new_on_call_user_id:
+        description: The ID of the user who will be taking over the on-call duty
+        required: true
+        type: string
+      # port_payload:
+      #   required: true
+      #   description: >-
+      #     Port's payload, including details for who triggered the action and
+      #     general context (blueprint, run id, etc...)
+
+jobs:
+  change-incident-owner:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Log Executing Request to Changing On-Call Owner
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to make a request to pagerduty..."
+
+      - name: Change Who is On-Call in PagerDuty
+        id: change_on_call_user
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}/overides'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"'
+          data: >-
+            {
+              "overrides": [
+                {
+                  "start": "${{ github.event.inputs.start_time }}",
+                  "end": "${{ github.event.inputs.end_time }}",
+                  "user": {
+                    "id": "${{ github.event.inputs.new_on_call_user_id }}",
+                    "type": "user_reference"
+                  },
+                  "time_zone": "UTC"
+                }
+              ]
+            }
+
+      - name: Log Before Requesting for Updated Schedule
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Getting updated schedule from pagerduty..."
+
+      - name: Request For Changed Schedule
+        id: new_schedule
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}'
+          method: 'GET'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"'
+
+      - name: Extract Users From New Schedule
+        uses: sergeysova/jq-action@v2
+        id: users
+        with:
+          cmd: 'jq  [.users[].summary] "${{ fromJson(steps.new_schedule.outputs.response).schedule}}" -r'
+      
+      - name: Show users
+        run: 'echo "users ${{ steps.users. }}"'
+
+      - name: Log Before Upserting Schedule to Port
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Ingesting updated schedule to port..."
+          
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
+          title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
+          blueprint: "pagerdutyIncident"
+          properties: |-
+            {
+              "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
+              "timezone": "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}",
+              "description": "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}",
+              "users": "${{ fromJson(steps.users.outputs)}}",
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
