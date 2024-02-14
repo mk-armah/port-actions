@@ -2,11 +2,11 @@ name: Change On Call User In PagerDuty
 on:
   workflow_dispatch:
     inputs:
-      start:
+      start_time:
         description: The start time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z)
         required: true
         type: string
-      end:
+      end_time:
         description: The end time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z).
         required: true
         type: string
@@ -45,7 +45,7 @@ jobs:
         with:
           url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}/overides'
           method: 'POST'
-          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
           data: >-
             {
               "overrides": [
@@ -77,7 +77,7 @@ jobs:
         with:
           url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}'
           method: 'GET'
-          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
       - name: Extract Users From New Schedule
         uses: sergeysova/jq-action@v2
