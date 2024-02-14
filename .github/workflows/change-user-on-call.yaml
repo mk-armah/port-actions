@@ -80,13 +80,16 @@ jobs:
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
       - name: Show Changed Schedule
-        run: 'echo ${{ steps.new_schedule.outputs.response}} >> schedule_response.json'
+        run: 'echo ${{ steps.new_schedule.outputs.response}} >> schedule.json'
+
+      - name: Show users
+        run: 'cat @schedule.json'
         
       - name: Extract Users From New Schedule
         uses: sergeysova/jq-action@v2
         id: users
         with:
-          cmd: 'jq [.schedule.users[].summary] schedule_response.json -r'
+          cmd: 'jq [.schedule.users[].summary] schedule.json -r'
           
       - name: Show users
         run: 'echo "users ${{ steps.users.outputs }}"'
