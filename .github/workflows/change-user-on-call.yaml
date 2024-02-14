@@ -86,7 +86,7 @@ jobs:
           cmd: 'jq  [.users[].summary] "${{ fromJson(steps.new_schedule.outputs.response).schedule}}" -r'
       
       - name: Show users
-        run: 'echo "users ${{ steps.users. }}"'
+        run: 'echo "users ${{ steps.users }}"'
 
       - name: Log Before Upserting Schedule to Port
         uses: port-labs/port-github-action@v1
