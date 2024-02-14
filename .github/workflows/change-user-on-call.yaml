@@ -83,7 +83,7 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: users
         with:
-          cmd: 'jq  [.users[].summary] "${{ fromJson(steps.new_schedule.outputs.response).schedule}}" -r'
+          cmd: 'jq  [.users[].summary] ${{ toJson(steps.new_schedule.outputs.response).schedule}} -r'
           
       - name: Show users
         run: 'echo "users ${{ steps.users.outputs }}"'
