@@ -86,7 +86,7 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: users
         with:
-          cmd: 'jq [.users[].summary]  ${{ steps.new_schedule.outputs.response.schedule}}" -r'
+          cmd: 'jq [.schedule.users[].summary]  ${{ steps.new_schedule.outputs.response}} -r'
           
       - name: Show users
         run: 'echo "users ${{ steps.users.outputs }}"'
