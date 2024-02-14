@@ -80,7 +80,7 @@ jobs:
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
       - name: Show Changed Schedule
-        run: 'echo ${{ steps.new_schedule.outputs.response}} >> schedule.json'
+        run: 'echo ${{ steps.new_schedule.outputs.response}} > schedule.json'
 
       - name: Show users
         run: 'cat schedule.json'
