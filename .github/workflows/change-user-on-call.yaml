@@ -79,24 +79,15 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      - name: Show Changed Schedule
-        run: 'echo ${{ steps.new_schedule.outputs.response}} > schedule.json'
-
-      - name: Show users
-        run: 'cat schedule.json'
-        
-      # - name: Extract Users From New Schedule
-      #   uses: sergeysova/jq-action@v2
-      #   id: users
-      #   with:
-      #     cmd: echo '${{ toJson(steps.new_schedule.outputs.response) }}' | jq '[.schedule.users[].summary] -r'
-
       - name: Extract Users From New Schedule
-        run: echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]'
-        id: users
+        id: users # This ID is used to reference outputs of this step
+        run: |
+          USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]')
+          echo "::set-output name=user_list::$USERS"
           
-      - name: Show users
-        run: 'echo "users: ${{ steps.users.outputs.result }}"'
+      - name: Use Extracted Users
+        run: |
+          echo "Extracted Users: ${{ steps.users.outputs.user_list }}"
 
       # - name: Log Before Upserting Schedule to Port
       #   uses: port-labs/port-github-action@v1
