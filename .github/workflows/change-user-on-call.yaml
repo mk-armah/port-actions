@@ -82,9 +82,10 @@ jobs:
       - name: Extract Users From New Schedule
         id: users
         run: |
-          echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]' > users.json
-          USERS=$(cat users.json)
-          echo "user_list=$USERS" >> $GITHUB_OUTPUT
+          USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '([.schedule.users[].summary]) | @tsv')
+          echo "user_list<<EOF" >> $GITHUB_OUTPUT
+          echo "$USERS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Use Extracted Users
         run: |
