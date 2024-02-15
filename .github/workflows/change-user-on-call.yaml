@@ -85,11 +85,15 @@ jobs:
       - name: Show users
         run: 'cat schedule.json'
         
+      # - name: Extract Users From New Schedule
+      #   uses: sergeysova/jq-action@v2
+      #   id: users
+      #   with:
+      #     cmd: echo '${{ toJson(steps.new_schedule.outputs.response) }}' | jq '[.schedule.users[].summary] -r'
+
       - name: Extract Users From New Schedule
-        uses: sergeysova/jq-action@v2
+        run: echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]'
         id: users
-        with:
-          cmd: echo '${{ toJson(steps.new_schedule.outputs.response) }}' | jq '[.schedule.users[].summary] -r'
           
       - name: Show users
         run: 'echo "users: ${{ steps.users.outputs.result }}"'
