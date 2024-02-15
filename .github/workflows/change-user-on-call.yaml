@@ -82,14 +82,15 @@ jobs:
       - name: Extract Users From New Schedule
         id: users
         run: |
-          USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '([.schedule.users[].summary]) | @tsv')
-          echo "user_list<<EOF" >> $GITHUB_OUTPUT
-          echo "$USERS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo '${{ steps.new_schedule.outputs.response }}' | jq -c '.schedule.users[].summary' > users.json
+          echo "user_list<<EOF" >> $GITHUB_ENV
+          cat users.json >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Use Extracted Users
         run: |
-          echo "Extracted Users: '[${{ steps.users.outputs.user_list }}"]'
+          echo "Extracted Users: $user_list"
+        shell: bash
 
       # - name: Log Before Upserting Schedule to Port
       #   uses: port-labs/port-github-action@v1
