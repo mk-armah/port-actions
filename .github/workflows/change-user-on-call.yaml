@@ -83,8 +83,8 @@ jobs:
         id: users # This ID is used to reference outputs of this step
         run: |
           USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]')
-          echo "::set-output name=user_list::$USERS"
-          
+          echo "user_list=$USERS" >> $GITHUB_OUTPUT
+
       - name: Use Extracted Users
         run: |
           echo "Extracted Users: ${{ steps.users.outputs.user_list }}"
