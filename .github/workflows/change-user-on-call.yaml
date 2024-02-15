@@ -89,7 +89,7 @@ jobs:
 
       - name: Use Extracted Users
         run: |
-          echo "Extracted Users: ${{ steps.users.outputs.user_list }}"
+          echo "Extracted Users: '[${{ steps.users.outputs.user_list }}"]'
 
       # - name: Log Before Upserting Schedule to Port
       #   uses: port-labs/port-github-action@v1
