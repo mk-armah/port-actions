@@ -80,10 +80,12 @@ jobs:
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
       - name: Extract Users From New Schedule
-        id: users # This ID is used to reference outputs of this step
+        id: users
         run: |
-          USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]')
-          echo "user_list=$USERS" >> $GITHUB_OUTPUT
+          USERS=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '.schedule.users[].summary | @tsv')
+          echo "user_list<<EOF" >> $GITHUB_OUTPUT
+          echo "$USERS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Use Extracted Users
         run: |
