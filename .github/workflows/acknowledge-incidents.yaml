@@ -32,7 +32,7 @@ jobs:
       #     logMessage: "About to make a request to pagerduty..."
 
       - name: Request to Acknowledge Incident
-        id: acknowlege_incident
+        id: acknowledge_incident
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.pagerduty.com/incidents'
@@ -62,7 +62,7 @@ jobs:
       - name: Get Incident Object from Response
         id: incident
         run: |
-          echo "incident=${{ toJson(steps.akcnowlege_incident.outputs.response)}}" >> $GITHUB_ENV
+          echo "incident=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
 
       # - name: Log Before Upserting Entity
       #   uses: port-labs/port-github-action@v1
@@ -82,13 +82,13 @@ jobs:
       #     blueprint: "pagerdutyIncident"
       #     properties: |-
       #       {
-      #         "status": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.status }}",
-      #         "url": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.self }}",
-      #         "urgency": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.urgency }}",
-      #         "responder": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.assignments[0].assignee.summary}}",
-      #         "escalation_policy": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.escalation_policy.summary }}",
-      #         "created_at": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.created_at }}",
-      #         "updated_at": "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.updated_at }}"
+      #         "status": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.status }}",
+      #         "url": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.self }}",
+      #         "urgency": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.urgency }}",
+      #         "responder": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.assignments[0].assignee.summary}}",
+      #         "escalation_policy": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.escalation_policy.summary }}",
+      #         "created_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.created_at }}",
+      #         "updated_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incident.updated_at }}"
       #       }
       #     clientId: ${{ secrets.PORT_CLIENT_ID }}
       #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
