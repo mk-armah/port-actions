@@ -77,8 +77,8 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.acknowlege_incident.outputs.response).incidents[0].id }}"
-          title: "${{ fromJson(steps.acknowlege_incident.outputs.response).incidents[0].title }}"
+          identifier: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].id }}"
+          title: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].title }}"
           blueprint: "pagerdutyIncident"
           properties: |-
             {
