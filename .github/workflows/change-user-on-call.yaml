@@ -97,6 +97,13 @@ jobs:
           echo "::set-output name=user_summaries::$USERS_JSON"
         shell: bash
 
+      - name: View Details
+        id: extract_users
+        run: |
+          USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
+          echo "ScheduleID ${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
+        shell: bash
+
       - name: Log Before Upserting Schedule to Port
         uses: port-labs/port-github-action@v1
         with:
