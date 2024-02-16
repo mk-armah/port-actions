@@ -38,7 +38,7 @@ jobs:
               {
                 "incidents": [
                   {
-                    "id": ${{ fromJson(inputs.port_payload).context.entity }},
+                    "id": "${{ fromJson(inputs.port_payload).context.entity }}",
                     "type": "incident_reference",
                     "status": "acknowledged"
                   }
