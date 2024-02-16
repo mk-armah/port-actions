@@ -39,15 +39,15 @@ jobs:
           method: 'PUT'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}", "From": "${{ github.event.inputs.from }}"}'
           data: >-
-            {
-              "incidents": [
-                {
-                  "id": ${{fromJson(github.event.inputs.incident_id)}},
-                  "type": "incident_reference",
-                  "status": "acknowledged"
-                }
-              ]
-            }
+              {
+                "incidents": [
+                  {
+                    "id": ${{fromJson(github.event.inputs.incident_id)}},
+                    "type": "incident_reference",
+                    "status": "acknowledged"
+                  }
+                ]
+              }
 
       # - name: Log Before Processing Incident Response
       #   uses: port-labs/port-github-action@v1
