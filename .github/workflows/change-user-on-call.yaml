@@ -105,13 +105,13 @@ jobs:
         with:
           identifier: "${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
           title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
-          blueprint: "pagerdutyIncident"
+          blueprint: "pagerdutySchedule"
           properties: |-
             {
               "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
               "timezone": "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}",
               "description": "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}",
-              "users": $(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '.schedule.users[].summary'),
+              "users": "users": $(echo '${{ steps.new_schedule.outputs.response }}' | jq -r '[.schedule.users[].summary]'),
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
