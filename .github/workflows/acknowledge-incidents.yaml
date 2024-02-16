@@ -42,7 +42,7 @@ jobs:
               {
                 "incidents": [
                   {
-                    "id": ${{fromJson(github.event.inputs.incident_id)}},
+                    "id": "${{ github.event.inputs.incident_id }}",
                     "type": "incident_reference",
                     "status": "acknowledged"
                   }
