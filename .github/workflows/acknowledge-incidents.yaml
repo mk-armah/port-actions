@@ -62,7 +62,7 @@ jobs:
       - name: Get Incident Object from Response
         id: incident
         run: |
-          echo "incident=${{ toJson(steps.acknowledge_incident.outputs.response.incidents[0])}}" >> $GITHUB_ENV
+          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -77,8 +77,8 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.id }}"
-          title: "${{ fromJson(steps.acknowlege_incident.outputs.response).incident.title }}"
+          identifier: "${{ fromJson(steps.acknowlege_incident.outputs.response).incidents[0].id }}"
+          title: "${{ fromJson(steps.acknowlege_incident.outputs.response).incidents[0].title }}"
           blueprint: "pagerdutyIncident"
           properties: |-
             {
