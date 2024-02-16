@@ -117,7 +117,7 @@ jobs:
         with:
           identifier: "${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
           title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
-          blueprint: "pagerdutySchedule"
+          blueprint: ${{fromJson(github.event.inputs.port_payload).context.blueprint}}
           properties: |-
             {
               "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
