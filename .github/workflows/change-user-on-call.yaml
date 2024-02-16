@@ -95,17 +95,18 @@ jobs:
         run: |
           USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
           echo "::set-output name=user_summaries::$USERS_JSON"
-          echo identifier: "${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
-          echo title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
-          echo url : "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}"
-          echo timezone: "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}"
-          echo description: "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}"
-          echo users: [] #${{ steps.extract_users.outputs.user_summaries }}
         shell: bash
 
       - name: View Details
         run: |
           echo "${{ steps.extract_users.outputs.user_summaries }}"
+         
+          echo "identifier: ${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
+          echo "title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
+          echo "url : "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}"
+          echo "timezone: "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}"
+          echo "description: "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}"
+          echo "users: [] #${{ steps.extract_users.outputs.user_summaries }}"
         shell: bash
 
       - name: Log Before Upserting Schedule to Port
