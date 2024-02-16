@@ -1,5 +1,4 @@
-name: Change PagerDuty Incident Owner
-
+name: Acknowledge Incident In PagerDuty
 on:
   workflow_dispatch:
     inputs:
