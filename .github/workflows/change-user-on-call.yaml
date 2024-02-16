@@ -124,7 +124,7 @@ jobs:
               "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
               "timezone": "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}",
               "description": "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}",
-              "users": "users": ${{ steps.extract_users.outputs.user_summaries }}
+              "users": ${{ steps.extract_users.outputs.user_summaries }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
