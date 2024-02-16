@@ -100,13 +100,11 @@ jobs:
       - name: View Details
         run: |
           echo "${{ steps.extract_users.outputs.user_summaries }}"
-         
           echo "identifier: ${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
           echo "title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
           echo "url : "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}"
-          echo "timezone: "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}"
-          echo "description: "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}"
-          echo "users: [] #${{ steps.extract_users.outputs.user_summaries }}"
+          echo "timezone: "${{ fromJson(steps.new_schedule.outputs.response).schedule.timezone }}"
+          echo "description: "${{ fromJson(steps.new_schedule.outputs.response).schedule.description}}"
         shell: bash
 
       - name: Log Before Upserting Schedule to Port
@@ -128,8 +126,8 @@ jobs:
           properties: |-
             {
               "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
-              "timezone": "${{ fromJson(steps.change_owner.outputs.response).schedule.timezone }}",
-              "description": "${{ fromJson(steps.change_owner.outputs.response).schedule.description}}",
+              "timezone": "${{ fromJson(steps.new_schedule.outputs.response).schedule.timezone }}",
+              "description": "${{ fromJson(steps.new_schedule.outputs.response).schedule.description}}",
               "users": [] #${{ steps.extract_users.outputs.user_summaries }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
