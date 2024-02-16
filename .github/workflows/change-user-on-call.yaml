@@ -99,8 +99,7 @@ jobs:
 
       - name: View Details
         run: |
-          USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
-          echo "ScheduleID ${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
+          echo "${{ steps.extract_users.outputs.user_summaries }}"
         shell: bash
 
       - name: Log Before Upserting Schedule to Port
