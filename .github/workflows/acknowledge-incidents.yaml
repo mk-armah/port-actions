@@ -2,10 +2,6 @@ name: Acknowledge Incident In PagerDuty
 on:
   workflow_dispatch:
     inputs:
-      $targetEntity:
-        description: ID of the PagerDuty Incident
-        required: true
-        type: string
       from:
         description: The email address of a valid user associated with the account making the request.
         required: true
@@ -42,7 +38,7 @@ jobs:
               {
                 "incidents": [
                   {
-                    "id": "${{ github.event.inputs.$targetEntity }}",
+                    "id": ${{ fromJson(inputs.port_payload).context.entity }},
                     "type": "incident_reference",
                     "status": "acknowledged"
                   }
@@ -79,7 +75,7 @@ jobs:
         with:
           identifier: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].id }}"
           title: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].title }}"
-          blueprint: "pagerdutyIncident"
+          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |-
             {
               "status": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].status }}",
