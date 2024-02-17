@@ -75,13 +75,6 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      # - name: Extract Users From New Schedule
-      #   id: extract_users
-      #   run: |
-      #     USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
-      #     echo "::set-output name=user_summaries::$USERS_JSON"
-      #   shell: bash
-
       - name: Extract Users From New Schedule
         id: extract_users
         run: |
