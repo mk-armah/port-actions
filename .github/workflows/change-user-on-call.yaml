@@ -1,4 +1,4 @@
-name: Change On Call User In PagerDuty
+name: Change Who is On Call In PagerDuty
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +21,7 @@ on:
           general context (blueprint, run id, etc...)
 
 jobs:
-  change-incident-owner:
+  change-on-call-user:
     runs-on: ubuntu-latest
     steps:
       
