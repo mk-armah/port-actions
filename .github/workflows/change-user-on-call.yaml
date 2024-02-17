@@ -33,7 +33,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "About to make a request to pagerduty..."
+          logMessage: "Making request to pagerduty ..."
 
       - name: Change Who is On-Call in PagerDuty
         id: change_on_call_user
@@ -65,7 +65,9 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Getting updated schedule from pagerduty ..."
+          logMessage: |
+                "Request was successful\n"
+                "Getting updated schedule from pagerduty ..."
 
       - name: Request For Changed Schedule
         id: new_schedule
