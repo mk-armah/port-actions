@@ -61,4 +61,4 @@ jobs:
         run: python calculate_pr_metrics.py
       
       - name: Calculated Metrics
-        run: echo '${{ steps.metrics.outputs.metrics}}'
+        run: echo '${{ env.metrics}}'
