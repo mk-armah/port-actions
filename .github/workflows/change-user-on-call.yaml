@@ -10,10 +10,6 @@ on:
         description: The end time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z).
         required: true
         type: string
-      schedule_id:
-        description: The ID of the schedule you're modifying
-        required: true
-        type: string
       new_on_call_user_id:
         description: The ID of the user who will be taking over the on-call duty
         required: true
@@ -43,7 +39,7 @@ jobs:
         id: change_on_call_user
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}/overrides'
+          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.${{fromJson(github.event.inputs.port_payload).context.entity}} }}/overrides'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
           data: >-
@@ -69,42 +65,22 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Getting updated schedule from pagerduty..."
+          logMessage: "Getting updated schedule from pagerduty ..."
 
       - name: Request For Changed Schedule
         id: new_schedule
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.schedule_id }}'
+          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.${{fromJson(github.event.inputs.port_payload).context.entity}} }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      # - name: Extract Users From New Schedule
-      #   id: users
-      #   run: |
-      #     USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '.schedule.users[].summary')
-      #     echo "user_list=$USERS_JSON" >> $GITHUB_ENV
-
-      # - name: Use Extracted Users
-      #   run: |
-      #     echo "Extracted Users: $user_list"
-      #   shell: bash
 
       - name: Extract Users From New Schedule
         id: extract_users
         run: |
           USERS_JSON=$(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
           echo "::set-output name=user_summaries::$USERS_JSON"
-        shell: bash
-
-      - name: View Details
-        run: |
-          echo "${{ steps.extract_users.outputs.user_summaries }}"
-          echo "identifier: ${{ fromJson(steps.new_schedule.outputs.response).schedule.id }}"
-          echo "title: "${{ fromJson(steps.new_schedule.outputs.response).schedule.name }}"
-          echo "url : "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}"
-          echo "timezone: "${{ fromJson(steps.new_schedule.outputs.response).schedule.time_zone }}"
-          echo "description: "${{ fromJson(steps.new_schedule.outputs.response).schedule.description}}"
         shell: bash
 
       - name: Log Before Upserting Schedule to Port
