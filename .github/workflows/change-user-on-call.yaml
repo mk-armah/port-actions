@@ -71,7 +71,7 @@ jobs:
         id: new_schedule
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.pagerduty.com/schedules/${{ github.event.inputs.${{fromJson(github.event.inputs.port_payload).context.entity}} }}'
+          url: 'https://api.pagerduty.com/schedules/${{fromJson(github.event.inputs.port_payload).context.entity}}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
