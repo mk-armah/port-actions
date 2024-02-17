@@ -65,9 +65,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: |
-                "Request was successful\n"
-                "Getting updated schedule from pagerduty ..."
+          logMessage: "Getting updated schedule from pagerduty ..."
 
       - name: Request For Changed Schedule
         id: new_schedule
