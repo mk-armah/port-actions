@@ -104,7 +104,7 @@ jobs:
               "url": "${{ fromJson(steps.new_schedule.outputs.response).schedule.html_url }}",
               "timezone": "${{ fromJson(steps.new_schedule.outputs.response).schedule.time_zone }}",
               "description": "${{ fromJson(steps.new_schedule.outputs.response).schedule.description}}",
-              "users": $(echo '${{ steps.new_schedule.outputs.response }}' | jq -c '[.schedule.users[].summary]')
+              "users": ${{ steps.extract_users.outputs.user_summaries }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
