@@ -111,7 +111,8 @@ def main():
     metrics = repo_metrics.calculate_pr_metrics()
 
     metrics_json = json.dumps(metrics, default=str)  # Ensure proper serialization
-    print(f"::set-output name=metrics::{metrics_json}")
+    with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
+        github_env.write(f"metrics={metrics_json}\n")
 
 if __name__ == "__main__":
     main()
