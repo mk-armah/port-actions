@@ -28,7 +28,9 @@ jobs:
           pat-token: ${{ secrets.PATTOKEN }}
       
       - name: Results for Deployment Frequency
-        run: echo '${{ toJson(steps.deploymement_frequency.outputs)}}'
+        run: |
+          echo '${{ toJson(steps.deploymement_frequency.outputs)}}'
+          echo '${{ env.result }}'
           
       - name: Lead Time For Changes
         id: lead_time_for_changes
