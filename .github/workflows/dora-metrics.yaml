@@ -19,8 +19,7 @@ jobs:
         repo: ${{ fromJson(github.event.inputs.repositories) }}
     
     steps:
-
-      - name: 
+    
       - name: Deployment Frequency
         id: deploymement_frequency
         uses: DeveloperMetrics/deployment-frequency@v1.5.5
