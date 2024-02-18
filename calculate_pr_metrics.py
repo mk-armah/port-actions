@@ -85,6 +85,7 @@ class RepositoryMetrics:
         average_prs_reviewed_per_week = len(review_weeks) / max(1, self.time_frame)
 
         metrics = {
+            "id": self.repo.id,
             'average_open_to_close_time': self.timedelta_to_decimal_hours(aggregated['total_open_to_close_time'] / aggregated['prs_merged']) if aggregated['prs_merged'] else 0,
             'average_time_to_first_review': self.timedelta_to_decimal_hours(aggregated['total_time_to_first_review'] / aggregated['prs_opened']) if aggregated['prs_opened'] else 0,
             'average_time_to_approval': self.timedelta_to_decimal_hours(aggregated['total_time_to_approval'] / aggregated['prs_opened']) if aggregated['prs_opened'] else 0,
