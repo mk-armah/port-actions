@@ -21,10 +21,10 @@ jobs:
     steps:
       - name: Deployment Frequency
         id: deploymement_frequency
-        uses: DeveloperMetrics/deployment-frequency@main
+        uses: DeveloperMetrics/deployment-frequency@v1.5.5
         with:
           workflows: 'CI/CD'
-          owner-repo: 'mk-armah/self-service-actions-examples'
+          owner-repo: ${{ matrix.repo }}
           pat-token: ${{ secrets.PATTOKEN }}
       
       - name: Results for Deployment Frequency
