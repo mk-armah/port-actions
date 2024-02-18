@@ -19,6 +19,8 @@ jobs:
         repo: ${{ fromJson(github.event.inputs.repositories) }}
     
     steps:
+
+      - name: 
       - name: Deployment Frequency
         id: deploymement_frequency
         uses: DeveloperMetrics/deployment-frequency@v1.5.5
@@ -47,7 +49,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-          
+      
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -61,6 +63,50 @@ jobs:
           REPOSITORY: ${{ matrix.repo }}
           TIME_FRAME: ${{ github.event.inputs.timeFrame }}
         run: python calculate_pr_metrics.py
-      
+
+      # - name: Log After Upserting Entity
+      #   uses: port-labs/port-github-action@v1
+      #   with:
+      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+      #     baseUrl: https://api.getport.io
+      #     operation: PATCH_RUN
+      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+      #     logMessage: "Upserting metrics was successful ✅"
+          
       - name: Calculated Metrics
         run: echo '${{ env.metrics}}'
+
+      # - name: UPSERT Entity
+      #   uses: port-labs/port-github-action@v1
+      #   with:
+      #     identifier: "${{ env.metrics.id }}"
+      #     title: "${{ matrix.repo }}"
+      #     blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+      #     properties: |-
+      #       {
+      #         "average_open_to_close_time": "${{ env.metrics.average_open_to_close_time }}",
+      #         "average_time_to_first_review": "${{ env.metrics.average_time_to_first_review }}",
+      #         "average_time_to_approval": "${{ env.metrics.average_time_to_approval }}",
+      #         "prs_opened": "${{ env.metrics.prs_opened }}",
+      #         "weekly_prs_merged": "${{ env.metrics.weekly_prs_merged }}",
+      #         "average_reviews_per_pr": "${{ env.metrics.average_reviews_per_pr }}",
+      #         "average_commits_per_pr": "${{ env.metrics.average_commits_per_pr }}",
+      #         "average_loc_changed_per_pr": "${{ env.metrics.average_loc_changed_per_pr }}",
+      #         "average_prs_reviewed_per_week": "${{ env.metrics.average_prs_reviewed_per_week }}",
+      #       }
+      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+      #     baseUrl: https://api.getport.io
+      #     operation: UPSERT
+      #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
+
+      # - name: Log After Upserting Entity
+      #   uses: port-labs/port-github-action@v1
+      #   with:
+      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+      #     baseUrl: https://api.getport.io
+      #     operation: PATCH_RUN
+      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+      #     logMessage: "Entity upserting was successful ✅"
