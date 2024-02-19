@@ -74,7 +74,7 @@ jobs:
           logMessage: "Upserting dora metrics to Port"
           
       - name: Calculated Metrics
-        run: echo '${{ env.metrics}}'
+        run: echo "${{ env.metrics.average_open_to_close_time }}"
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -84,15 +84,15 @@ jobs:
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |-
             {
-              "average_open_to_close_time": "${{ env.metrics.average_open_to_close_time }}",
-              "average_time_to_first_review": "${{ env.metrics.average_time_to_first_review }}",
-              "average_time_to_approval": "${{ env.metrics.average_time_to_approval }}",
-              "prs_opened": "${{ env.metrics.prs_opened }}",
-              "weekly_prs_merged": "${{ env.metrics.weekly_prs_merged }}",
-              "average_reviews_per_pr": "${{ env.metrics.average_reviews_per_pr }}",
-              "average_commits_per_pr": "${{ env.metrics.average_commits_per_pr }}",
-              "average_loc_changed_per_pr": "${{ env.metrics.average_loc_changed_per_pr }}",
-              "average_prs_reviewed_per_week": "${{ env.metrics.average_prs_reviewed_per_week }}",
+              "averageOpenToCloseTime": "${{ env.metrics.average_open_to_close_time }}",
+              "averageTimeToFirstReview": "${{ env.metrics.average_time_to_first_review }}",
+              "averageTimeToApproval": "${{ env.metrics.average_time_to_approval }}",
+              "psOpened": "${{ env.metrics.prs_opened }}",
+              "weeklyPrsMerged": "${{ env.metrics.weekly_prs_merged }}",
+              "averageReviewsPerPr": "${{ env.metrics.average_reviews_per_pr }}",
+              "averageCommitsPerPr": "${{ env.metrics.average_commits_per_pr }}",
+              "averageLocChangedPerPr": "${{ env.metrics.average_loc_changed_per_pr }}",
+              "averagePrsReviewedPerWeek": "${{ env.metrics.average_prs_reviewed_per_week }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
