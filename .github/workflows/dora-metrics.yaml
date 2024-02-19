@@ -3,9 +3,9 @@ name: Ingest DORA Metrics
 on:
   workflow_dispatch:
     inputs:
-      repositories:
-        description: 'Comma-separated list of repositories to analyze'
-        required: true
+      repository:
+        description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
+        required: true  
       timeFrame:
         description: 'Last X weeks'
         required: true
@@ -14,18 +14,14 @@ on:
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        repo: ${{ fromJson(github.event.inputs.repositories) }}
     
     steps:
-    
       - name: Deployment Frequency
         id: deploymement_frequency
         uses: DeveloperMetrics/deployment-frequency@v1.5.5
         with:
           workflows: 'CI/CD'
-          owner-repo: ${{ matrix.repo }}
+          owner-repo: ${{ github.event.inputs.repository }}
           pat-token: ${{ secrets.PATTOKEN }}
       
       - name: Results for Deployment Frequency
@@ -38,7 +34,7 @@ jobs:
         uses: DeveloperMetrics/lead-time-for-changes@main
         with:
           workflows: 'CI/CD'
-          owner-repo: ${{ matrix.repo }}
+          owner-repo: ${{ github.event.inputs.repository }}
           pat-token: ${{ secrets.PATTOKEN }}
           
       - name: Checkout code
@@ -59,53 +55,53 @@ jobs:
         id: metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
-          REPOSITORY: ${{ matrix.repo }}
+          REPOSITORY: ${{ github.event.inputs.repository }}
           TIME_FRAME: ${{ github.event.inputs.timeFrame }}
         run: python calculate_pr_metrics.py
 
-      # - name: Log After Upserting Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Upserting metrics was successful ✅"
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Upserting dora metrics to Port"
           
       - name: Calculated Metrics
         run: echo '${{ env.metrics}}'
 
-      # - name: UPSERT Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     identifier: "${{ env.metrics.id }}"
-      #     title: "${{ matrix.repo }}"
-      #     blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
-      #     properties: |-
-      #       {
-      #         "average_open_to_close_time": "${{ env.metrics.average_open_to_close_time }}",
-      #         "average_time_to_first_review": "${{ env.metrics.average_time_to_first_review }}",
-      #         "average_time_to_approval": "${{ env.metrics.average_time_to_approval }}",
-      #         "prs_opened": "${{ env.metrics.prs_opened }}",
-      #         "weekly_prs_merged": "${{ env.metrics.weekly_prs_merged }}",
-      #         "average_reviews_per_pr": "${{ env.metrics.average_reviews_per_pr }}",
-      #         "average_commits_per_pr": "${{ env.metrics.average_commits_per_pr }}",
-      #         "average_loc_changed_per_pr": "${{ env.metrics.average_loc_changed_per_pr }}",
-      #         "average_prs_reviewed_per_week": "${{ env.metrics.average_prs_reviewed_per_week }}",
-      #       }
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: UPSERT
-      #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ env.metrics.id }}"
+          title: ${{ github.event.inputs.repository }}
+          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          properties: |-
+            {
+              "average_open_to_close_time": "${{ env.metrics.average_open_to_close_time }}",
+              "average_time_to_first_review": "${{ env.metrics.average_time_to_first_review }}",
+              "average_time_to_approval": "${{ env.metrics.average_time_to_approval }}",
+              "prs_opened": "${{ env.metrics.prs_opened }}",
+              "weekly_prs_merged": "${{ env.metrics.weekly_prs_merged }}",
+              "average_reviews_per_pr": "${{ env.metrics.average_reviews_per_pr }}",
+              "average_commits_per_pr": "${{ env.metrics.average_commits_per_pr }}",
+              "average_loc_changed_per_pr": "${{ env.metrics.average_loc_changed_per_pr }}",
+              "average_prs_reviewed_per_week": "${{ env.metrics.average_prs_reviewed_per_week }}",
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
-      # - name: Log After Upserting Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Entity upserting was successful ✅"
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
