@@ -84,7 +84,7 @@ jobs:
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |-
             {
-              "averageOpenToCloseTime": "${{ env.metrics.average_open_to_close_time }}",
+              "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
               "averageTimeToFirstReview": "${{ env.metrics.average_time_to_first_review }}",
               "averageTimeToApproval": "${{ env.metrics.average_time_to_approval }}",
               "psOpened": "${{ env.metrics.prs_opened }}",
