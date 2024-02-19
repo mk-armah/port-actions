@@ -74,7 +74,7 @@ jobs:
           logMessage: "Upserting dora metrics to Port"
           
       - name: Calculated Metrics
-        run: echo "${{ env.metrics.average_open_to_close_time }}"
+        run: echo "${{ env.metrics }}"
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
