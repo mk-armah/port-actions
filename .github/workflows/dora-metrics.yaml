@@ -79,20 +79,20 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ env.metrics.id }}"
+          identifier: "${{ fromJson(env.metrics).id }}"
           title: ${{ github.event.inputs.repository }}
-          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          blueprint: doraMetrics
           properties: |-
             {
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-              "averageTimeToFirstReview": "${{ env.metrics.average_time_to_first_review }}",
-              "averageTimeToApproval": "${{ env.metrics.average_time_to_approval }}",
-              "psOpened": "${{ env.metrics.prs_opened }}",
-              "weeklyPrsMerged": "${{ env.metrics.weekly_prs_merged }}",
-              "averageReviewsPerPr": "${{ env.metrics.average_reviews_per_pr }}",
-              "averageCommitsPerPr": "${{ env.metrics.average_commits_per_pr }}",
-              "averageLocChangedPerPr": "${{ env.metrics.average_loc_changed_per_pr }}",
-              "averagePrsReviewedPerWeek": "${{ env.metrics.average_prs_reviewed_per_week }}"
+              "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
+              "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
+              "psOpened": "${{ fromJson(env.metrics).prs_opened }}",
+              "weeklyPrsMerged": "${{ fromJson(env.metrics).weekly_prs_merged }}",
+              "averageReviewsPerPr": "${{ fromJson(env.metrics).average_reviews_per_pr }}",
+              "averageCommitsPerPr": "${{ fromJson(env.metrics).average_commits_per_pr }}",
+              "averageLocChangedPerPr": "${{ fromJson(env.metrics).average_loc_changed_per_pr }}",
+              "averagePrsReviewedPerWeek": "${{ fromJson(env.metrics).average_prs_reviewed_per_week }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
