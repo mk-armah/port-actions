@@ -6,7 +6,7 @@ on:
       repository:
         description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
         required: true
-      timeFrame:
+      timeframe:
         description: 'Last X weeks'
         required: true
       port_payload:
@@ -60,7 +60,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ github.event.inputs.repository }}
-          TIME_FRAME: ${{ github.event.inputs.timeFrame }}
+          TIME_FRAME: ${{ github.event.inputs.timeframe }}
         run: python calculate_pr_metrics.py
 
       - name: Log Before Upserting Entity
