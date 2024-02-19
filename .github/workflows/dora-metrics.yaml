@@ -31,7 +31,7 @@ jobs:
       - name: Run DORA deployment frequency 
         shell: pwsh
         run: |
-           $result = deploymentfrequency.ps1 -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           $result = ${{ github.action_path }}/deploymentfrequency.ps1 -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
            Write-Host "::set-output name=result::$result"
            Write-Output $result >> $env:GITHUB_STEP_SUMMARY
          
