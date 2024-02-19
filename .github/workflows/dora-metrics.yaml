@@ -27,10 +27,17 @@ jobs:
           workflows: 'CI/CD'
           owner-repo: ${{ github.event.inputs.repository }}
           pat-token: ${{ secrets.PATTOKEN }}
-      
+
+      - name: Run DORA deployment frequency 
+        shell: pwsh
+        run: |
+           $result = ${{ deploymentfrequency.ps1 -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           Write-Host "::set-output name=result::$result"
+           Write-Output $result >> $env:GITHUB_STEP_SUMMARY
+         
       - name: Results for Deployment Frequency
         run: |
-          echo '${{ steps.deploymement_frequency.outputs }}'
+          echo '${{ steps.deploymement_frequency.outputs.result }}'
           echo '${{ env.result }}'
           
       - name: Lead Time For Changes
