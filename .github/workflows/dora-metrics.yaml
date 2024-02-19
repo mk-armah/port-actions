@@ -3,17 +3,27 @@ name: Ingest DORA Metrics
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
-        required: true
-      timeFrame:
-        description: 'Last X weeks'
-        required: true
-      port_payload:
-        required: true
-        description: Port's payload, including details for who triggered the action and
-          general context (blueprint, run id, etc...)
-        type: string
+      # repository:
+      #   description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
+      #   required: true
+      # timeFrame:
+      #   description: 'Last X weeks'
+      #   required: true
+      # port_payload:
+      #   required: true
+      #   description: Port's payload, including details for who triggered the action and
+      #     general context (blueprint, run id, etc...)
+      #   type: string
+      
+        repository:
+          type: string
+        timeFrame:
+          type: string
+        port_payload:
+          required: true
+          description: Port's payload, including details for who triggered the action and
+            general context (blueprint, run id, etc...)
+          type: string
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
