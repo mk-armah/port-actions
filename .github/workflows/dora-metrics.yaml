@@ -40,6 +40,11 @@ jobs:
           workflows: 'CI/CD'
           owner-repo: ${{ github.event.inputs.repository }}
           pat-token: ${{ secrets.PATTOKEN }}
+
+      - name: Results for Deployment Frequency
+        run: |
+          echo '${{ steps.lead_time_for_changes.outputs.result }}'
+          echo '${{ env.result }}'
           
       - name: Checkout code
         uses: actions/checkout@v2
