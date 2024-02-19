@@ -10,7 +10,11 @@ on:
         description: 'Last X weeks'
         required: true
         default: '4'  # Default to the last 4 weeks
-
+      port_payload:
+        required: true
+        description: Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+        type: string
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
