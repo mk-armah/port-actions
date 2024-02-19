@@ -87,7 +87,7 @@ jobs:
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
               "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
               "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
-              "psOpened": "${{ fromJson(env.metrics).prs_opened }}",
+              "prsOpened": "${{ fromJson(env.metrics).prs_opened }}",
               "weeklyPrsMerged": "${{ fromJson(env.metrics).weekly_prs_merged }}",
               "averageReviewsPerPr": "${{ fromJson(env.metrics).average_reviews_per_pr }}",
               "averageCommitsPerPr": "${{ fromJson(env.metrics).average_commits_per_pr }}",
