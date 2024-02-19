@@ -5,11 +5,10 @@ on:
     inputs:
       repository:
         description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
-        required: true  
+        required: true
       timeFrame:
         description: 'Last X weeks'
         required: true
-        default: '4'  # Default to the last 4 weeks
       port_payload:
         required: true
         description: Port's payload, including details for who triggered the action and
