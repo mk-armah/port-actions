@@ -28,12 +28,15 @@ jobs:
       #     owner-repo: ${{ github.event.inputs.repository }}
       #     pat-token: ${{ secrets.PATTOKEN }}
 
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Run DORA deployment frequency 
         shell: pwsh
         run: |
            $scriptPath = Join-Path ${{ github.workspace }} "deploymentfrequency.ps1"
-           echo $scriptPath
-           $result = & $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           chmod +x $scriptPath
+           $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
            Write-Host "::set-output name=result::$result"
            Write-Output $result >> $env:GITHUB_STEP_SUMMARY
          
