@@ -74,7 +74,7 @@ jobs:
       #   shell: pwsh
 
       - name: Json Response
-        run: echo ${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}
+        run: echo '${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
         
       - name: Checkout code
         uses: actions/checkout@v2
