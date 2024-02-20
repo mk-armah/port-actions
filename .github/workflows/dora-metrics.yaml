@@ -32,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
            $scriptPath = Join-Path ${{ github.workspace }} "deploymentfrequency.ps1"
-           $result = scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           $result = $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
            Write-Host "::set-output name=result::$result"
            Write-Output $result >> $env:GITHUB_STEP_SUMMARY
            echo dir
