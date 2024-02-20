@@ -47,14 +47,24 @@ jobs:
           echo '${{ steps.deploymement_frequency.outputs.result }}'
           echo '${{ env.result }}'
           
-      - name: Lead Time For Changes
-        id: lead_time_for_changes
-        uses: DeveloperMetrics/lead-time-for-changes@main
-        with:
-          workflows: 'CI/CD'
-          owner-repo: ${{ github.event.inputs.repository }}
-          pat-token: ${{ secrets.PATTOKEN }}
+      # - name: Lead Time For Changes
+      #   id: lead_time_for_changes
+      #   uses: DeveloperMetrics/lead-time-for-changes@main
+      #   with:
+      #     workflows: 'CI/CD'
+      #     owner-repo: ${{ github.event.inputs.repository }}
+      #     pat-token: ${{ secrets.PATTOKEN }}
 
+      - name: Run DORA lead time for changes
+        id: lead_time_for_changes
+        shell: pwsh
+        run: |
+           $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
+           chmod +x $scriptPath
+           $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
+           Write-Output $result >> $env:GITHUB_STEP_SUMMARY
+           Write-Host "::set-output name=result::$result"
+         
       - name: Results for Deployment Frequency
         run: |
           echo '${{ steps.lead_time_for_changes.outputs.result }}'
