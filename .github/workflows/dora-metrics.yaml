@@ -38,6 +38,7 @@ jobs:
            $scriptPath = Join-Path ${{ github.workspace }} "deploymentfrequency.ps1"
            chmod +x $scriptPath
            $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           Write-Host "Using script at: $scriptPath"
            Write-Host "::set-output name=result::$result"
            Write-Output $result >> $env:GITHUB_STEP_SUMMARY
          
