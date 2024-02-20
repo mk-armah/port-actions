@@ -60,9 +60,9 @@ jobs:
         run: |
           $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
           chmod +x $scriptPath
-          $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
-          Write-Host "::set-output name=jsonResult::$result"
-         
+          $result = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
+          echo "::set-output name=jsonResult::$result"
+    
       - name: Use Lead Time for Changes Results
         run: |
           $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
