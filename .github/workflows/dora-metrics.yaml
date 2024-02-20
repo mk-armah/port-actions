@@ -41,6 +41,22 @@ jobs:
            Write-Host "Using script at: $scriptPath"
            Write-Host "::set-output name=result::$result"
            Write-Output $result >> $env:GITHUB_STEP_SUMMARY
+           Write-Host "Directory contents:"
+           Get-ChildItem $dirPath -Force | ForEach-Object { Write-Host $_.FullName }
+      
+           # Define the full path to the script
+           $scriptPath = Join-Path $dirPath "deploymentfrequency.ps1"
+      
+           # Check if the script exists at the path
+           if (Test-Path $scriptPath) {
+             Write-Host "Script found at: $scriptPath"
+      
+            # Optional: Execute the script if found
+            # $result = & pwsh -File $scriptPath -ownerRepo "port-labs/ocean" -workflows "CI/CD" -branch "main" -numberOfDays 30 -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+            # Write-Host "Script execution result: $result"
+            } else {
+             Write-Host "Script not found at: $scriptPath"
+            }
          
       - name: Results for Deployment Frequency
         run: |
