@@ -62,16 +62,20 @@ jobs:
           chmod +x $scriptPath
           $result = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
           echo "::set-output name=jsonResult::$result"
+
     
-      - name: Use Lead Time for Changes Results
-        run: |
-          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
-          Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
-          Write-Host "Workflow Average Time Duration: $($results.WorkflowAverageTimeDuration)"
-          Write-Host "Lead Time for Changes in Hours: $($results.LeadTimeForChangesInHours)"
-          Write-Host "Rating: $($results.Rating)"
-        shell: pwsh
-          
+      # - name: Use Lead Time for Changes Results
+      #   run: |
+      #     $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
+      #     Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
+      #     Write-Host "Workflow Average Time Duration: $($results.WorkflowAverageTimeDuration)"
+      #     Write-Host "Lead Time for Changes in Hours: $($results.LeadTimeForChangesInHours)"
+      #     Write-Host "Rating: $($results.Rating)"
+      #   shell: pwsh
+
+      - name: Json Response
+        run: echo ${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}
+        
       - name: Checkout code
         uses: actions/checkout@v2
 
