@@ -55,19 +55,22 @@ jobs:
       #     pat-token: ${{ secrets.PATTOKEN }}
 
       - name: Run DORA lead time for changes
-        id: lead_time_for_changes
+        id: lead_time_for_changes  # Ensure this step has an ID
         shell: pwsh
         run: |
-           $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
-           chmod +x $scriptPath
-           $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
-           Write-Output $result >> $env:GITHUB_STEP_SUMMARY
-           Write-Host "::set-output name=result::$result"
+          $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
+          chmod +x $scriptPath
+          $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod 'last' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
+          Write-Host "::set-output name=jsonResult::$result"
          
-      - name: Results for Deployment Frequency
+      - name: Use Lead Time for Changes Results
         run: |
-          echo '${{ steps.lead_time_for_changes.outputs.result }}'
-          echo '${{ env.result }}'
+          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
+          Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
+          Write-Host "Workflow Average Time Duration: $($results.WorkflowAverageTimeDuration)"
+          Write-Host "Lead Time for Changes in Hours: $($results.LeadTimeForChangesInHours)"
+          Write-Host "Rating: $($results.Rating)"
+        shell: pwsh
           
       - name: Checkout code
         uses: actions/checkout@v2
