@@ -234,11 +234,18 @@ function Main ([string] $ownerRepo,
     }
     else
     {
+        # $resultObject = @{
+        # DeploymentFrequency = $null
+        # Rating = $null
+        # NumberOfUniqueDeploymentDays = $null
+        # TotalDeployments = $null
+        # }
+
         $resultObject = @{
-        DeploymentFrequency = $null
-        Rating = $null
-        NumberOfUniqueDeploymentDays = $null
-        TotalDeployments = $null
+        DeploymentFrequency = [math]::Round($deploymentsPerDay, 2)
+        Rating = $rating
+        NumberOfUniqueDeploymentDays = $uniqueDates.Length
+        TotalDeployments = $totalDeployments
         }
         
         # Convert the result object to JSON
