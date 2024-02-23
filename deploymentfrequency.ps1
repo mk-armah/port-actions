@@ -235,10 +235,10 @@ function Main ([string] $ownerRepo,
     else
     {
         $resultObject = @{
-        DeploymentFrequency = null
-        Rating = null
-        NumberOfUniqueDeploymentDays = null
-        TotalDeployments = null
+        DeploymentFrequency = $null
+        Rating = $null
+        NumberOfUniqueDeploymentDays = $null
+        TotalDeployments = $null
         }
         
         # Convert the result object to JSON
