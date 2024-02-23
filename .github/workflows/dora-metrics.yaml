@@ -55,23 +55,15 @@ jobs:
       #     pat-token: ${{ secrets.PATTOKEN }}
 
   
-      # - name: Run DORA lead time for changes
-      #   id: lead_time_for_changes  # Ensure this step has an ID
-      #   shell: pwsh
-      #   run: |
-      #     $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
-      #     chmod +x $scriptPath
-      #     $result = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
-      #     echo "::set-output name=jsonResult::$result"
-
       - name: Run DORA lead time for changes
-        id: lead_time_for_changes
+        id: lead_time_for_changes  # Ensure this step has an ID
         shell: pwsh
         run: |
           $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
           chmod +x $scriptPath
-          $jsonResult = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey "" | Select-Object -Last 1
-          echo "::set-output name=jsonResult::$jsonResult"
+          $result = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
+          echo "::set-output name=jsonResult::$result"
+
 
       - name: Print Raw Lead Time for Changes Results
         run: |
