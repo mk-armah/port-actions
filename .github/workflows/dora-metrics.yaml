@@ -72,7 +72,7 @@ jobs:
 
       - name: Use Lead Time for Changes Results
         run: |
-          $results = '${{ toJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
+          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}'
           echo "Lead Time for Changes Results: $results"
 
         
