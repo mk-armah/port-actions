@@ -215,11 +215,39 @@ function Main ([string] $ownerRepo,
 
     if ($dateList.Count -gt 0 -and $numberOfDays -gt 0)
     {
-        Write-Host "Deployment frequency over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"        
+        Write-Host "Deployment frequency over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"   
+        
+        $resultObject = @{
+        DeploymentFrequency = [math]::Round($deploymentsPerDay, 2)
+        Rating = $rating
+        NumberOfUniqueDeploymentDays = $uniqueDates.Length
+        TotalDeployments = $totalDeployments
+        }
+        
+        # Convert the result object to JSON
+        $jsonResult = $resultObject | ConvertTo-Json -Compress
+        
+        # Output the JSON string
+        Write-Output "###JSON_START###"  # This marker helps to easily identify the JSON part in the output
+        Write-Output $jsonResult
         return GetFormattedMarkdown -workflowNames $workflowNames -displayMetric $displayMetric -displayUnit $displayUnit -repo $ownerRepo -branch $branch -numberOfDays $numberOfDays -numberOfUniqueDates $uniqueDates.Length.ToString() -color $color -rating $rating
     }
     else
     {
+        $resultObject = @{
+        DeploymentFrequency = ""
+        Rating = ""
+        NumberOfUniqueDeploymentDays = ""
+        TotalDeployments = ""
+        }
+        
+        # Convert the result object to JSON
+        $jsonResult = $resultObject | ConvertTo-Json -Compress
+        
+        # Output the JSON string
+        Write-Output "###JSON_START###"  # This marker helps to easily identify the JSON part in the output
+        Write-Output $jsonResult
+        
         return GetFormattedMarkdownForNoResult -workflows $workflows -numberOfDays $numberOfDays
     }
 }
