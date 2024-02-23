@@ -279,11 +279,38 @@ function Main ([string] $ownerRepo,
     if ($leadTimeForChangesInHours -gt 0 -and $numberOfDays -gt 0)
     {
         Write-Host "Lead time for changes average over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"
+        # Construct result object
+        $resultObject = @{
+            PRAverageTimeDuration = [math]::Round($totalPRHours / $prCounter, 2)
+            WorkflowAverageTimeDuration = $totalAverageworkflowHours
+            LeadTimeForChangesInHours = $leadTimeForChangesInHours
+            Rating = $rating
+        }
+        
+        # Convert result object to JSON
+        $jsonResult = $resultObject | ConvertTo-Json -Compress
+        
+        # Output the JSON string
+        Write-Host "###JSON_START###"
+        Write-Output $jsonResult
         return GetFormattedMarkdown -workflowNames $workflowNames -displayMetric $displayMetric -displayUnit $displayUnit -repo $ownerRepo -branch $branch -numberOfDays $numberOfDays -color $color -rating $rating
     }
     else
     {
         Write-Host "No lead time for changes to display for this workflow and time period"
+        
+        # Construct result object
+        $resultObject = @{
+            PRAverageTimeDuration = ""
+            WorkflowAverageTimeDuration = ""
+            LeadTimeForChangesInHours = ""
+            Rating = ""
+        }
+        
+        # Output the JSON string
+        Write-Host "###JSON_START###"
+        Write-Output $jsonResult
+        
         return GetFormattedMarkdownForNoResult -workflows $workflows -numberOfDays $numberOfDays
     }
 }
