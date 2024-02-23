@@ -301,10 +301,10 @@ function Main ([string] $ownerRepo,
         
         # Construct result object
         $resultObject = @{
-            PRAverageTimeDuration = ""
-            WorkflowAverageTimeDuration = ""
-            LeadTimeForChangesInHours = ""
-            Rating = ""
+            PRAverageTimeDuration = [math]::Round($totalPRHours / $prCounter, 2)
+            WorkflowAverageTimeDuration = $totalAverageworkflowHours
+            LeadTimeForChangesInHours = $leadTimeForChangesInHours
+            Rating = $rating
         }
         
         # Output the JSON string
