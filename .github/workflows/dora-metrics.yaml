@@ -73,7 +73,7 @@ jobs:
         
       - name: Use Lead Time for Changes Results
         run: |
-          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json - Compress
+          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
           Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
         shell: pwsh
 
