@@ -327,24 +327,24 @@ function GetAuthHeader ([string] $patToken, [string] $actionsToken, [string] $ap
     #Write-Host "patToken is something: $(![string]::IsNullOrEmpty($patToken))"
     if (![string]::IsNullOrEmpty($patToken))
     {
-        Write-Host "Authentication detected: PAT TOKEN"
+        # Write-Host "Authentication detected: PAT TOKEN"
         $base64AuthInfo = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$patToken"))
         $authHeader = @{Authorization=("Basic {0}" -f $base64AuthInfo)}
     }
     elseif (![string]::IsNullOrEmpty($actionsToken))
     {
-        Write-Host "Authentication detected: GITHUB TOKEN"  
+        #Write-Host "Authentication detected: GITHUB TOKEN"  
         $authHeader = @{Authorization=("Bearer {0}" -f $base64AuthInfo)}
     }
     elseif (![string]::IsNullOrEmpty($appId)) # GitHup App auth
     {
-        Write-Host "Authentication detected: GITHUB APP TOKEN"  
+        #Write-Host "Authentication detected: GITHUB APP TOKEN"  
         $token = Get-JwtToken $appId $appInstallationId $appPrivateKey        
         $authHeader = @{Authorization=("token {0}" -f $token)}
     }    
     else
     {
-        Write-Host "No authentication detected" 
+        #Write-Host "No authentication detected" 
         $base64AuthInfo = $null
         $authHeader = $null
     }
