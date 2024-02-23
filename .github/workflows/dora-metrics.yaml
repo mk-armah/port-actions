@@ -18,20 +18,12 @@ on:
 jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
-    
     steps:
-      # - name: Deployment Frequency
-      #   id: deploymement_frequency
-      #   uses: DeveloperMetrics/deployment-frequency@v1.5.5
-      #   with:
-      #     workflows: 'CI/CD'
-      #     owner-repo: ${{ github.event.inputs.repository }}
-      #     pat-token: ${{ secrets.PATTOKEN }}
 
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Run DORA deployment frequency 
+      - name: Run DORA Deployment Frequency 
         id: deploymement_frequency
         shell: pwsh
         run: |
@@ -45,8 +37,18 @@ jobs:
         run: |
           echo "Raw Results: ${{ steps.deploymement_frequency.outputs.jsonResult }}"
         shell: pwsh
+
+      - name: Set Deployment Frequency Results
+        run: |
+          results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
+          echo "Lead Time for Changes Results: $results"
+          echo "TOTAL_DEPLOYMENTS=$(echo $results | jq -r '.TotalDeployments')" >> $GITHUB_ENV
+          echo "DEPLOYMENT_FREQUENCY_RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
+          echo "NUMBER_OF_UNIQUE_DEPLOYMENTS=$(echo $results | jq -r '.NumberOfUniqueDeploymentDays')" >> $GITHUB_ENV
+          echo "DEPLOYMENT_FREQUENCY=$(echo $results | jq -r '.DeploymentFrequency')" >> $GITHUB_ENV
+        shell: bash
         
-      - name: Run DORA lead time for changes
+      - name: Run DORA Lead Time for Changes
         id: lead_time_for_changes
         shell: pwsh
         run: |
@@ -56,12 +58,12 @@ jobs:
           $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
           echo "::set-output name=jsonResult::$jsonLine"
 
-      - name: Use Lead Time for Changes Results - Bash
+      - name: Set Lead Time for Changes Results
         run: |
           results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
           echo "Lead Time for Changes Results: $results"
           echo "LEAD_TIME_FOR_CHANGES_IN_HOURS=$(echo $results | jq -r '.LeadTimeForChangesInHours')" >> $GITHUB_ENV
-          echo "RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
+          echo "LEAD_TIME_RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
           echo "WORKFLOW_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.WorkflowAverageTimeDuration')" >> $GITHUB_ENV
           echo "PR_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.PRAverageTimeDuration')" >> $GITHUB_ENV
         shell: bash
@@ -80,8 +82,7 @@ jobs:
           # pip install httpx
           pip install PyGithub datetime
 
-      - name: Calculate PR Metrics
-        id: metrics
+      - name: Compute PR Metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ github.event.inputs.repository }}
@@ -97,9 +98,6 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Upserting dora metrics to Port"
-          
-      - name: Calculated Metrics
-        run: echo "${{ env.metrics }}"
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -109,8 +107,12 @@ jobs:
           blueprint: doraMetrics
           properties: |-
             {
+              "totalDeployments": "${{ env.TOTAL_DEPLOYMENTS }}",
+              "deploymentRating": "${{ env.DEPLOYMENT_RATING }}",
+              "numberOfUniqueDeploymentDays": "${{ env.NUMBER_OF_UNIQUE_DEPLOYMENTS }}",
+              "deploymentFrequency": "${{ env.DEPLOYMENT_FREQUENCY }}",
               "leadTimeForChangesInHours": "${{ env.LEAD_TIME_FOR_CHANGES_IN_HOURS }}",
-              "rating": "${{ env.RATING }}",
+              "rating": "${{ env.LEAD_TIME_RATING }}",
               "workflowAverageTimeDuration": "${{ env.WORKFLOW_AVERAGE_TIME_DURATION }}",
               "prAverageTimeDuration": "${{ env.PR_AVERAGE_TIME_DURATION }}",
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
