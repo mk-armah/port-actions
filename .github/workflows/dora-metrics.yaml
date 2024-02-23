@@ -37,24 +37,15 @@ jobs:
         run: |
            $scriptPath = Join-Path ${{ github.workspace }} "deploymentfrequency.ps1"
            chmod +x $scriptPath
-           $result = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '60' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
-           Write-Host "Using script at: $scriptPath"
-           Write-Host "::set-output name=result::$result"
-           Write-Output $result >> $env:GITHUB_STEP_SUMMARY
-         
-      - name: Results for Deployment Frequency
-        run: |
-          echo '${{ steps.deploymement_frequency.outputs.result }}'
-          
-      # - name: Lead Time For Changes
-      #   id: lead_time_for_changes
-      #   uses: DeveloperMetrics/lead-time-for-changes@main
-      #   with:
-      #     workflows: 'CI/CD'
-      #     owner-repo: ${{ github.event.inputs.repository }}
-      #     pat-token: ${{ secrets.PATTOKEN }}
+           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '60' -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+           $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
+           echo "::set-output name=jsonResult::$jsonLine"
 
-  
+      - name: Print Raw Deployment Frequency 
+        run: |
+          echo "Raw Results: ${{ steps.deploymement_frequency.outputs.jsonResult }}"
+        shell: pwsh
+        
       - name: Run DORA lead time for changes
         id: lead_time_for_changes
         shell: pwsh
@@ -64,18 +55,6 @@ jobs:
           $output = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
           $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
           echo "::set-output name=jsonResult::$jsonLine"
-
-
-      - name: Print Raw Lead Time for Changes Results
-        run: |
-          echo "Raw Results: ${{ steps.lead_time_for_changes.outputs.jsonResult }}"
-        shell: pwsh
-        
-      - name: Use Lead Time for Changes Results
-        run: |
-          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
-          Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
-        shell: pwsh
 
       - name: Use Lead Time for Changes Results - Bash
         run: |
