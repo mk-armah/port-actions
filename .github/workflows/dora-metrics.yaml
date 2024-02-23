@@ -64,14 +64,19 @@ jobs:
           echo "::set-output name=jsonResult::$result"
 
     
+      # - name: Use Lead Time for Changes Results
+      #   run: |
+      #     $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
+      #     Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
+      #   shell: pwsh
+
       - name: Use Lead Time for Changes Results
         run: |
-          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}' | ConvertFrom-Json
-          Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
-      #     Write-Host "Workflow Average Time Duration: $($results.WorkflowAverageTimeDuration)"
-      #     Write-Host "Lead Time for Changes in Hours: $($results.LeadTimeForChangesInHours)"
-      #     Write-Host "Rating: $($results.Rating)"
-        shell: pwsh
+          $results = '${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
+          # echo "PR Average Time Duration: ($results.PRAverageTimeDuration)"
+          echo $results
+
+        
 
       # - name: Json Response
       #   run: echo '${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
