@@ -56,13 +56,14 @@ jobs:
 
   
       - name: Run DORA lead time for changes
-        id: lead_time_for_changes  # Ensure this step has an ID
+        id: lead_time_for_changes
         shell: pwsh
         run: |
           $scriptPath = Join-Path ${{ github.workspace }} "leadtimeforchanges.ps1"
           chmod +x $scriptPath
-          $result = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '60' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""             
-          echo "::set-output name=jsonResult::$result"
+          $output = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "CI/CD" -branch "main" -numberOfDays '30' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}" -actionsToken "" -appId "" -appInstallationId "" -appPrivateKey ""
+          $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
+          echo "::set-output name=jsonResult::$jsonLine"
 
 
       - name: Print Raw Lead Time for Changes Results
