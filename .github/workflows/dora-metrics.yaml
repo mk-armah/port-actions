@@ -112,7 +112,7 @@ jobs:
               "numberOfUniqueDeploymentDays": "${{ env.NUMBER_OF_UNIQUE_DEPLOYMENTS }}",
               "deploymentFrequency": "${{ env.DEPLOYMENT_FREQUENCY }}",
               "leadTimeForChangesInHours": "${{ env.LEAD_TIME_FOR_CHANGES_IN_HOURS }}",
-              "rating": "${{ env.LEAD_TIME_RATING }}",
+              "leadTimeRating": "${{ env.LEAD_TIME_RATING }}",
               "workflowAverageTimeDuration": "${{ env.WORKFLOW_AVERAGE_TIME_DURATION }}",
               "prAverageTimeDuration": "${{ env.PR_AVERAGE_TIME_DURATION }}",
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
