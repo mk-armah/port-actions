@@ -72,9 +72,8 @@ jobs:
 
       - name: Use Lead Time for Changes Results
         run: |
-          $results = '${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
-          # echo "PR Average Time Duration: ($results.PRAverageTimeDuration)"
-          echo $results
+          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}'
+          echo "Lead Time for Changes Results: $results"
 
         
 
