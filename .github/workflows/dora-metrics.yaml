@@ -77,15 +77,18 @@ jobs:
           Write-Host "PR Average Time Duration: $($results.PRAverageTimeDuration)"
         shell: pwsh
 
-      - name: Use Lead Time for Changes Results
+      - name: Use Lead Time for Changes Results - Bash
         run: |
-          $results = '${{ steps.lead_time_for_changes.outputs.jsonResult }}'
+          results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
           echo "Lead Time for Changes Results: $results"
-
-        
-
-      # - name: Json Response
-      #   run: echo '${{ fromJson(steps.lead_time_for_changes.outputs.jsonResult) }}'
+          prAverageTimeDuration=$(echo $results | jq -r '.PRAverageTimeDuration')
+          leadTimeForChangesInHours=$(echo $results | jq -r '.LeadTimeForChangesInHours')
+          rating=$(echo $results | jq -r '.Rating')
+          
+          echo "PR Average Time Duration: $prAverageTimeDuration"
+          echo "Lead Time for Changes in Hours: $leadTimeForChangesInHours"
+          echo "Rating: $rating"
+        shell: bash
         
       - name: Checkout code
         uses: actions/checkout@v2
