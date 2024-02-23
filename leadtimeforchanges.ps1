@@ -36,11 +36,11 @@ function Main ([string] $ownerRepo,
     {
         $commitCountingMethod = "last"
     }
-    Write-Host "Owner/Repo: $owner/$repo"
-    Write-Host "Number of days: $numberOfDays"
-    Write-Host "Workflows: $($workflowsArray[0])"
-    Write-Host "Branch: $branch"
-    Write-Host "Commit counting method '$commitCountingMethod' being used"
+    # Write-Host "Owner/Repo: $owner/$repo"
+    # Write-Host "Number of days: $numberOfDays"
+    # Write-Host "Workflows: $($workflowsArray[0])"
+    # Write-Host "Branch: $branch"
+    # Write-Host "Commit counting method '$commitCountingMethod' being used"
 
     #==========================================
     # Get authorization headers
@@ -201,10 +201,10 @@ function Main ([string] $ownerRepo,
     }
     
     #Aggregate the PR and workflow processing times to calculate the average number of hours 
-    Write-Host "PR average time duration $($totalPRHours / $prCounter)"
-    Write-Host "Workflow average time duration $($totalAverageworkflowHours)"
-    $leadTimeForChangesInHours = ($totalPRHours / $prCounter) + ($totalAverageworkflowHours)
-    Write-Host "Lead time for changes in hours: $leadTimeForChangesInHours"
+    # Write-Host "PR average time duration $($totalPRHours / $prCounter)"
+    # Write-Host "Workflow average time duration $($totalAverageworkflowHours)"
+    # $leadTimeForChangesInHours = ($totalPRHours / $prCounter) + ($totalAverageworkflowHours)
+    # Write-Host "Lead time for changes in hours: $leadTimeForChangesInHours"
 
     #==========================================
     #Show current rate limit
@@ -217,7 +217,7 @@ function Main ([string] $ownerRepo,
     {
         $rateLimitResponse = Invoke-RestMethod -Uri $uri5 -ContentType application/json -Method Get -Headers @{Authorization=($authHeader["Authorization"])} -SkipHttpErrorCheck -StatusCodeVariable "HTTPStatus"
     }    
-    Write-Host "Rate limit consumption: $($rateLimitResponse.rate.used) / $($rateLimitResponse.rate.limit)"
+    # Write-Host "Rate limit consumption: $($rateLimitResponse.rate.used) / $($rateLimitResponse.rate.limit)"
 
     #==========================================
     #output result
@@ -278,7 +278,7 @@ function Main ([string] $ownerRepo,
     }
     if ($leadTimeForChangesInHours -gt 0 -and $numberOfDays -gt 0)
     {
-        Write-Host "Lead time for changes average over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"
+        # Write-Host "Lead time for changes average over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"
         
         # Construct result object
         $resultObject = @{
@@ -298,7 +298,17 @@ function Main ([string] $ownerRepo,
     }
     else
     {
-        Write-Host "No lead time for changes to display for this workflow and time period"
+        # Construct result object
+        $resultObject = @{
+            PRAverageTimeDuration = ""
+            WorkflowAverageTimeDuration = ""
+            LeadTimeForChangesInHours = ""
+            Rating = ""
+        }
+        
+        # Output the JSON string
+        Write-Output $jsonResult
+        
         return GetFormattedMarkdownForNoResult -workflows $workflows -numberOfDays $numberOfDays
     }
 }
