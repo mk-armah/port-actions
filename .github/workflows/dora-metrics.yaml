@@ -81,13 +81,10 @@ jobs:
         run: |
           results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
           echo "Lead Time for Changes Results: $results"
-          prAverageTimeDuration=$(echo $results | jq -r '.PRAverageTimeDuration')
-          leadTimeForChangesInHours=$(echo $results | jq -r '.LeadTimeForChangesInHours')
-          rating=$(echo $results | jq -r '.Rating')
-          
-          echo "PR Average Time Duration: $prAverageTimeDuration"
-          echo "Lead Time for Changes in Hours: $leadTimeForChangesInHours"
-          echo "Rating: $rating"
+          echo "LEAD_TIME_FOR_CHANGES_IN_HOURS=$(echo $results | jq -r '.LeadTimeForChangesInHours')" >> $GITHUB_ENV
+          echo "RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
+          echo "WORKFLOW_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.WorkflowAverageTimeDuration')" >> $GITHUB_ENV
+          echo "PR_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.PRAverageTimeDuration')" >> $GITHUB_ENV
         shell: bash
         
       - name: Checkout code
@@ -133,10 +130,10 @@ jobs:
           blueprint: doraMetrics
           properties: |-
             {
-              "leadTimeForChangesInHours": "${{ steps.lead_time_for_changes.outputs.jsonResult.LeadTimeForChangesInHours}}",
-              "rating": "${{ steps.lead_time_for_changes.outputs.jsonResult.Rating}}",
-              "workflowAverageTimeDuration": "${{ steps.lead_time_for_changes.outputs.jsonResult.WorkflowAverageTimeDuration}}",
-              "prAverageTimeDuration": $(echo ${{ steps.lead_time_for_changes.outputs.jsonResult }} | jq -r '.PRAverageTimeDuration'),
+              "leadTimeForChangesInHours": "${{ env.LEAD_TIME_FOR_CHANGES_IN_HOURS }}",
+              "rating": "${{ env.RATING }}",
+              "workflowAverageTimeDuration": "${{ env.WORKFLOW_AVERAGE_TIME_DURATION }}",
+              "prAverageTimeDuration": "${{ env.PR_AVERAGE_TIME_DURATION }}",
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
               "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
               "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
