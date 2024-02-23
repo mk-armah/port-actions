@@ -36,11 +36,11 @@ function Main ([string] $ownerRepo,
     {
         $commitCountingMethod = "last"
     }
-    # Write-Host "Owner/Repo: $owner/$repo"
-    # Write-Host "Number of days: $numberOfDays"
-    # Write-Host "Workflows: $($workflowsArray[0])"
-    # Write-Host "Branch: $branch"
-    # Write-Host "Commit counting method '$commitCountingMethod' being used"
+    Write-Host "Owner/Repo: $owner/$repo"
+    Write-Host "Number of days: $numberOfDays"
+    Write-Host "Workflows: $($workflowsArray[0])"
+    Write-Host "Branch: $branch"
+    Write-Host "Commit counting method '$commitCountingMethod' being used"
 
     #==========================================
     # Get authorization headers
@@ -201,10 +201,10 @@ function Main ([string] $ownerRepo,
     }
     
     #Aggregate the PR and workflow processing times to calculate the average number of hours 
-    # Write-Host "PR average time duration $($totalPRHours / $prCounter)"
-    # Write-Host "Workflow average time duration $($totalAverageworkflowHours)"
-    # $leadTimeForChangesInHours = ($totalPRHours / $prCounter) + ($totalAverageworkflowHours)
-    # Write-Host "Lead time for changes in hours: $leadTimeForChangesInHours"
+    Write-Host "PR average time duration $($totalPRHours / $prCounter)"
+    Write-Host "Workflow average time duration $($totalAverageworkflowHours)"
+    $leadTimeForChangesInHours = ($totalPRHours / $prCounter) + ($totalAverageworkflowHours)
+    Write-Host "Lead time for changes in hours: $leadTimeForChangesInHours"
 
     #==========================================
     #Show current rate limit
@@ -217,7 +217,7 @@ function Main ([string] $ownerRepo,
     {
         $rateLimitResponse = Invoke-RestMethod -Uri $uri5 -ContentType application/json -Method Get -Headers @{Authorization=($authHeader["Authorization"])} -SkipHttpErrorCheck -StatusCodeVariable "HTTPStatus"
     }    
-    # Write-Host "Rate limit consumption: $($rateLimitResponse.rate.used) / $($rateLimitResponse.rate.limit)"
+    Write-Host "Rate limit consumption: $($rateLimitResponse.rate.used) / $($rateLimitResponse.rate.limit)"
 
     #==========================================
     #output result
@@ -278,37 +278,12 @@ function Main ([string] $ownerRepo,
     }
     if ($leadTimeForChangesInHours -gt 0 -and $numberOfDays -gt 0)
     {
-        # Write-Host "Lead time for changes average over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"
-        
-        # Construct result object
-        $resultObject = @{
-            PRAverageTimeDuration = [math]::Round($totalPRHours / $prCounter, 2)
-            WorkflowAverageTimeDuration = $totalAverageworkflowHours
-            LeadTimeForChangesInHours = $leadTimeForChangesInHours
-            Rating = $rating
-        }
-        
-        # Convert result object to JSON
-        $jsonResult = $resultObject | ConvertTo-Json -Compress
-        
-        # Output the JSON string
-        Write-Output $jsonResult
-        
+        Write-Host "Lead time for changes average over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"
         return GetFormattedMarkdown -workflowNames $workflowNames -displayMetric $displayMetric -displayUnit $displayUnit -repo $ownerRepo -branch $branch -numberOfDays $numberOfDays -color $color -rating $rating
     }
     else
     {
-        # Construct result object
-        $resultObject = @{
-            PRAverageTimeDuration = ""
-            WorkflowAverageTimeDuration = ""
-            LeadTimeForChangesInHours = ""
-            Rating = ""
-        }
-        
-        # Output the JSON string
-        Write-Output $jsonResult
-        
+        Write-Host "No lead time for changes to display for this workflow and time period"
         return GetFormattedMarkdownForNoResult -workflows $workflows -numberOfDays $numberOfDays
     }
 }
@@ -327,24 +302,24 @@ function GetAuthHeader ([string] $patToken, [string] $actionsToken, [string] $ap
     #Write-Host "patToken is something: $(![string]::IsNullOrEmpty($patToken))"
     if (![string]::IsNullOrEmpty($patToken))
     {
-        # Write-Host "Authentication detected: PAT TOKEN"
+        Write-Host "Authentication detected: PAT TOKEN"
         $base64AuthInfo = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$patToken"))
         $authHeader = @{Authorization=("Basic {0}" -f $base64AuthInfo)}
     }
     elseif (![string]::IsNullOrEmpty($actionsToken))
     {
-        #Write-Host "Authentication detected: GITHUB TOKEN"  
+        Write-Host "Authentication detected: GITHUB TOKEN"  
         $authHeader = @{Authorization=("Bearer {0}" -f $base64AuthInfo)}
     }
     elseif (![string]::IsNullOrEmpty($appId)) # GitHup App auth
     {
-        #Write-Host "Authentication detected: GITHUB APP TOKEN"  
+        Write-Host "Authentication detected: GITHUB APP TOKEN"  
         $token = Get-JwtToken $appId $appInstallationId $appPrivateKey        
         $authHeader = @{Authorization=("token {0}" -f $token)}
     }    
     else
     {
-        #Write-Host "No authentication detected" 
+        Write-Host "No authentication detected" 
         $base64AuthInfo = $null
         $authHeader = $null
     }
