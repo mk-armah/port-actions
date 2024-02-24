@@ -104,7 +104,7 @@ class RepositoryMetrics:
 
 def main():
     repo_name = os.getenv('REPOSITORY')
-    time_frame = os.getenv('TIME_FRAME_IN_DAYS') #os.getenv('TIME_FRAME')
+    time_frame = os.getenv('TIMEFRAME_IN_DAYS') #os.getenv('TIME_FRAME')
     print("Repository Name:", repo_name)
     print("TimeFrame (in weeks):", time_frame)
     
