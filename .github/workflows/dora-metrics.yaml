@@ -22,7 +22,13 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
+      - name: Convert Weeks to Days
+        run: |
+          days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
+          echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
+        shell: bash
+            
       - name: Run DORA Deployment Frequency 
         id: deploymement_frequency
         shell: pwsh
