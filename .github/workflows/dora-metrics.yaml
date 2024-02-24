@@ -68,10 +68,6 @@ jobs:
           echo "WORKFLOW_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.WorkflowAverageTimeDuration')" >> $GITHUB_ENV
           echo "PR_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.PRAverageTimeDuration')" >> $GITHUB_ENV
         shell: bash
-        
-      # - name: Checkout code
-      #   uses: actions/checkout@v2
-      # #${{ github.event.inputs.timeframe }} --
 
       - name: Set up Python
         uses: actions/setup-python@v2
