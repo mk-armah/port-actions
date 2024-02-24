@@ -26,7 +26,7 @@ jobs:
       - name: Convert Weeks to Days
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
-          echo "TIME_FRAME=$days" >> $GITHUB_ENV
+          echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
         shell: bash
             
       - name: Run DORA Deployment Frequency 
