@@ -9,7 +9,7 @@ class RepositoryMetrics:
         self.g = Github(os.getenv('GITHUB_TOKEN'))
         self.repo_name = repo_name
         self.time_frame = int(time_frame)
-        self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(weeks=self.time_frame)
+        self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(days=self.time_frame)
         self.repo = self.g.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
@@ -104,7 +104,7 @@ class RepositoryMetrics:
 
 def main():
     repo_name = os.getenv('REPOSITORY')
-    time_frame = os.getenv('TIME_FRAME')
+    time_frame = os.getenv('TIME_FRAME_IN_DAYS') #os.getenv('TIME_FRAME')
     print("Repository Name:", repo_name)
     print("TimeFrame (in weeks):", time_frame)
     
