@@ -39,11 +39,6 @@ jobs:
            $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
            echo "::set-output name=jsonResult::$jsonLine"
 
-      - name: Print Raw Deployment Frequency 
-        run: |
-          echo "Raw Results: ${{ steps.deploymement_frequency.outputs.jsonResult }}"
-        shell: pwsh
-
       - name: Set Deployment Frequency Results
         run: |
           results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
@@ -74,8 +69,9 @@ jobs:
           echo "PR_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.PRAverageTimeDuration')" >> $GITHUB_ENV
         shell: bash
         
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
+      # #${{ github.event.inputs.timeframe }} --
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -92,7 +88,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ github.event.inputs.repository }}
-          TIME_FRAME: ${{ github.event.inputs.timeframe }}
+          # TIME_FRAME: $(( ${{ github.event.inputs.timeframe }} * 7 )) 
         run: python calculate_pr_metrics.py
 
       - name: Log Before Upserting Entity
