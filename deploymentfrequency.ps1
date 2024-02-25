@@ -234,12 +234,6 @@ function Main ([string] $ownerRepo,
     }
     else
     {
-        # $resultObject = @{
-        # DeploymentFrequency = $null
-        # Rating = $null
-        # NumberOfUniqueDeploymentDays = $null
-        # TotalDeployments = $null
-        # }
 
         $resultObject = @{
         DeploymentFrequency = [math]::Round($deploymentsPerDay, 2)
