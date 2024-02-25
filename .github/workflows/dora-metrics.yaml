@@ -28,7 +28,17 @@ jobs:
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
         shell: bash
-            
+
+      - name: Log Before Running Deployment Frequency
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Computing deployment frequency metric ..."
+          
       - name: Run DORA Deployment Frequency 
         id: deploymement_frequency
         shell: pwsh
@@ -49,7 +59,17 @@ jobs:
           echo "NUMBER_OF_UNIQUE_DEPLOYMENTS=$(echo $results | jq -r '.NumberOfUniqueDeploymentDays')" >> $GITHUB_ENV
           echo "DEPLOYMENT_FREQUENCY=$(echo $results | jq -r '.DeploymentFrequency')" >> $GITHUB_ENV
         shell: bash
-        
+
+      - name: Log Before Running Lead Time for Changes
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Computing lead time for changes metric ..."
+          
       - name: Run DORA Lead Time for Changes
         id: lead_time_for_changes
         shell: pwsh
@@ -82,6 +102,16 @@ jobs:
           # pip install httpx
           pip install PyGithub datetime
 
+      - name: Log Before Running PR Metrics
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Computing PR metrics on the repository ..."
+          
       - name: Compute PR Metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
