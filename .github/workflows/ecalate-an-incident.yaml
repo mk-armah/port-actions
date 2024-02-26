@@ -44,7 +44,7 @@ jobs:
         id: escalate_incident
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.pagerduty.com/incidents/${{ github.event.inputs.incident_id }}'
+          url: 'https://api.pagerduty.com/incidents/${{fromJson(github.event.inputs.port_payload).context.incident_id}}'
           method: 'PUT'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}", "From": "${{ github.event.inputs.from }}"}'
           data: >-
