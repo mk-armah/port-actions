@@ -69,7 +69,27 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Reporting the escalated incident back to Port ..."
 
-      # Additional steps to report the escalation status back to Port or perform other operations can be added here
+      - name: Upsert pagerduty entity to Port 
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(steps.escalate_incident.outputs.response).incident.id }}"
+          title: "${{ fromJson(steps.escalate_incident.outputs.response).incident.title }}"
+          blueprint: "pagerdutyIncident"
+          properties: |-
+            {
+              "status": "${{ fromJson(steps.escalate_incident.outputs.response).incident.status }}",
+              "url": "${{ fromJson(steps.escalate_incident.outputs.response).incident.self }}",
+              "urgency": "${{ fromJson(steps.escalate_incident.outputs.response).incident.urgency }}",
+              "responder": "${{ fromJson(steps.escalate_incident.outputs.response).incident.assignments[0].assignee.summary}}",
+              "escalation_policy": "${{ fromJson(steps.escalate_incident.outputs.response).incident.escalation_policy.summary }}",
+              "created_at": "${{ fromJson(steps.escalate_incident.outputs.response).incident.created_at }}",
+              "updated_at": "${{ fromJson(steps.escalate_incident.outputs.response).incident.updated_at }}"
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
       - name: Inform completion of PagerDuty escalation process into Port
         uses: port-labs/port-github-action@v1
