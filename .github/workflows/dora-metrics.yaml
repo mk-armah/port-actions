@@ -134,6 +134,7 @@ jobs:
           blueprint: doraMetrics
           properties: |-
             {
+              "timeFrameInWeeks": ${{ github.event.inputs.timeframe }},
               "totalDeployments": "${{ env.TOTAL_DEPLOYMENTS }}",
               "deploymentRating": "${{ env.DEPLOYMENT_RATING }}",
               "numberOfUniqueDeploymentDays": "${{ env.NUMBER_OF_UNIQUE_DEPLOYMENTS }}",
