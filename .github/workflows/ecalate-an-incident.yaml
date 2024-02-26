@@ -1,0 +1,82 @@
+name: Escalate PagerDuty Incident
+
+on:
+  workflow_dispatch:
+    inputs:
+      incident_id:
+        description: ID of the PagerDuty Incident to escalate
+        required: true
+        type: string
+      escalation_policy_id:
+        description: PagerDuty Escalation Policy ID to apply
+        required: true
+        type: string
+      urgency:
+        description: New urgency level for the incident (e.g., "high")
+        required: false
+        type: string
+      from:
+        description: The email address of a valid user associated with the account making the request.
+        required: true
+        type: string
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+
+jobs:
+  escalate-incident:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Inform execution of request to escalate incident
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to escalate incident in PagerDuty..."
+
+      - name: Escalate Incident in PagerDuty
+        id: escalate_incident
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/incidents/${{ github.event.inputs.incident_id }}'
+          method: 'PUT'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}", "From": "${{ github.event.inputs.from }}"}'
+          data: >-
+            {
+              "incident": {
+                "type": "incident_reference",
+                "escalation_policy": {
+                  "id": "${{ github.event.inputs.escalation_policy_id }}",
+                  "type": "escalation_policy_reference"
+                },
+                "urgency": "${{ github.event.inputs.urgency }}"
+              }
+            }
+
+      - name: Inform ingestion of PagerDuty escalation to Port
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Reporting the escalated incident back to Port ..."
+
+      # Additional steps to report the escalation status back to Port or perform other operations can be added here
+
+      - name: Inform completion of PagerDuty escalation process into Port
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Incident escalation process was successful ✅"
