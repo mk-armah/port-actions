@@ -5,8 +5,8 @@ on:
       application_name:
         description: The ArgoCD Application Name.
         required: true
-      app_server:
-        description: The ArgoCD Application Link.
+      application_host:
+        description: The ArgoCD Application host.
         required: true
         type: string
       port_payload:
@@ -33,7 +33,7 @@ jobs:
       - name: Sync ArgoCD Application
         uses: omegion/argocd-actions@v1
         with:
-          address: ${{ github.event.inputs.app_server }}
+          address: ${{ github.event.inputs.application_host }}
           token: ${{ secrets.ARGOCD_TOKEN }}
           action: sync
           appName: ${{ github.event.inputs.application_name }}
@@ -63,7 +63,7 @@ jobs:
         id: synced_application
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://${{github.event.inputs.server}}/api/v1/applications/${{github.event.inputs.application_name}}'
+          url: 'https://${{github.event.inputs.application_host}}/api/v1/applications/${{github.event.inputs.application_name}}'
           method: 'GET'
           customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{secrets.ARGOCD_TOKEN}}" }'
               
