@@ -5,7 +5,7 @@ on:
       application_name:
         description: The ArgoCD Application Name.
         required: true
-      server:
+      app_server:
         description: The ArgoCD Application Link.
         required: true
         type: string
@@ -33,7 +33,7 @@ jobs:
       - name: Sync ArgoCD Application
         uses: omegion/argocd-actions@v1
         with:
-          address: ${{ github.event.inputs.server }}
+          address: ${{ github.event.inputs.app_server }}
           token: ${{ secrets.ARGOCD_TOKEN }}
           action: sync
           appName: ${{ github.event.inputs.application_name }}
