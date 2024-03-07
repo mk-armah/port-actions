@@ -65,7 +65,7 @@ jobs:
         with:
           url: 'https://${{github.event.inputs.server}}/api/v1/applications/${{github.event.inputs.application_name}}'
           method: 'GET'
-          customHeaders: '{ "Content-Type": "application/json", "Authorization: Bearer ${{secrets.ARGOCD_TOKEN}}" }'
+          customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{secrets.ARGOCD_TOKEN}}" }'
               
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
