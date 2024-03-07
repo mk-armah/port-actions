@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       application_name:
-        description: The ArgoCD Application Name.
+        description: The ArgoCD Application Name. e.g. app.example.com
         required: true
       application_host:
         description: The ArgoCD Application host.
