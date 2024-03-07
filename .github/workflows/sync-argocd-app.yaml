@@ -91,8 +91,7 @@ jobs:
               "destinationServer": "${{ fromJson(steps.synced_application.outputs.response).spec.destination.server }}",
               "syncStatus": "${{ fromJson(steps.synced_application.outputs.response).status.sync.status }}",
               "healthStatus": "${{ fromJson(steps.synced_application.outputs.response).status.health.status }}",
-              "createdAt": "${{ fromJson(steps.synced_application.outputs.response).metadata.creationTimestamp}}",
-              
+              "createdAt": "${{ fromJson(steps.synced_application.outputs.response).metadata.creationTimestamp}}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
