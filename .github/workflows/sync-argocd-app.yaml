@@ -1,4 +1,4 @@
-name: Acknowledge Incident In PagerDuty
+name: Sync ArgoCD Application
 on:
   workflow_dispatch:
     inputs:
@@ -47,9 +47,9 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Request to acknowledge incident failed ..."
+          logMessage: "Request to sync argocd application failed ..."
           
-      - name: Log Before Processing Incident Response
+      - name: Log Before Requesting for Synced Application
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -57,12 +57,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Getting incident object from response received ..."
-
-      - name: Get Incident Object from Response
-        id: incident
-        run: |
-          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
+          logMessage: "Fetching data of synced application ..."
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
