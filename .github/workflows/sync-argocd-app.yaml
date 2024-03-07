@@ -63,7 +63,7 @@ jobs:
         id: synced_application
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://${{github.event.inputs.server}}/api/v1/applications/${{application_name}}'
+          url: 'https://${{github.event.inputs.server}}/api/v1/applications/${{github.event.inputs.application_name}}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Authorization: Bearer ${{secrets.ARGOCD_TOKEN}}"'
               
