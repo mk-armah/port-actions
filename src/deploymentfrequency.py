@@ -66,7 +66,8 @@ def main():
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
     workflows = 'apply-release.yaml'
     branch = 'main'
-    number_of_days = 30 if not os.getenv('TIMEFRAME_IN_DAYS') else os.getenv('TIMEFRAME_IN_DAYS')
+    time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
+    number_of_days = 30 if not time_frame else time_frame
 
     calculator = DeploymentFrequencyCalculator(owner_repo, token, workflows, branch, number_of_days)
     frequency_per_day, unique_deployments, rating = calculator.calculate_deployment_frequency()
