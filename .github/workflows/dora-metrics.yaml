@@ -116,6 +116,10 @@ jobs:
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/calculate_pr_metrics.py
 
+      - name: Py Deployment Frequency
+        id: pydeployment_fequency
+        run: python src/deploymentfrequency.py
+          
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
