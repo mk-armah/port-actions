@@ -1,5 +1,6 @@
 from github import Github
 from datetime import datetime, timedelta
+import os
 
 class GitHubRepo:
     def __init__(self, owner_repo, token):
@@ -61,11 +62,11 @@ class DeploymentFrequencyCalculator:
 
 def main():
     # Parameters
-    owner_repo = 'owner/repo'
-    token = ''  # Your personal access token or GitHub App token
-    workflows = 'workflow1,workflow2'
+    owner_repo = os.getenv('REPOSITORY')
+    token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
+    workflows = 'apply-release.yaml'
     branch = 'main'
-    number_of_days = 30
+    number_of_days = 30 if not os.getenv('TIMEFRAME_IN_DAYS') else os.getenv('TIMEFRAME_IN_DAYS')
 
     calculator = DeploymentFrequencyCalculator(owner_repo, token, workflows, branch, number_of_days)
     frequency_per_day, unique_deployments, rating = calculator.calculate_deployment_frequency()
