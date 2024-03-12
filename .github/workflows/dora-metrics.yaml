@@ -112,14 +112,14 @@ jobs:
           
       - name: Compute PR Metrics
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically provided GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}  # Use the automatically provided GITHUB_TOKEN
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/calculate_pr_metrics.py
 
       - name: Py Deployment Frequency
         id: pydeployment_fequency
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/deploymentfrequency.py
           
