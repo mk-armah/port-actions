@@ -41,7 +41,14 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Computing deployment frequency metric ..."
-          
+
+      - name: Test elite repo with PAT Token
+        uses: DeveloperMetrics/deployment-frequency@main
+        with:
+          workflows: 'CI/CD'
+          owner-repo: "${{ inputs.repository }}"
+          pat-token: "${{ secrets.PATTOKEN }}"
+    
       - name: Run DORA Deployment Frequency 
         id: deploymement_frequency
         shell: pwsh
