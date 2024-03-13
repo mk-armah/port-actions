@@ -45,7 +45,7 @@ jobs:
         run: |
            $scriptPath = Join-Path ${{ github.workspace }} "src/deploymentfrequency.ps1"
            chmod +x $scriptPath
-           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "release-framework.yml,release-integrations.yml,sonarcloud-framework.yml,validate-integration-files.yml" -branch "main" -numberOfDays '60' -patToken "${{ secrets.PATTOKEN }}"
+           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "release-framework,release-integrations,sonarcloud-framework,validate-integration-files" -branch "main" -numberOfDays '60' -patToken "${{ secrets.PATTOKEN }}"
            $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
            echo "::set-output name=jsonResult::$jsonLine"
 
