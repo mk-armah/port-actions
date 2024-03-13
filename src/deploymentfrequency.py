@@ -1,80 +1,83 @@
-from github import Github
-from datetime import datetime, timedelta
-import os
+import requests
+import datetime
+import base64
+from urllib.parse import quote
 
-class GitHubRepo:
-    def __init__(self, owner_repo, token):
-        self.owner, self.repo_name = owner_repo.split('/')
-        self.github = Github(token)
-        self.repo = self.github.get_repo(f"{self.owner}/{self.repo_name}")
+def main(owner_repo, workflows, branch, number_of_days, pat_token="", actions_token="", app_id="", app_installation_id="", app_private_key=""):
+    owner, repo = owner_repo.split('/')
+    workflows_array = workflows.split(',')
+    print(f"Owner/Repo: {owner}/{repo}")
+    print(f"Workflows: {workflows}")
+    print(f"Branch: {branch}")
+    print(f"Number of days: {number_of_days}")
 
-    def get_workflows(self, workflow_names):
-        workflows = self.repo.get_workflows()
-        return [wf for wf in workflows if wf.name in workflow_names]
+    auth_header = get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key)
 
-class Workflow:
-    def __init__(self, workflow, branch, start_date, end_date):
-        self.workflow = workflow
-        self.branch = branch
-        self.start_date = start_date
-        self.end_date = end_date
+    uri = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    if auth_header:
+        headers.update(auth_header)
 
-    def get_successful_runs(self):
-        successful_runs = []
-        for run in self.workflow.get_runs():
-            run_date = run.created_at.replace(tzinfo=None)  # Remove timezone for comparison
-            if run.head_branch == self.branch and self.start_date <= run_date <= self.end_date and run.conclusion == 'success':
-                successful_runs.append(run_date.date())
-        return successful_runs
+    response = requests.get(uri, headers=headers)
+    if response.status_code == 404:
+        print("Repo is not found or you do not have access")
+        return
 
-class DeploymentFrequencyCalculator:
-    def __init__(self, owner_repo, token, workflows, branch, number_of_days):
-        self.repo = GitHubRepo(owner_repo, token)
-        self.workflows = workflows.split(',')
-        self.branch = branch
-        self.number_of_days = number_of_days
-        self.end_date = datetime.utcnow()
-        self.start_date = self.end_date - timedelta(days=number_of_days)
+    workflows_response = response.json()
+    workflow_ids = []
+    workflow_names = []
 
-    def calculate_deployment_frequency(self):
-        unique_dates = set()
-        for workflow_name in self.workflows:
-            for wf in self.repo.get_workflows(self.workflows):
-                if wf.name == workflow_name:
-                    workflow = Workflow(wf, self.branch, self.start_date, self.end_date)
-                    unique_dates.update(workflow.get_successful_runs())
+    for workflow in workflows_response['workflows']:
+        if workflow['name'] in workflows_array and workflow['id'] not in workflow_ids:
+            workflow_ids.append(workflow['id'])
+            workflow_names.append(workflow['name'])
 
-        unique_deployments = len(unique_dates)
-        frequency_per_day = unique_deployments / self.number_of_days if self.number_of_days > 0 else 0
-        return frequency_per_day, unique_deployments, self._calculate_rating(frequency_per_day)
+    date_list = []
+    unique_dates = set()
+    deployments_per_day_list = []
 
-    def _calculate_rating(self, frequency_per_day):
-        if frequency_per_day > 1:
-            return "Elite"
-        elif frequency_per_day >= 1/7:
-            return "High"
-        elif frequency_per_day >= 1/30:
-            return "Medium"
-        elif frequency_per_day > 1/365:
-            return "Low"
-        else:
-            return "None"
+    for workflow_id in workflow_ids:
+        uri = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+        response = requests.get(uri, headers=headers)
+        workflow_runs_response = response.json()
 
-def main():
-    # Parameters
+        for run in workflow_runs_response['workflow_runs']:
+            run_date = datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+            if run['head_branch'] == branch and run_date > datetime.datetime.now() - datetime.timedelta(days=number_of_days):
+                date_list.append(run_date)
+                unique_dates.add(run_date.date())
+
+    if date_list:
+        deployments_per_day = len(date_list) / number_of_days
+        deployments_per_day_list.append(deployments_per_day)
+
+    if deployments_per_day_list:
+        total_deployments = sum(deployments_per_day_list)
+        deployments_per_day = total_deployments / len(deployments_per_day_list)
+    else:
+        deployments_per_day = 0
+
+    print(f"Deployment frequency over the last {number_of_days} days is {deployments_per_day} per day")
+
+def get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key):
+    if pat_token:
+        token_bytes = pat_token.encode('utf-8')
+        base64_bytes = base64.b64encode(token_bytes)
+        return {"Authorization": f"Basic {base64_bytes.decode('utf-8')}"}
+    elif actions_token:
+        return {"Authorization": f"Bearer {actions_token}"}
+    elif app_id:
+        # GitHub App authentication is more complex and involves generating a JWT. This is a placeholder for the logic.
+        return {"Authorization": "Bearer generated_app_token"}
+    else:
+        return None
+
+if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
     workflows = 'Apply release,Release framework,Sonarcloud scan integrations'
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
-
-    calculator = DeploymentFrequencyCalculator(owner_repo, token, workflows, branch, number_of_days)
-    frequency_per_day, unique_deployments, rating = calculator.calculate_deployment_frequency()
-
-    print(f"Deployment frequency: {frequency_per_day:.2f} per day")
-    print(f"DORA rating: {rating}")
-    print(f"Number of unique deployment days: {unique_deployments}")
-
-if __name__ == "__main__":
-    main()
+    
+    main(owner_repo, workflows, branch, number_of_days, pat_token=token)
