@@ -1,5 +1,6 @@
 from github import Github
 import datetime
+import os
 
 class DeploymentFrequency:
     def __init__(self, owner_repo, workflows, branch, number_of_days, pat_token=""):
