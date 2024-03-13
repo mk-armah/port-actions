@@ -5,10 +5,7 @@ Param(
     [string] $branch,
     [Int32] $numberOfDays,
     [string] $patToken = "",
-    [string] $actionsToken = "",
-    [string] $appId = "",
-    [string] $appInstallationId = "",
-    [string] $appPrivateKey = ""
+    [string] $actionsToken = ""
 )
 
 #The main function
@@ -17,10 +14,7 @@ function Main ([string] $ownerRepo,
     [string] $branch,
     [Int32] $numberOfDays,
     [string] $patToken = "",
-    [string] $actionsToken = "",
-    [string] $appId = "",
-    [string] $appInstallationId = "",
-    [string] $appPrivateKey = "")
+    [string] $actionsToken = "")
 {
 
     #==========================================
@@ -37,7 +31,7 @@ function Main ([string] $ownerRepo,
 
     #==========================================
     # Get authorization headers  
-    $authHeader = GetAuthHeader $patToken $actionsToken $appId $appInstallationId $appPrivateKey
+    $authHeader = GetAuthHeader $patToken $actionsToken
 
     #==========================================
     #Get workflow definitions from github
@@ -260,10 +254,6 @@ function GetAuthHeader ([string] $patToken, [string] $actionsToken, [string] $ap
 {
     #Clean the string - without this the PAT TOKEN doesn't process
     $patToken = $patToken.Trim()
-    #Write-Host  $appId
-    #Write-Host "pattoken: $patToken"
-    #Write-Host "app id is something: $(![string]::IsNullOrEmpty($appId))"
-    #Write-Host "patToken is something: $(![string]::IsNullOrEmpty($patToken))"
     if (![string]::IsNullOrEmpty($patToken))
     {
         Write-Host "Authentication detected: PAT TOKEN"
@@ -274,13 +264,7 @@ function GetAuthHeader ([string] $patToken, [string] $actionsToken, [string] $ap
     {
         Write-Host "Authentication detected: GITHUB TOKEN"  
         $authHeader = @{Authorization=("Bearer {0}" -f $base64AuthInfo)}
-    }
-    elseif (![string]::IsNullOrEmpty($appId)) # GitHup App auth
-    {
-        Write-Host "Authentication detected: GITHUB APP TOKEN"  
-        $token = Get-JwtToken $appId $appInstallationId $appPrivateKey        
-        $authHeader = @{Authorization=("token {0}" -f $token)}
-    }    
+    } 
     else
     {
         Write-Host "No authentication detected" 
@@ -303,51 +287,6 @@ function ConvertTo-Base64UrlString(
     else {
         throw "GitHub App authenication error: ConvertTo-Base64UrlString requires string or byte array input, received $($in.GetType())"
     }
-}
-
-function Get-JwtToken([string] $appId, [string] $appInstallationId, [string] $appPrivateKey)
-{
-    # Write-Host "appId: $appId"
-    $now = (Get-Date).ToUniversalTime()
-    $createDate = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-    $expiryDate = [Math]::Floor([decimal](Get-Date($now.AddMinutes(4)) -UFormat "%s"))
-    $rawclaims = [Ordered]@{
-        iat = [int]$createDate
-        exp = [int]$expiryDate
-        iss = $appId
-    } | ConvertTo-Json
-    # Write-Host "expiryDate: $expiryDate"
-    # Write-Host "rawclaims: $rawclaims"
-
-    $Header = [Ordered]@{
-        alg = "RS256"
-        typ = "JWT"
-    } | ConvertTo-Json
-    # Write-Host "Header: $Header"
-    $base64Header = ConvertTo-Base64UrlString $Header
-    # Write-Host "base64Header: $base64Header"
-    $base64Payload = ConvertTo-Base64UrlString $rawclaims
-    # Write-Host "base64Payload: $base64Payload"
-
-    $jwt = $base64Header + '.' + $base64Payload
-    $toSign = [System.Text.Encoding]::UTF8.GetBytes($jwt)
-
-    $rsa = [System.Security.Cryptography.RSA]::Create();    
-    # https://stackoverflow.com/a/70132607 lead to the right import
-    $rsa.ImportRSAPrivateKey([System.Convert]::FromBase64String($appPrivateKey), [ref] $null);
-
-    try { $sig = ConvertTo-Base64UrlString $rsa.SignData($toSign,[Security.Cryptography.HashAlgorithmName]::SHA256,[Security.Cryptography.RSASignaturePadding]::Pkcs1) }
-    catch { throw New-Object System.Exception -ArgumentList ("GitHub App authenication error: Signing with SHA256 and Pkcs1 padding failed using private key $($rsa): $_", $_.Exception) }
-    $jwt = $jwt + '.' + $sig
-    # send headers
-    $uri = "https://api.github.com/app/installations/$appInstallationId/access_tokens"
-    $jwtHeader = @{
-        Accept = "application/vnd.github+json"
-        Authorization = "Bearer $jwt"
-    }
-    $tokenResponse = Invoke-RestMethod -Uri $uri -Headers $jwtHeader -Method Post -ErrorAction Stop
-    # Write-Host $tokenResponse.token
-    return $tokenResponse.token
 }
 
 # Format output for deployment frequency in markdown
@@ -375,4 +314,4 @@ function GetFormattedMarkdownForNoResult([string] $workflows, [string] $numberOf
     return $markdown
 }
 
-main -ownerRepo $ownerRepo -workflows $workflows -branch $branch -numberOfDays $numberOfDays -patToken $patToken -actionsToken $actionsToken -appId $appId -appInstallationId $appInstallationId -appPrivateKey $appPrivateKey
+main -ownerRepo $ownerRepo -workflows $workflows -branch $branch -numberOfDays $numberOfDays -patToken $patToken -actionsToken $actionsToken
