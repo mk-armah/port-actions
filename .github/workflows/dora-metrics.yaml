@@ -133,6 +133,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/deploymentfrequency.py
+
+      - name: Py Lead Time For Change
+        id: pyleadtimeforchanges
+        env:
+          WORKFLOWS: ${{ inputs.workflow }}
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
+          REPOSITORY: ${{ github.event.inputs.repository }}
+        run: python src/leadtimeforchanges.py
           
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
