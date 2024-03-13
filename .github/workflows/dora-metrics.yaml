@@ -29,6 +29,13 @@ jobs:
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
         shell: bash
 
+      - name: Test elite repo with PAT Token
+        uses: DeveloperMetrics/deployment-frequency@main
+        with:
+          workflows: 'dora-metrics'
+          owner-repo: 'mk-armah/jira-actions'
+          pat-token: "${{ secrets.PATTOKEN }}"
+
       - name: Log Before Running Deployment Frequency
         uses: port-labs/port-github-action@v1
         with:
