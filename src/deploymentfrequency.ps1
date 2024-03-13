@@ -129,7 +129,7 @@ function Main ([string] $ownerRepo,
     {
         $deploymentsPerDay = $totalDeployments / $deploymentsPerDayList.Length
     }
-    #Write-Host "Total deployments $totalDeployments with a final deployments value of $deploymentsPerDay"
+    Write-Host "Total deployments $totalDeployments with a final deployments value of $deploymentsPerDay"
 
     #==========================================
     #Show current rate limit
