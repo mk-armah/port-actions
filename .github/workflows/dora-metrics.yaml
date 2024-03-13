@@ -9,6 +9,9 @@ on:
       timeframe:
         description: 'Last X weeks'
         required: true
+      workflow:
+        description: The name of the workflows to process. Multiple workflows can be separated by a comma (,).
+        required: true
       port_payload:
         required: true
         description: Port's payload, including details for who triggered the action and
@@ -29,14 +32,6 @@ jobs:
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
         shell: bash
 
-      - name: Test elite repo with PAT Token
-        uses: DeveloperMetrics/deployment-frequency@main
-        with:
-          workflows: 'Apply release,Release framework,Sonarcloud scan integrations'
-          owner-repo: 'port-labs/ocean'
-          pat-token: "${{ secrets.PATTOKEN }}"
-          number-of-days: '${{ env.TIMEFRAME_IN_DAYS }}'
-
       - name: Log Before Running Deployment Frequency
         uses: port-labs/port-github-action@v1
         with:
@@ -53,7 +48,7 @@ jobs:
         run: |
            $scriptPath = Join-Path ${{ github.workspace }} "src/deploymentfrequency.ps1"
            chmod +x $scriptPath
-           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows 'Apply release,Release framework,Sonarcloud scan integrations' -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -patToken "${{ secrets.PATTOKEN }}"
+           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "${{ inputs.workflow }}" -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -patToken "${{ secrets.PATTOKEN }}"
            $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
            echo "::set-output name=jsonResult::$jsonLine"
 
@@ -83,7 +78,7 @@ jobs:
         run: |
           $scriptPath = Join-Path ${{ github.workspace }} "src/leadtimeforchanges.ps1"
           chmod +x $scriptPath
-          $output = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "Sonarcloud scan integrations" -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}"
+          $output = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "${{ inputs.repository }}" -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}"
           $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
           echo "::set-output name=jsonResult::$jsonLine"
 
