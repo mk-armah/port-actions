@@ -2,6 +2,7 @@ import requests
 import datetime
 import base64
 from urllib.parse import quote
+import os
 
 def main(owner_repo, workflows, branch, number_of_days, pat_token="", actions_token="", app_id="", app_installation_id="", app_private_key=""):
     owner, repo = owner_repo.split('/')
