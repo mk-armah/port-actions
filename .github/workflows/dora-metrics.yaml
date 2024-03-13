@@ -122,6 +122,7 @@ jobs:
       - name: Py Deployment Frequency
         id: pydeployment_fequency
         env:
+          WORKFLOWS: ${{ inputs.workflow }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/deploymentfrequency.py
