@@ -15,39 +15,39 @@ class DeploymentFrequency:
         self.owner, self.repo_name = owner_repo.split('/')
         self.repo = self.github.get_repo(f"{self.owner}/{self.repo_name}")
 
-    # def fetch_workflow_runs(self):
-    #     workflow_runs_list = []
-    #     unique_dates = set()
-    #     now_utc = datetime.datetime.now(pytz.utc)
-
-    #     for workflow_name in self.workflows:
-    #         workflows = self.repo.get_workflows()
-    #         for workflow in workflows:
-    #             if workflow.name == workflow_name:
-    #                 runs = workflow.get_runs(branch=self.branch)
-    #                 for run in runs:
-    #                     run_date = run.created_at.replace(tzinfo=pytz.utc)
-    #                     if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
-    #                         workflow_runs_list.append(run)
-    #                         unique_dates.add(run_date.date())
-
-    #     return workflow_runs_list, unique_dates
-
     def fetch_workflow_runs(self):
         workflow_runs_list = []
         unique_dates = set()
         now_utc = datetime.datetime.now(pytz.utc)
-    
-        for workflow_identifier in self.workflows:  # workflow_identifier could be the ID or filename
-            workflow = self.repo.get_workflow(workflow_identifier)
-            runs = workflow.get_runs(branch=self.branch)
-            for run in runs:
-                run_date = run.created_at.replace(tzinfo=pytz.utc)
-                if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
-                    workflow_runs_list.append(run)
-                    unique_dates.add(run_date.date())
-    
+
+        for workflow_name in self.workflows:
+            workflows = self.repo.get_workflows()
+            for workflow in workflows:
+                if workflow.name == workflow_name:
+                    runs = workflow.get_runs(branch=self.branch)
+                    for run in runs:
+                        run_date = run.created_at.replace(tzinfo=pytz.utc)
+                        if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
+                            workflow_runs_list.append(run)
+                            unique_dates.add(run_date.date())
+
         return workflow_runs_list, unique_dates
+
+    # def fetch_workflow_runs(self):
+    #     workflow_runs_list = []
+    #     unique_dates = set()
+    #     now_utc = datetime.datetime.now(pytz.utc)
+    
+    #     for workflow_identifier in self.workflows:  # workflow_identifier could be the ID or filename
+    #         workflow = self.repo.get_workflow(workflow_identifier)
+    #         runs = workflow.get_runs(branch=self.branch)
+    #         for run in runs:
+    #             run_date = run.created_at.replace(tzinfo=pytz.utc)
+    #             if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
+    #                 workflow_runs_list.append(run)
+    #                 unique_dates.add(run_date.date())
+    
+    #     return workflow_runs_list, unique_dates
 
 
     def calculate_deployments_per_day(self, workflow_runs_list):
