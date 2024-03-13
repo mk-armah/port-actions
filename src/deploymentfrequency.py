@@ -1,5 +1,6 @@
 from github import Github
 import datetime
+import pytz  # Make sure to install pytz if you haven't: pip install pytz
 import os
 
 class DeploymentFrequency:
@@ -16,6 +17,7 @@ class DeploymentFrequency:
     def fetch_workflow_runs(self):
         workflow_runs_list = []
         unique_dates = set()
+        now_utc = datetime.datetime.now(pytz.utc)  # Get current time in UTC
 
         for workflow_name in self.workflows:
             workflows = self.repo.get_workflows()
@@ -23,11 +25,11 @@ class DeploymentFrequency:
                 if workflow.name == workflow_name:
                     runs = workflow.get_runs(branch=self.branch)
                     for run in runs:
-                        run_date = run.created_at
-                        if run_date > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
+                        run_date = run.created_at.replace(tzinfo=pytz.utc)  # Ensure run_date is offset-aware and in UTC
+                        if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
                             workflow_runs_list.append(run)
                             unique_dates.add(run_date.date())
-        
+
         return workflow_runs_list, unique_dates
 
     def calculate_deployments_per_day(self, workflow_runs_list):
