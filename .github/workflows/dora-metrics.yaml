@@ -32,8 +32,8 @@ jobs:
       - name: Test elite repo with PAT Token
         uses: DeveloperMetrics/deployment-frequency@main
         with:
-          workflows: 'Ingest DORA Metrics'
-          owner-repo: 'mk-armah/jira-actions'
+          workflows: 'Apply release,Release framework,Sonarcloud scan integrations'
+          owner-repo: 'port-labs/ocean'
           pat-token: "${{ secrets.PATTOKEN }}"
 
       - name: Log Before Running Deployment Frequency
