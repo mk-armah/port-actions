@@ -95,7 +95,7 @@ class DeploymentFrequency:
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
-    workflows = 'apply-release.yml,release-framework.yml,sonarcloud-framework.yml'
+    workflows = 'sonarcloud-framework.yml'
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
