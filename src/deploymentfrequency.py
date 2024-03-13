@@ -64,7 +64,7 @@ def main():
     # Parameters
     owner_repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
-    workflows = 'Sonarcloud scan integrations'
+    workflows = 'Apply release,Release framework,Sonarcloud scan integrations'
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
