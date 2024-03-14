@@ -90,7 +90,7 @@ class DeploymentFrequency:
         print(f"Number of days: {self.number_of_days}")
         print(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
         print(f"Rating: {rating} ({color})")
-        print(json.dumps(results, indent=2))
+        return json.dumps(results, default=str)
 
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
@@ -101,4 +101,7 @@ if __name__ == "__main__":
     number_of_days = 30 if not time_frame else time_frame
     
     df = DeploymentFrequency(owner_repo,workflows, branch, number_of_days, pat_token=token)
-    df.report()
+    report = df.report()
+    
+    with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
+        github_env.write(f"report={report}\n")
