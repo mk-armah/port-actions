@@ -78,10 +78,10 @@ class DeploymentFrequency:
         rating, color = self.compute_rating(deployments_per_day)
 
         results = {
-            "DeploymentFrequency": round(deployments_per_day, 2),
-            "Rating": rating,
-            "NumberOfUniqueDeploymentDays": len(unique_dates),
-            "TotalDeployments": len(workflow_runs_list)
+            "deployment_frequency": round(deployments_per_day, 2),
+            "rating": rating,
+            "number_of_unique_deployment_days": len(unique_dates),
+            "total_deployments": len(workflow_runs_list)
         }
 
         print(f"Owner/Repo: {self.owner}/{self.repo_name}")
