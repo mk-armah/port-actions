@@ -212,7 +212,7 @@ function Main ([string] $ownerRepo,
         Write-Host "Deployment frequency over last $numberOfDays days, is $displayMetric $displayUnit, with a DORA rating of '$rating'"   
         
         $resultObject = @{
-        DeploymentFrequency = [math]::Round($deploymentsPerDay, 2)
+        DeploymentFrequency = [math]::Round($deploymentsPerDay*7, 2)
         Rating = $rating
         NumberOfUniqueDeploymentDays = $uniqueDates.Length
         TotalDeployments = $totalDeployments
@@ -230,7 +230,7 @@ function Main ([string] $ownerRepo,
     {
 
         $resultObject = @{
-        DeploymentFrequency = [math]::Round($deploymentsPerDay, 2)
+        DeploymentFrequency = [math]::Round($deploymentsPerDay*7, 2)
         Rating = $rating
         NumberOfUniqueDeploymentDays = $uniqueDates.Length
         TotalDeployments = $totalDeployments
