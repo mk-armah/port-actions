@@ -45,7 +45,7 @@ jobs:
       - name: Test elite repo with PAT Token
         uses: DeveloperMetrics/deployment-frequency@main
         with:
-          workflows: 'CI/CD'
+          workflows: "${{ inputs.workflow }}"
           owner-repo: "${{ inputs.repository }}"
           pat-token: "${{ secrets.PATTOKEN }}"
     
