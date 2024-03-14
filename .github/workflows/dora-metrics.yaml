@@ -48,6 +48,7 @@ jobs:
           workflows: "${{ inputs.workflow }}"
           owner-repo: "${{ inputs.repository }}"
           pat-token: "${{ secrets.PATTOKEN }}"
+          number-of-days: '${{env.TIMEFRAME_IN_DAYS}}'
     
       - name: Run DORA Deployment Frequency 
         id: deploymement_frequency
