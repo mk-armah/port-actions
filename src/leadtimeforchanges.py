@@ -23,7 +23,7 @@ def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="
     workflows_response = get_workflows(owner, repo, auth_header)
     workflow_processing_result = process_workflows(workflows_response, workflows_array, owner, repo, branch, number_of_days, auth_header)
 
-    evaluate_lead_time(pr_processing_result, workflow_processing_result, number_of_days)
+    return evaluate_lead_time(pr_processing_result, workflow_processing_result, number_of_days)
 
 def get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key):
     headers = {}
@@ -101,6 +101,13 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
     print(f"Workflow average time duration: {workflow_average} hours")
     print(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
 
+    report = {
+            "pr_average_time_duration" : pr_average,
+            "workflow_average_time_duration" : workflow_average,
+            "lead_time_for_changes_in_hours": lead_time_for_changes_in_hours
+    }
+    return json.dumps(results, default=str)
+    
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
@@ -109,4 +116,8 @@ if __name__ == "__main__":
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
     
-    main(owner_repo, workflows, branch, number_of_days)
+    report = main(owner_repo, workflows, branch, number_of_days)
+        report = df.report()
+    
+    with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
+        github_env.write(f"report={report}\n")
