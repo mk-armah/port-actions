@@ -103,8 +103,8 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
 
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
-    token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
-    workflows = os.getenv('GITHUB_TOKEN')
+    token = os.getenv('PATTOKEN')  # Your personal access token or GitHub App token
+    workflows = os.getenv('WORKFLOWS')
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
