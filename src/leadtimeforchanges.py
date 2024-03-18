@@ -1,5 +1,6 @@
 from github import Github
 from datetime import datetime, timedelta
+import os
 
 class GithubLeadTimeCalculator:
     def __init__(self, token, owner_repo, workflows, branch, number_of_days, commit_counting_method="last"):
