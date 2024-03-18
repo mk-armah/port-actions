@@ -13,8 +13,9 @@ class GithubLeadTimeCalculator:
         self.commit_counting_method = commit_counting_method if commit_counting_method else "last"
 
     def get_pull_requests(self):
+        utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)  # Make UTC time offset-aware using standard library
         prs = self.repo.get_pulls(state='closed', base=self.branch)
-        return [pr for pr in prs if pr.merged and pr.merged_at > datetime.utcnow() - timedelta(days=self.number_of_days)]
+        return [pr for pr in prs if pr.merged and pr.merged_at > utc_now - timedelta(days=self.number_of_days)]
 
     def process_pull_requests(self, pull_requests):
         pr_counter = len(pull_requests)
