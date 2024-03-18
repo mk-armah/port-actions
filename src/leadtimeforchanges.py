@@ -67,7 +67,7 @@ if __name__ == "__main__":
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
 
-    calculator = GithubLeadTimeCalculator(pat_token, owner_repo, workflows, branch, number_of_days)
+    calculator = GithubLeadTimeCalculator(token, owner_repo, workflows, branch, number_of_days)
     report = calculator.run()
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"report={report}\n")
