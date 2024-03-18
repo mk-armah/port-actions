@@ -1,5 +1,5 @@
 from github import Github
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 
 class GithubLeadTimeCalculator:
