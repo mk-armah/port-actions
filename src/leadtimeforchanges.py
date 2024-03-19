@@ -32,22 +32,26 @@ class GitHubAnalytics:
         }
 
     def _calculate_pr_lead_times(self):
-        # Make start_date offset-aware by setting it to UTC
-        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=self.number_of_days)
+        start_date = datetime.now(timezone.utc) - datetime.timedelta(days=self.number_of_days)
         prs = self.repo.get_pulls(state='closed', base=self.branch, sort='created', direction='desc')
         lead_times = []
 
         for pr in prs:
             if pr.merged and pr.merged_at > start_date:
                 commits = pr.get_commits()
-                # Use the commit counting method to select the appropriate commit date
-                if self.commit_counting_method == 'first':
-                    first_commit_date = commits[0].commit.committer.date
-                else:  # Default to the last commit if the method is 'last' or unspecified
-                    first_commit_date = commits[-1].commit.committer.date
 
-                pr_duration = (pr.merged_at - first_commit_date).total_seconds() / 3600.0  # Convert to hours
-                lead_times.append(pr_duration)
+                # Check if the commits list is not empty
+                if commits.totalCount > 0:
+                    if self.commit_counting_method == 'first':
+                        first_commit_date = commits[0].commit.committer.date
+                    else:  # Default to the last commit if the method is 'last' or unspecified
+                        first_commit_date = commits[-1].commit.committer.date
+                        
+                    pr_duration = (pr.merged_at - first_commit_date).total_seconds() / 3600.0  # Convert to hours
+                    lead_times.append(pr_duration)
+                else:
+                    # Handle the case where there are no commits (optional)
+                    pass
 
         return lead_times
 
