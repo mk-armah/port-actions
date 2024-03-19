@@ -106,7 +106,7 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
             "workflow_average_time_duration" : workflow_average,
             "lead_time_for_changes_in_hours": lead_time_for_changes_in_hours
     }
-    return json.dumps(results, default=str)
+    return json.dumps(report, default=str)
     
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
@@ -117,7 +117,5 @@ if __name__ == "__main__":
     number_of_days = 30 if not time_frame else time_frame
     
     report = main(owner_repo, workflows, branch, number_of_days)
-        report = df.report()
-    
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"report={report}\n")
