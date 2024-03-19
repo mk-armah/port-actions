@@ -1,6 +1,7 @@
 from github import Github
 import datetime
 import os
+import json
 
 class GitHubAnalytics:
     def __init__(self, owner_repo, workflows, branch, number_of_days, commit_counting_method, token=None):
@@ -18,7 +19,17 @@ class GitHubAnalytics:
 
         average_pr_time = sum(pr_lead_times) / len(pr_lead_times) if pr_lead_times else 0
         average_workflow_time = sum(workflow_lead_times) / len(workflow_lead_times) if workflow_lead_times else 0
-        return average_pr_time, average_workflow_time
+
+        lead_time_for_changes = average_pr_time + average_workflow_time
+        rating, color = self._determine_rating(lead_time_for_changes)
+
+        return {
+            "PRAverageTimeDuration": round(average_pr_time, 2),
+            "WorkflowAverageTimeDuration": round(average_workflow_time, 2),
+            "LeadTimeForChangesInHours": lead_time_for_changes,
+            "Rating": rating,
+            "Color": color
+        }
 
     def _calculate_pr_lead_times(self):
         start_date = datetime.datetime.now() - datetime.timedelta(days=self.number_of_days)
@@ -31,7 +42,7 @@ class GitHubAnalytics:
                 first_commit_date = commits[0].commit.committer.date if self.commit_counting_method == 'first' else commits[-1].commit.committer.date
                 pr_duration = (pr.merged_at - first_commit_date).total_seconds() / 3600.0  # Convert to hours
                 lead_times.append(pr_duration)
-        
+
         return lead_times
 
     def _calculate_workflow_lead_times(self):
@@ -49,21 +60,42 @@ class GitHubAnalytics:
 
         return lead_times
 
-    def display_results(self, average_pr_time, average_workflow_time):
-        print(f"PR average time duration: {average_pr_time} hours")
-        print(f"Workflow average time duration: {average_workflow_time} hours")
-        # Add more detailed results or formatting here as needed
+    def _determine_rating(self, lead_time_for_changes):
+        # Define your thresholds for ratings here
+        daily_deployment = 24
+        weekly_deployment = 24 * 7
+        monthly_deployment = 24 * 30
+        six_months_deployment = 24 * 30 * 6
+
+        if lead_time_for_changes < 1:
+            return "Elite", "brightgreen"
+        elif lead_time_for_changes <= daily_deployment:
+            return "High", "green"
+        elif lead_time_for_changes <= weekly_deployment:
+            return "Medium", "yellow"
+        elif lead_time_for_changes <= six_months_deployment:
+            return "Low", "orange"
+        else:
+            return "Poor", "red"
+
+    def display_results(self, results):
+        print(f"PR average time duration: {results['PRAverageTimeDuration']} hours")
+        print(f"Workflow average time duration: {results['WorkflowAverageTimeDuration']} hours")
+        print(f"Lead time for changes in hours: {results['LeadTimeForChangesInHours']}")
+        print(f"Rating: {results['Rating']} (Color: {results['Color']})")
 
 # Usage
 if __name__ == "__main__":
-    owner_repo = "owner/repo"  # Format: "owner/repo"
-    workflows = "workflow1,workflow2"  # Comma-separated workflow names
+    owner_repo = os.getenv('REPOSITORY')
+    workflows = os.getenv('WORKFLOWS')  # Comma-separated workflow names
     branch = "main"
-    number_of_days = 30
+    time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
+    number_of_days = 30 if not time_frame else time_frame
     commit_counting_method = "last"  # "last" or "first"
-    token = "your_token_here"  # Replace with your actual token or None for unauthenticated access
+    token = os.getenv('GITHUB_TOKEN')  # Replace with your actual token or None for unauthenticated access
 
     analytics = GitHubAnalytics(owner_repo, workflows, branch, number_of_days, commit_counting_method, token)
-    average_pr_time, average_workflow_time = analytics.calculate_lead_times()
-    analytics.display_results(average_pr_time, average_workflow_time)
+    report  = json.dumps(analytics.calculate_lead_times())
     
+    with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
+        github_env.write(f"report={report}\n")
