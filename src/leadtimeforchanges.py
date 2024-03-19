@@ -19,7 +19,7 @@ class GithubLeadTimeCalculator:
 
     def process_pull_requests(self, pull_requests):
         pr_counter = len(pull_requests)
-        total_pr_hours = sum([(pr.merged_at - pr.get_commits()[0 if self.commit_counting_method == "first" else -1].commit.committer.date).total_seconds() / 3600 for pr in pull_requests])
+        total_pr_hours = sum([(pr.merged_at - pr.get_commits()[-1].commit.committer.date).total_seconds() / 3600 for pr in pull_requests])
         return pr_counter, total_pr_hours
 
     def get_workflows(self):
