@@ -32,7 +32,7 @@ class GitHubAnalytics:
         }
 
     def _calculate_pr_lead_times(self):
-        start_date = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=self.number_of_days)
+        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=self.number_of_days)
         prs = self.repo.get_pulls(state='closed', base=self.branch, sort='created', direction='desc')
         lead_times = []
 
