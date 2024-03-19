@@ -1,96 +1,123 @@
-from github import Github
-import datetime
-import os
+import requests
+from datetime import datetime, timedelta
+import base64
 import json
+import os
 
-class GitHubAnalytics:
-    def __init__(self, owner_repo, workflows, branch, number_of_days, commit_counting_method, token=None):
-        self.owner, self.repo_name = owner_repo.split('/')
-        self.workflows = workflows.split(',')  # Assuming workflows is a comma-separated string
-        self.branch = branch
-        self.number_of_days = number_of_days
-        self.commit_counting_method = commit_counting_method
-        self.github = Github(token) if token else Github()
-        self.repo = self.github.get_repo(f"{self.owner}/{self.repo_name}")
+def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token="", actions_token="", app_id="", app_installation_id="", app_private_key=""):
+    owner, repo = owner_repo.split('/')
+    workflows_array = workflows.split(',')
+    if commit_counting_method == "":
+        commit_counting_method = "last"
+    print(f"Owner/Repo: {owner}/{repo}")
+    print(f"Number of days: {number_of_days}")
+    print(f"Workflows: {workflows_array[0]}")
+    print(f"Branch: {branch}")
+    print(f"Commit counting method '{commit_counting_method}' being used")
 
-    def calculate_lead_times(self):
-        pr_lead_times = self._calculate_pr_lead_times()
-        workflow_lead_times = self._calculate_workflow_lead_times()
+    auth_header = get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key)
 
-        average_pr_time = sum(pr_lead_times) / len(pr_lead_times) if pr_lead_times else 0
-        average_workflow_time = sum(workflow_lead_times) / len(workflow_lead_times) if workflow_lead_times else 0
+    prs_response = get_pull_requests(owner, repo, branch, auth_header)
+    pr_processing_result = process_pull_requests(prs_response, number_of_days, commit_counting_method, owner, repo, auth_header)
 
-        lead_time_for_changes = average_pr_time + average_workflow_time
-        rating, color = self._determine_rating(lead_time_for_changes)
+    workflows_response = get_workflows(owner, repo, auth_header)
+    workflow_processing_result = process_workflows(workflows_response, workflows_array, owner, repo, branch, number_of_days, auth_header)
 
-        return {
-            "PRAverageTimeDuration": round(average_pr_time, 2),
-            "WorkflowAverageTimeDuration": round(average_workflow_time, 2),
-            "LeadTimeForChangesInHours": lead_time_for_changes,
-            "Rating": rating,
-            "Color": color
-        }
+    return evaluate_lead_time(pr_processing_result, workflow_processing_result, number_of_days)
 
-    def _calculate_pr_lead_times(self):
-        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=self.number_of_days)
-        prs = self.repo.get_pulls(state='closed', base=self.branch, sort='created', direction='desc')
-        lead_times = []
+def get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key):
+    headers = {}
+    if pat_token:
+        encoded_credentials = base64.b64encode(f":{pat_token}".encode()).decode()
+        headers['Authorization'] = f"Basic {encoded_credentials}"
+    elif actions_token:
+        headers['Authorization'] = f"Bearer {actions_token}"
+    # Add more authentication methods as needed
+    return headers
 
-        for pr in prs:
-            if pr.merged and pr.merged_at > start_date:
-                commits = pr.get_commits()
+def get_pull_requests(owner, repo, branch, headers):
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls?state=all&head={branch}&per_page=100&state=closed"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 404:
+        print("Repo is not found or you do not have access")
+        exit()
+    return response.json()
 
-                # Check if the commits list is not empty
-                if commits.totalCount > 0:
-                    if self.commit_counting_method == 'first':
-                        first_commit_date = commits[0].commit.committer.date
-                    else:  # Default to the last commit if the method is 'last' or unspecified
-                        first_commit_date = commits[-1].commit.committer.date
-                        
-                    pr_duration = (pr.merged_at - first_commit_date).total_seconds() / 3600.0  # Convert to hours
-                    lead_times.append(pr_duration)
-                else:
-                    # Handle the case where there are no commits (optional)
-                    pass
+def process_pull_requests(prs, number_of_days, commit_counting_method, owner, repo, headers):
+    pr_counter = 0
+    total_pr_hours = 0
+    for pr in prs:
+        merged_at = pr.get('merged_at')
+        if merged_at and datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=number_of_days):
+            pr_counter += 1
+            commits_url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr['number']}/commits?per_page=100"
+            commits_response = requests.get(commits_url, headers=headers).json()
+            if commits_response:
+                if commit_counting_method == "last":
+                    start_date = commits_response[-1]['commit']['committer']['date']
+                elif commit_counting_method == "first":
+                    start_date = commits_response[0]['commit']['committer']['date']
+                start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%SZ")
+                merged_at = datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ")
+                duration = merged_at - start_date
+                total_pr_hours += duration.total_seconds() / 3600
+    return pr_counter, total_pr_hours
 
-        return lead_times
+def get_workflows(owner, repo, headers):
+    url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 404:
+        print("Repo is not found or you do not have access")
+        exit()
+    return response.json()
 
-    def _determine_rating(self, lead_time_for_changes):
-        # Define your thresholds for ratings here
-        daily_deployment = 24
-        weekly_deployment = 24 * 7
-        monthly_deployment = 24 * 30
-        six_months_deployment = 24 * 30 * 6
+def process_workflows(workflows_response, workflow_names, owner, repo, branch, number_of_days, headers):
+    workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+    total_workflow_hours = 0
+    workflow_counter = 0
+    for workflow_id in workflow_ids:
+        runs_url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+        runs_response = requests.get(runs_url, headers=headers).json()
+        for run in runs_response['workflow_runs']:
+            if run['head_branch'] == branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=number_of_days):
+                workflow_counter += 1
+                start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
+                duration = end_time - start_time
+                total_workflow_hours += duration.total_seconds() / 3600
+    return workflow_counter, total_workflow_hours
 
-        if lead_time_for_changes < 1:
-            return "Elite", "brightgreen"
-        elif lead_time_for_changes <= daily_deployment:
-            return "High", "green"
-        elif lead_time_for_changes <= weekly_deployment:
-            return "Medium", "yellow"
-        elif lead_time_for_changes <= six_months_deployment:
-            return "Low", "orange"
-        else:
-            return "Poor", "red"
+def evaluate_lead_time(pr_result, workflow_result, number_of_days):
+    pr_counter, total_pr_hours = pr_result
+    workflow_counter, total_workflow_hours = workflow_result
+    if pr_counter == 0:
+        pr_counter = 1
+    if workflow_counter == 0:
+        workflow_counter = 1
+    pr_average = total_pr_hours / pr_counter
+    workflow_average = total_workflow_hours / workflow_counter
+    lead_time_for_changes_in_hours = pr_average + workflow_average
+    print(f"PR average time duration: {pr_average} hours")
+    print(f"Workflow average time duration: {workflow_average} hours")
+    print(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
 
-    def display_results(self, results):
-        print(f"PR average time duration: {results['PRAverageTimeDuration']} hours")
-        print(f"Workflow average time duration: {results['WorkflowAverageTimeDuration']} hours")
-        print(f"Lead time for changes in hours: {results['LeadTimeForChangesInHours']}")
-        print(f"Rating: {results['Rating']} (Color: {results['Color']})")
-
-# Usage
+    report = {
+            "pr_average_time_duration" : pr_average,
+            "workflow_average_time_duration" : workflow_average,
+            "lead_time_for_changes_in_hours": lead_time_for_changes_in_hours
+    }
+    return json.dumps(results, default=str)
+    
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
-    workflows = os.getenv('WORKFLOWS')  # Comma-separated workflow names
-    branch = "main"
+    token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
+    workflows = os.getenv('WORKFLOWS')
+    branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
-    commit_counting_method = "last"  # "last" or "first"
-    token = os.getenv('GITHUB_TOKEN')  # Replace with your actual token or None for unauthenticated access
-
-    analytics = GitHubAnalytics(owner_repo, workflows, branch, number_of_days, commit_counting_method, token)
-    report  = json.dumps(analytics.calculate_lead_times())
+    
+    report = main(owner_repo, workflows, branch, number_of_days)
+        report = df.report()
     
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"report={report}\n")
