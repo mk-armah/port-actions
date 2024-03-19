@@ -45,18 +45,23 @@ class GitHubAnalytics:
 
         return lead_times
 
-    def _calculate_workflow_lead_times(self):
-        start_date = datetime.datetime.now() - datetime.timedelta(days=self.number_of_days)
-        workflows = self.repo.get_workflows()
+    def _calculate_pr_lead_times(self):
+        # Make start_date offset-aware by setting it to UTC
+        start_date = datetime.now(timezone.utc) - datetime.timedelta(days=self.number_of_days)
+        prs = self.repo.get_pulls(state='closed', base=self.branch, sort='created', direction='desc')
         lead_times = []
 
-        for workflow in workflows:
-            if workflow.name in self.workflows:
-                runs = workflow.get_runs(branch=self.branch)
-                for run in runs:
-                    if run.status == "completed" and run.created_at > start_date:
-                        duration = (run.updated_at - run.created_at).total_seconds() / 3600.0  # Convert to hours
-                        lead_times.append(duration)
+        for pr in prs:
+            if pr.merged and pr.merged_at > start_date:
+                commits = pr.get_commits()
+                # Use the commit counting method to select the appropriate commit date
+                if self.commit_counting_method == 'first':
+                    first_commit_date = commits[0].commit.committer.date
+                else:  # Default to the last commit if the method is 'last' or unspecified
+                    first_commit_date = commits[-1].commit.committer.date
+
+                pr_duration = (pr.merged_at - first_commit_date).total_seconds() / 3600.0  # Convert to hours
+                lead_times.append(pr_duration)
 
         return lead_times
 
