@@ -87,6 +87,46 @@ def process_workflows(workflows_response, workflow_names, owner, repo, branch, n
                 total_workflow_hours += duration.total_seconds() / 3600
     return workflow_counter, total_workflow_hours
 
+def calculate_rating(lead_time_for_changes_in_hours):
+    daily_deployment=24,
+    weekly_deployment=24*7,
+    monthly_deployment=24*30,
+    every_six_months_deployment=24*30*6
+    
+    if lead_time_for_changes_in_hours <= 0:
+        rating = "None"
+        color = "lightgrey"
+    elif lead_time_for_changes_in_hours < 1:
+        rating = "Elite"
+        color = "brightgreen"
+    elif lead_time_for_changes_in_hours <= daily_deployment:
+        rating = "Elite"
+        color = "brightgreen"
+    elif daily_deployment < lead_time_for_changes_in_hours <= weekly_deployment:
+        rating = "High"
+        color = "green"
+    elif weekly_deployment < lead_time_for_changes_in_hours <= monthly_deployment:
+        rating = "High"
+        color = "green"
+    elif monthly_deployment < lead_time_for_changes_in_hours <= every_six_months_deployment:
+        rating = "Medium"
+        color = "yellow"
+    else: 
+        # lead_time_for_changes_in_hours > every_six_months_deployment
+        rating = "Low"
+        color = "red"
+        
+    display_metric = round(lead_time_for_changes_in_hours, 2)
+    display_unit = "hours"
+        
+    return {
+        "rating": rating,
+        "color": color,
+        "display_metric": display_metric,
+        "display_unit": display_unit
+    }
+
+
 def evaluate_lead_time(pr_result, workflow_result, number_of_days):
     pr_counter, total_pr_hours = pr_result
     workflow_counter, total_workflow_hours = workflow_result
@@ -106,6 +146,9 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
             "workflow_average_time_duration" : workflow_average,
             "lead_time_for_changes_in_hours": lead_time_for_changes_in_hours
     }
+    rating = calculate_rating(lead_time_for_changes_in_hours)
+    report.update(rating)
+    
     return json.dumps(report, default=str)
     
 if __name__ == "__main__":
