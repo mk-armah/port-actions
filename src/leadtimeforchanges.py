@@ -88,9 +88,9 @@ def process_workflows(workflows_response, workflow_names, owner, repo, branch, n
     return workflow_counter, total_workflow_hours
 
 def calculate_rating(lead_time_for_changes_in_hours):
-    daily_deployment=24,
-    weekly_deployment=24*7,
-    monthly_deployment=24*30,
+    daily_deployment=24
+    weekly_deployment=24*7
+    monthly_deployment=24*30
     every_six_months_deployment=24*30*6
     
     if lead_time_for_changes_in_hours <= 0:
