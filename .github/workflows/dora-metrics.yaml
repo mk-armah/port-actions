@@ -22,82 +22,14 @@ jobs:
   compute-dora-metrics:
     runs-on: ubuntu-latest
     steps:
-
+    
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
       - name: Convert Weeks to Days
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Log Before Running Deployment Frequency
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Computing deployment frequency metric ..."
-
-      - name: Test elite repo with PAT Token
-        uses: DeveloperMetrics/deployment-frequency@main
-        with:
-          workflows: "${{ inputs.workflow }}"
-          owner-repo: "${{ inputs.repository }}"
-          pat-token: "${{ secrets.PATTOKEN }}"
-          number-of-days: '${{env.TIMEFRAME_IN_DAYS}}'
-    
-      - name: Run DORA Deployment Frequency 
-        id: deploymement_frequency
-        shell: pwsh
-        run: |
-           $scriptPath = Join-Path ${{ github.workspace }} "src/deploymentfrequency.ps1"
-           chmod +x $scriptPath
-           $output = & pwsh -File $scriptPath -ownerRepo "${{ inputs.repository }}" -workflows "${{ inputs.workflow }}" -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -patToken "${{ secrets.PATTOKEN }}"
-           $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
-           echo "::set-output name=jsonResult::$jsonLine"
-
-      - name: Set Deployment Frequency Results
-        run: |
-          results='${{ steps.deploymement_frequency.outputs.jsonResult }}'
-          echo "Lead Time for Changes Results: $results"
-          echo "TOTAL_DEPLOYMENTS=$(echo $results | jq -r '.TotalDeployments')" >> $GITHUB_ENV
-          echo "DEPLOYMENT_FREQUENCY_RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
-          echo "NUMBER_OF_UNIQUE_DEPLOYMENTS=$(echo $results | jq -r '.NumberOfUniqueDeploymentDays')" >> $GITHUB_ENV
-          echo "DEPLOYMENT_FREQUENCY=$(echo $results | jq -r '.DeploymentFrequency')" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Log Before Running Lead Time for Changes
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Computing lead time for changes metric ..."
-          
-      - name: Run DORA Lead Time for Changes
-        id: lead_time_for_changes
-        shell: pwsh
-        run: |
-          $scriptPath = Join-Path ${{ github.workspace }} "src/leadtimeforchanges.ps1"
-          chmod +x $scriptPath
-          $output = & pwsh -File $scriptPath -ownerRepo "${{ github.event.inputs.repository }}" -workflows "${{ inputs.workflow }}" -branch "main" -numberOfDays '${{env.TIMEFRAME_IN_DAYS}}' -commitCountingMethod "last" -patToken "${{ secrets.PATTOKEN }}"
-          $jsonLine = $output | Select-String "###JSON_START###" -Context 0,1 | ForEach-Object { $_.Context.PostContext }
-          echo "::set-output name=jsonResult::$jsonLine"
-
-      - name: Set Lead Time for Changes Results
-        run: |
-          results='${{ steps.lead_time_for_changes.outputs.jsonResult }}'
-          echo "Lead Time for Changes Results: $results"
-          echo "LEAD_TIME_FOR_CHANGES_IN_HOURS=$(echo $results | jq -r '.LeadTimeForChangesInHours')" >> $GITHUB_ENV
-          echo "LEAD_TIME_RATING=$(echo $results | jq -r '.Rating')" >> $GITHUB_ENV
-          echo "WORKFLOW_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.WorkflowAverageTimeDuration')" >> $GITHUB_ENV
-          echo "PR_AVERAGE_TIME_DURATION=$(echo $results | jq -r '.PRAverageTimeDuration')" >> $GITHUB_ENV
         shell: bash
 
       - name: Set up Python
@@ -127,16 +59,36 @@ jobs:
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/calculate_pr_metrics.py
 
-      - name: Py Deployment Frequency
-        id: pydeployment_fequency
+      - name: Log Before Running Deployment Frequency
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Computing deployment frequency metric ..."
+          
+      - name: Deployment Frequency
+        id: deployment_fequency
         env:
           WORKFLOWS: ${{ inputs.workflow }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
           REPOSITORY: ${{ github.event.inputs.repository }}
         run: python src/deploymentfrequency.py
 
-      - name: Py Lead Time For Change
-        id: pyleadtimeforchanges
+      - name: Log Before Running Lead Time for Changes
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Computing lead time for changes metric ..."
+          
+      - name: Lead Time For Changes
+        id: lead_time_for_changes
         env:
           WORKFLOWS: ${{ inputs.workflow }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
@@ -162,14 +114,14 @@ jobs:
           properties: |-
             {
               "timeFrameInWeeks": ${{ github.event.inputs.timeframe }},
-              "totalDeployments": "${{ env.TOTAL_DEPLOYMENTS }}",
-              "deploymentRating": "${{ env.DEPLOYMENT_RATING }}",
-              "numberOfUniqueDeploymentDays": "${{ env.NUMBER_OF_UNIQUE_DEPLOYMENTS }}",
-              "deploymentFrequency": "${{ env.DEPLOYMENT_FREQUENCY }}",
-              "leadTimeForChangesInHours": "${{ env.LEAD_TIME_FOR_CHANGES_IN_HOURS }}",
-              "leadTimeRating": "${{ env.LEAD_TIME_RATING }}",
-              "workflowAverageTimeDuration": "${{ env.WORKFLOW_AVERAGE_TIME_DURATION }}",
-              "prAverageTimeDuration": "${{ env.PR_AVERAGE_TIME_DURATION }}",
+              "totalDeployments": "${{ fromJson(env.deployment_frequency_report).total_deployments }}",
+              "deploymentRating": "${{ fromJson(env.deployment_frequency_report).rating }}",
+              "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
+              "deploymentFrequency": "${{ fromJson(env.deployment_frequency_report).deployment_frequency }}",
+              "leadTimeForChangesInHours": "${{ fromJson(env.lead_time_for_changes_report).lead_time_for_changes_in_hours }}",
+              "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).lead_time_rating }}",
+              "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
+              "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
               "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
               "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
