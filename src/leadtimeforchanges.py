@@ -161,4 +161,4 @@ if __name__ == "__main__":
     
     report = main(owner_repo, workflows, branch, number_of_days)
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
-        github_env.write(f"report={report}\n")
+        github_env.write(f"leadtimeforchanges_report={report}\n")
