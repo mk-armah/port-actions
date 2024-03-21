@@ -120,19 +120,19 @@ class RepositoryMetrics:
             )
             if aggregated["prs_merged"]
             else 0,
-            "average_reviews_per_pr": aggregated["total_reviews"]
-            / aggregated["prs_opened"]
+            "average_reviews_per_pr": round(aggregated["total_reviews"]
+            / aggregated["prs_opened"],2)
             if aggregated["prs_opened"]
             else 0,
-            "average_commits_per_pr": aggregated["total_commits"]
-            / aggregated["prs_opened"]
+            "average_commits_per_pr": round(aggregated["total_commits"]
+            / aggregated["prs_opened"],2)
             if aggregated["prs_opened"]
             else 0,
-            "average_loc_changed_per_pr": aggregated["total_loc_changed"]
-            / aggregated["prs_opened"]
+            "average_loc_changed_per_pr": round(aggregated["total_loc_changed"]
+            / aggregated["prs_opened"],2)
             if aggregated["prs_opened"]
             else 0,
-            "average_prs_reviewed_per_week": average_prs_reviewed_per_week,
+            "average_prs_reviewed_per_week": round(average_prs_reviewed_per_week,2),
         }
 
         return metrics
