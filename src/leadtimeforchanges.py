@@ -142,9 +142,9 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
     print(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
 
     report = {
-            "pr_average_time_duration" : pr_average,
-            "workflow_average_time_duration" : workflow_average,
-            "lead_time_for_changes_in_hours": lead_time_for_changes_in_hours
+            "pr_average_time_duration" : round(pr_average,2),
+            "workflow_average_time_duration" : round(workflow_average,2),
+            "lead_time_for_changes_in_hours": round(lead_time_for_changes_in_hours,2)
     }
     rating = calculate_rating(lead_time_for_changes_in_hours)
     report.update(rating)
