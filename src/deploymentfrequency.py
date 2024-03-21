@@ -33,23 +33,6 @@ class DeploymentFrequency:
 
         return workflow_runs_list, unique_dates
 
-    # def fetch_workflow_runs(self):
-    #     workflow_runs_list = []
-    #     unique_dates = set()
-    #     now_utc = datetime.datetime.now(pytz.utc)
-    
-    #     for workflow_identifier in self.workflows:  # workflow_identifier could be the ID or filename
-    #         workflow = self.repo.get_workflow(workflow_identifier)
-    #         runs = workflow.get_runs(branch=self.branch)
-    #         for run in runs:
-    #             run_date = run.created_at.replace(tzinfo=pytz.utc)
-    #             if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
-    #                 workflow_runs_list.append(run)
-    #                 unique_dates.add(run_date.date())
-    
-    #     return workflow_runs_list, unique_dates
-
-
     def calculate_deployments_per_day(self, workflow_runs_list):
         if self.number_of_days > 0:
             return len(workflow_runs_list) / self.number_of_days
