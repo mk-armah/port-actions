@@ -7,13 +7,13 @@ import json
 
 class RepositoryMetrics:
     def __init__(self, repo_name, time_frame):
-        self.g = Github(os.getenv("GITHUB_TOKEN"))
+        self.github_client = Github(os.getenv("GITHUB_TOKEN"))
         self.repo_name = repo_name
         self.time_frame = int(time_frame)
         self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(
             days=self.time_frame
         )
-        self.repo = self.g.get_repo(f"{self.repo_name}")
+        self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
         prs = self.repo.get_pulls(state="all", sort="created", direction="desc")
