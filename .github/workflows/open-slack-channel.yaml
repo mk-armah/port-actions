@@ -1,9 +1,9 @@
 
-name: Open Slack Channel For An Incident
+name: Open Slack Channel
 on:
   workflow_dispatch:
     inputs:
-      channel:
+      channel_name:
         description: Name of the public or private channel to create.
         required: true
         type: string
@@ -49,7 +49,7 @@ jobs:
           customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
           data: >-
                {
-                 "name": ${{github.event.inputs.name}},
+                 "name": ${{github.event.inputs.channel_name}},
                  "is_private": ${{github.event.inputs.is_private}}
                  }
                  
