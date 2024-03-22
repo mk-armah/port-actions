@@ -43,14 +43,9 @@ jobs:
         id: create_channel
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://slack.com/api/conversations.create'
+          url: 'https://slack.com/api/conversations.create?name=${{inputs.channel_name}}&is_private=${{inputs.ins_private}}&pretty=1'
           method: 'POST'
           customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
-          data: >-
-               {
-                 "name": ${{github.event.inputs.channel_name}},
-                 "is_private": ${{github.event.inputs.is_private}}
-                 }
                  
       - name: Log If Request Fails 
         if: failure()
