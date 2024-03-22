@@ -1,4 +1,3 @@
-
 name: Open Slack Channel
 on:
   workflow_dispatch:
@@ -8,11 +7,11 @@ on:
         required: true
         type: string
       is_private:
-        description: Create a private channel instead of a public one
+        description: Create a private channel instead of a public one.
         required: false
         type: boolean
       team_id:
-        description: encoded team id to create the channel in, required if org token is used
+        description: Encoded team ID to create the channel in, required if org token is used.
         type: string
         required: false
       members:
@@ -20,37 +19,22 @@ on:
         type: array
         required: false
       port_payload:
+        description: Port's payload, including details for who triggered the action and general context (blueprint, run ID, etc...).
         required: true
-        description: >-
-          Port's payload, including details for who triggered the action and
-          general context (blueprint, run id, etc...)
 
 jobs:
   open-slack-channel:
     runs-on: ubuntu-latest
     steps:
-      - name: Log Executing Request to Open Channel 
+      - name: Log Executing Request to Open Channel
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           logMessage: "About to create a conversation channel in slack..."
-
-      # - name: Create Slack Channel
-      #   id: create_channel
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: 'https://slack.com/api/conversations.create'
-      #     method: 'POST'
-      #     customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
-      #     data: >-
-      #         '{
-      #           "name": ${{inputs.channel_name}},
-      #           "is_private": ${{inputs.is_private}}
-      #         }'
 
       - name: Create Slack Channel
         id: create_channel
@@ -60,7 +44,7 @@ jobs:
           response=$(curl -s -X POST "https://slack.com/api/conversations.create" \
             -H "Authorization: Bearer $SLACK_TOKEN" \
             -H "Content-Type: application/json" \
-            --data "{\"name\": \"${{ github.event.inputs.channel }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
+            --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }}\"}")
   
           # Extract the channel ID
           channel_id=$(echo $response | jq -r '.channel.id')
@@ -73,10 +57,8 @@ jobs:
             echo "Failed to create Slack channel"
             echo "Response: $response"
             exit 1
-          fi
 
-              
-      - name: Log If Request Fails 
+      - name: Log If Request Fails
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
@@ -84,15 +66,14 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Request to create slack channel failed ..."
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
+          logMessage: "Request to create Slack channel failed..."
           
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
         env:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
-          CHANNEL_ID: ${{ fromJson(steps.create_channel.outputs.response).channel.id }}
         run: |
           MEMBER_EMAILS= ${{ toJSON(github.event.inputs.members) }}
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
@@ -110,7 +91,7 @@ jobs:
             fi
           done
 
-      - name: Log If Request to Add Members Fails 
+      - name: Log If Request to Add Members Fails
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
@@ -118,5 +99,5 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Failed to add members to slack channel ..."
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
+          logMessage: "Failed to add members to Slack channel..."
