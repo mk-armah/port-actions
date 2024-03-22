@@ -70,7 +70,7 @@ jobs:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: ${{ fromJson(steps.create_channel.outputs.response).channel.id }}
         run: |
-          MEMBER_EMAILS= ${{ toJSON(github.event.inputs.members) }} # Assuming this is a JSON array of emails
+          MEMBER_EMAILS= ${{ toJSON(github.event.inputs.members) }}
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail" \
               -H "Content-Type: application/x-www-form-urlencoded" \
