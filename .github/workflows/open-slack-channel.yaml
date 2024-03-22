@@ -1,1 +1,134 @@
 
+name: Open Slack Channel For An Incident
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Name of the public or private channel to create.
+        required: true
+        type: string
+      is_private:
+        description: Create a private channel instead of a public one
+        required: false
+        type: boolean
+      team_id:
+        description: encoded team id to create the channel in, required if org token is used
+        type: string
+        required: false
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+
+jobs:
+  change-incident-owner:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Log Executing Request to Open Channel 
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to create a conversation channel in slack..."
+
+      - name: Request to Create Slack Channel
+        id: create_channel
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://slack.com/api/conversations.create'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
+          data: >-
+               {
+                 "name": ${{github.event.inputs.name}},
+                 "is_private": ${{github.event.inputs.is_private}}
+                 }
+
+      - name: Log Before Processing Incident Response
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Getting incident object from response received ..."
+
+      - name: Request to Send Message to Slack Channel
+        id: post_message
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://slack.com/api/conversations.create'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
+          data: >-
+               {
+                 "channel": "incident-${{github.event.inputs.channel}}",
+                 "text": ${{github.event.inputs.text}}
+                 }
+
+      - name: Invite Service Owners to Slack Channel
+        id: invite_members
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://slack.com/api/conversations.create'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
+          data: >-
+               {
+                 "channel": "incident-${{github.event.inputs.channel}}",
+                 "text": ${{github.event.inputs.text}}
+                 }
+                 
+                 
+      - name: Get Incident Object from Response
+        id: incident
+        run: |
+          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
+
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Reporting the updated incident back to port ..."
+
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].id }}"
+          title: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].title }}"
+          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          properties: |-
+            {
+              "status": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].status }}",
+              "url": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].self }}",
+              "urgency": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].urgency }}",
+              "responder": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].assignments[0].assignee.summary}}",
+              "escalation_policy": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].escalation_policy.summary }}",
+              "created_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].created_at }}",
+              "updated_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].updated_at }}"
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
