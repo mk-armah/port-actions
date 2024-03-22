@@ -43,7 +43,7 @@ jobs:
         id: create_channel
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://slack.com/api/conversations.create?name=${{inputs.channel_name}}&is_private=${{inputs.ins_private}}&pretty=1'
+          url: 'https://slack.com/api/conversations.create?name=${{inputs.channel_name}}&is_private=${{inputs.is_private}}&pretty=1'
           method: 'POST'
           customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
                  
