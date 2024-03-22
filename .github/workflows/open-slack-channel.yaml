@@ -40,7 +40,7 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "About to create a conversation channel in slack..."
 
-      - name: Request to Create Slack Channel
+      - name: Create Slack Channel
         id: create_channel
         uses: fjogeleit/http-request-action@v1
         with:
@@ -52,6 +52,7 @@ jobs:
                  "name": ${{github.event.inputs.name}},
                  "is_private": ${{github.event.inputs.is_private}}
                  }
+                 
       - name: Log If Request Fails 
         if: failure()
         uses: port-labs/port-github-action@v1
@@ -62,31 +63,31 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Request to create slack channel failed ..."
+          
+      - name: Add Members to Slack Channel
+        id: add_members
+        if: success()
+        env:
+          SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
+          CHANNEL_ID: ${{ fromJson(steps.create_channel.outputs.response).channel.id }}
+        run: |
+          MEMBER_EMAILS='${{ toJSON(github.event.inputs.members) }}' # Assuming this is a JSON array of emails
+          for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
+            user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -H "Authorization: Bearer $SLACK_TOKEN" \
+              --data-urlencode "email=$email" | jq -r '.user.id')
+            if [ "$user_id" != "null" ]; then
+              curl -s -X POST "https://slack.com/api/conversations.invite" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $SLACK_TOKEN" \
+                --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}"
+            else
+              echo "User ID not found for email $email"
+            fi
+          done
 
-      - name: Log Before Processing Incident Response
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Getting incident object from response received ..."
-
-      # - name: Request to Send Message to Slack Channel
-      #   id: post_message
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: 'https://slack.com/api/conversations.create'
-      #     method: 'POST'
-      #     customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
-      #     data: >-
-      #          {
-      #            "channel": "incident-${{github.event.inputs.channel}}",
-      #            "text": ${{github.event.inputs.text}}
-      #            }
-
-      - name: Log If Request Fails 
+      - name: Log If Request to Add Members Fails 
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
@@ -95,38 +96,8 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Failed to post message to slack channel ..."
-
+          logMessage: "Failed to add members to slack channel ..."
       
-      # - name: Invite Service Owners to Slack Channel
-      #   id: invite_members
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: 'https://slack.com/api/conversations.create'
-      #     method: 'POST'
-      #     customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
-      #     data: >-
-      #          {
-      #            "channel": "incident-${{github.event.inputs.channel}}",
-      #            "text": ${{github.event.inputs.text}}
-      #            }
-                 
-                 
-      - name: Get Incident Object from Response
-        id: incident
-        run: |
-          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
-
-      - name: Log Before Upserting Entity
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Reporting the updated incident back to port ..."
-
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
