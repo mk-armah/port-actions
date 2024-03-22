@@ -45,7 +45,7 @@ jobs:
         with:
           url: 'https://slack.com/api/conversations.create?name=${{inputs.channel_name}}&is_private=${{inputs.is_private}}&pretty=1'
           method: 'POST'
-          customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
+          customHeaders: '{ "Content-Type": "application/x-www-form-urlencoded", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
                  
       - name: Log If Request Fails 
         if: failure()
