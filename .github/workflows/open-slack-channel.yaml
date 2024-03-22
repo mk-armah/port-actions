@@ -36,34 +36,34 @@ jobs:
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           logMessage: "About to create a conversation channel in slack..."
 
-      - name: Create Slack Channel
-        id: create_channel
-        env:
-          SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
-        run: |
-          response=$(curl -s -X POST "https://slack.com/api/conversations.create" \
-            -H "Authorization: Bearer $SLACK_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
+      # - name: Create Slack Channel
+      #   id: create_channel
+      #   env:
+      #     SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
+      #   run: |
+      #     response=$(curl -s -X POST "https://slack.com/api/conversations.create" \
+      #       -H "Authorization: Bearer $SLACK_TOKEN" \
+      #       -H "Content-Type: application/json" \
+      #       --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
   
-          # Log the response for debugging
-          echo "API Response: $response"
+      #     # Log the response for debugging
+      #     echo "API Response: $response"
           
-          # Extract the channel ID
-          channel_id=$(echo $response | jq -r '.channel.id')
+      #     # Extract the channel ID
+      #     channel_id=$(echo $response | jq -r '.channel.id')
           
-          # Check if the channel ID is not null
-          if [[ "$channel_id" != "null" && "$channel_id" != "" ]]; then
-            echo "Channel ID: $channel_id"
-            # Use GITHUB_ENV to set the channel_id environment variable for subsequent steps
-            echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
-          else
-            echo "Failed to create Slack channel. Channel ID is null."
-            # Extract and log the error message from the response
-            error_message=$(echo $response | jq -r '.error')
-            echo "Error: $error_message"
-            exit 1
-          fi
+      #     # Check if the channel ID is not null
+      #     if [[ "$channel_id" != "null" && "$channel_id" != "" ]]; then
+      #       echo "Channel ID: $channel_id"
+      #       # Use GITHUB_ENV to set the channel_id environment variable for subsequent steps
+      #       echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
+      #     else
+      #       echo "Failed to create Slack channel. Channel ID is null."
+      #       # Extract and log the error message from the response
+      #       error_message=$(echo $response | jq -r '.error')
+      #       echo "Error: $error_message"
+      #       exit 1
+      #     fi
 
 
       - name: Log If Request Fails
@@ -81,9 +81,10 @@ jobs:
         id: add_members
         if: success()
         env:
+          CHANNEL_ID: 'C06QYNQQZU3'
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
         run: |
-          MEMBER_EMAILS= ${{ toJSON(github.event.inputs.members) }}
+          MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail" \
               -H "Content-Type: application/x-www-form-urlencoded" \
