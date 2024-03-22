@@ -15,6 +15,10 @@ on:
         description: encoded team id to create the channel in, required if org token is used
         type: string
         required: false
+      members:
+        description: Add members manually to the channel.
+        type: array
+        required: false
       port_payload:
         required: true
         description: >-
@@ -48,6 +52,16 @@ jobs:
                  "name": ${{github.event.inputs.name}},
                  "is_private": ${{github.event.inputs.is_private}}
                  }
+      - name: Log If Request Fails 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Request to create slack channel failed ..."
 
       - name: Log Before Processing Incident Response
         uses: port-labs/port-github-action@v1
@@ -59,31 +73,43 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Getting incident object from response received ..."
 
-      - name: Request to Send Message to Slack Channel
-        id: post_message
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: 'https://slack.com/api/conversations.create'
-          method: 'POST'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
-          data: >-
-               {
-                 "channel": "incident-${{github.event.inputs.channel}}",
-                 "text": ${{github.event.inputs.text}}
-                 }
+      # - name: Request to Send Message to Slack Channel
+      #   id: post_message
+      #   uses: fjogeleit/http-request-action@v1
+      #   with:
+      #     url: 'https://slack.com/api/conversations.create'
+      #     method: 'POST'
+      #     customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
+      #     data: >-
+      #          {
+      #            "channel": "incident-${{github.event.inputs.channel}}",
+      #            "text": ${{github.event.inputs.text}}
+      #            }
 
-      - name: Invite Service Owners to Slack Channel
-        id: invite_members
-        uses: fjogeleit/http-request-action@v1
+      - name: Log If Request Fails 
+        if: failure()
+        uses: port-labs/port-github-action@v1
         with:
-          url: 'https://slack.com/api/conversations.create'
-          method: 'POST'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
-          data: >-
-               {
-                 "channel": "incident-${{github.event.inputs.channel}}",
-                 "text": ${{github.event.inputs.text}}
-                 }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to post message to slack channel ..."
+
+      
+      # - name: Invite Service Owners to Slack Channel
+      #   id: invite_members
+      #   uses: fjogeleit/http-request-action@v1
+      #   with:
+      #     url: 'https://slack.com/api/conversations.create'
+      #     method: 'POST'
+      #     customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"'
+      #     data: >-
+      #          {
+      #            "channel": "incident-${{github.event.inputs.channel}}",
+      #            "text": ${{github.event.inputs.text}}
+      #            }
                  
                  
       - name: Get Incident Object from Response
