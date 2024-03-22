@@ -47,10 +47,10 @@ jobs:
           method: 'POST'
           customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
           data: >-
-              {
+              '{
                 "name": ${{inputs.channel_name}},
                 "is_private": ${{inputs.is_private}}
-              }
+              }'
               
       - name: Log If Request Fails 
         if: failure()
