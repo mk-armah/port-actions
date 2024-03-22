@@ -45,7 +45,7 @@ jobs:
         with:
           url: 'https://slack.com/api/conversations.create'
           method: 'POST'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": " Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }} }"'
+          customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
           data: >-
                {
                  "name": ${{github.event.inputs.channel_name}},
