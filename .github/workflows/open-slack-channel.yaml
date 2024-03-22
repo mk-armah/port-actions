@@ -48,7 +48,7 @@ jobs:
           customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}" }'
           data: >-
               {
-                "name": ${{inputs.name}},
+                "name": ${{inputs.channel_name}},
                 "is_private": ${{inputs.is_private}}
               }
               
