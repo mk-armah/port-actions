@@ -26,10 +26,9 @@ on:
           general context (blueprint, run id, etc...)
 
 jobs:
-  change-incident-owner:
+  open-slack-channel:
     runs-on: ubuntu-latest
     steps:
-      
       - name: Log Executing Request to Open Channel 
         uses: port-labs/port-github-action@v1
         with:
