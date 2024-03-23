@@ -81,24 +81,43 @@ jobs:
         id: add_members
         if: success()
         env:
-          CHANNEL_ID: 'C06QYNQQZU3'
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
         run: |
-          MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
+          MEMBER_EMAILS='${{ toJSON(github.event.inputs.members) }}'
+          declare -a already_in_channel_users=()
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail" \
               -H "Content-Type: application/x-www-form-urlencoded" \
               -H "Authorization: Bearer $SLACK_TOKEN" \
               --data-urlencode "email=$email" | jq -r '.user.id')
             if [ "$user_id" != "null" ]; then
-              curl -s -X POST "https://slack.com/api/conversations.invite" \
+              invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: Bearer $SLACK_TOKEN" \
-                --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}"
+                --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}")
+              error=$(echo $invite_response | jq -r '.error')
+              if [ "$error" = "already_in_channel" ]; then
+                # Add user IDs to the array
+                already_in_channel_users+=("$email")
+              fi
             else
               echo "User ID not found for email $email"
             fi
           done
+          # Convert the array to a JSON array string and save to an environment variable
+          already_in_channel_json=$(printf '%s\n' "${already_in_channel_users[@]}" | jq -R . | jq -cs .)
+          echo "ALREADY_IN_CHANNEL_USERS_JSON=$already_in_channel_json" >> $GITHUB_ENV
+
+      - name: Report Already Existing Users to Port
+        if: env.ALREADY_IN_CHANNEL_USERS_JSON
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
+          logMessage: "Users ${{ env.ALREADY_IN_CHANNEL_USERS_JSON }} are already in the Slack channel."
 
       - name: Log If Request to Add Members Fails
         if: failure()
