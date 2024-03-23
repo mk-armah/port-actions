@@ -95,6 +95,7 @@ jobs:
                 -H "Authorization: Bearer $SLACK_TOKEN" \
                 --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}")
               error=$(echo $invite_response | jq -r '.error')
+              echo $error
               if [ "$error" = "already_in_channel" ]; then
                 # Add user IDs to the array
                 already_in_channel_users+=("$email")
