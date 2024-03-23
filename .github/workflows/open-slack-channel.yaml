@@ -108,7 +108,7 @@ jobs:
           echo "ALREADY_IN_CHANNEL_USERS_JSON=$already_in_channel_json" >> $GITHUB_ENV
 
       - name: Report Already Existing Users to Port
-        if: env.ALREADY_IN_CHANNEL_USERS_JSON
+        if: ${{ env.ALREADY_IN_CHANNEL_USERS_JSON }} != '[]'
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
