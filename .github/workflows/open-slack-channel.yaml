@@ -98,6 +98,7 @@ jobs:
               if [ "$error" = "already_in_channel" ]; then
                 # Add user IDs to the array
                 already_in_channel_users+=("$email")
+                echo "Email $email is already in channel"
               fi
             else
               echo "User ID not found for email $email"
