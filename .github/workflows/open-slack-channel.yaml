@@ -83,13 +83,12 @@ jobs:
         env:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
         run: |
-          MEMBER_EMAILS='${{ toJSON(github.event.inputs.members) }}'
+          MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
           declare -a already_in_channel_users=()
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
-            user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail" \
+            user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail?email=$email" \
               -H "Content-Type: application/x-www-form-urlencoded" \
-              -H "Authorization: Bearer $SLACK_TOKEN" \
-              --data-urlencode "email=$email" | jq -r '.user.id')
+              -H "Authorization: Bearer $SLACK_TOKEN" | jq -r '.user.id')
             if [ "$user_id" != "null" ]; then
               invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
                 -H "Content-Type: application/json" \
