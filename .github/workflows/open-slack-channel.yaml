@@ -135,13 +135,14 @@ jobs:
         run: |
           # Step 1: Get the Port access token
           PORT_TOKEN_RESPONSE=$(curl -s -X 'POST' \
+          curl -X 'POST' \
             'https://api.getport.io/v1/auth/access_token' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
-            -d '{
-                  "clientId": "$clientId",
-                  "clientSecret": "$clientSecret"
-            }')
+            -d "{
+                  \"clientId\": \"$clientId\",
+                  \"clientSecret\": \"$clientSecret\"
+                }"
 
           echo $PORT_TOKEN_RESPONSE
           PORT_ACCESS_TOKEN=$(echo $PORT_TOKEN_RESPONSE | jq -r '.accessToken')
