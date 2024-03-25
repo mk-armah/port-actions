@@ -45,28 +45,25 @@ jobs:
       #       -H "Authorization: Bearer $SLACK_TOKEN" \
       #       -H "Content-Type: application/json" \
       #       --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
-  
-      #     # Log the response for debugging
+          
       #     echo "API Response: $response"
+      #     status=$(echo $response | jq -r '.ok')
           
-      #     # Extract the channel ID
-      #     channel_id=$(echo $response | jq -r '.channel.id')
-          
-      #     # Check if the channel ID is not null
-      #     if [[ "$channel_id" != "null" && "$channel_id" != "" ]]; then
+      #     if [$status=true]; then
+      #       channel_id=$(echo $response | jq -r '.channel.id')
       #       echo "Channel ID: $channel_id"
-      #       # Use GITHUB_ENV to set the channel_id environment variable for subsequent steps
       #       echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
+          
       #     else
       #       echo "Failed to create Slack channel. Channel ID is null."
-      #       # Extract and log the error message from the response
-      #       error_message=$(echo $response | jq -r '.error')
+      #       error=$(echo $response | jq -r '.error')
+      #       error_message="${error//_/ }
       #       echo "Error: $error_message"
+      #       echo "CREATE_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
       #       exit 1
       #     fi
 
-
-      - name: Log If Request Fails
+      - name: Log If Create Channel Request Fails
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
@@ -75,53 +72,50 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Request to create Slack channel failed..."
+          logMessage: "Failed to create slack channel >>> ${{env.CREATE_CHANNEL_ERROR}}"
           
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
         env:
+        
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
+          CHANNEL_ID: C06QYNQQZU3
         run: |
           MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
-          declare -a already_in_channel_users=()
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
-            user_id=$(curl -s -X POST "https://slack.com/api/users.lookupByEmail?email=$email" \
-              -H "Content-Type: application/x-www-form-urlencoded" \
-              -H "Authorization: Bearer $SLACK_TOKEN" | jq -r '.user.id')
-            if [ "$user_id" != "null" ]; then
+            user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
+              -H "Authorization: Bearer $SLACK_TOKEN")
+            
+            get_user_response=$(echo $user_response | jq -r '.ok')
+      
+            if [[ "$get_user_response" == "true" ]]; then
+              user_id=$(echo $user_response | jq -r '.user.id')
               invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: Bearer $SLACK_TOKEN" \
                 --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}")
-              error=$(echo $invite_response | jq -r '.error')
-              echo $error
-              if [ "$error" = "already_in_channel" ]; then
-                # Add user IDs to the array
-                already_in_channel_users+=("$email")
-                echo "Email $email is already in channel"
+      
+              status=$(echo $invite_response | jq -r '.ok')
+              if [[ "$status" == "false" ]]; then
+                error=$(echo $invite_response | jq -r '.error')
+                error="${error//_/ }"
+                error_message = "Failed to invite $email to channel, $error_message"
+                # Assuming you want to overwrite the ERROR_MESSAGE each time
+                echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
+                exit 1
               fi
             else
-              echo "User ID not found for email $email"
+              error=$(echo $user_response | jq -r '.error')
+              error="${error//_/ }"
+              error_message = "Could not get user details for $email, $error_message"
+              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
+              exit 1 
             fi
           done
-          # Convert the array to a JSON array string and save to an environment variable
-          already_in_channel_json=$(printf '%s\n' "${already_in_channel_users[@]}" | jq -R . | jq -cs .)
-          echo "ALREADY_IN_CHANNEL_USERS_JSON=$already_in_channel_json" >> $GITHUB_ENV
-
-      - name: Report Already Existing Users to Port
-        if: ${{ env.ALREADY_IN_CHANNEL_USERS_JSON }} != '[]'
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Users ${{ env.ALREADY_IN_CHANNEL_USERS_JSON }} are already in the Slack channel."
 
       - name: Log If Request to Add Members Fails
-        if: failure()
+        if: failture()
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -129,4 +123,4 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Failed to add members to Slack channel..."
+          logMessage: "${{env.ADD_MEMBER_TO_CHANNEL_ERROR}}"
