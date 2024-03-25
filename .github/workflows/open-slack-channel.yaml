@@ -100,15 +100,14 @@ jobs:
               if [[ "$status" == "false" ]]; then
                 error=$(echo $invite_response | jq -r '.error')
                 error="${error//_/ }"
-                error_message = "Failed to invite $email to channel, $error_message"
-                # Assuming you want to overwrite the ERROR_MESSAGE each time
+                error_message = "Failed to invite $email to channel, $error"
                 echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
                 exit 1
               fi
             else
               error=$(echo $user_response | jq -r '.error')
               error="${error//_/ }"
-              error_message = "Could not get user details for $email, $error_message"
+              error_message = "Could not get user details for $email, $error"
               echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
               exit 1 
             fi
