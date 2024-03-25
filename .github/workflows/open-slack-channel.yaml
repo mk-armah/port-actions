@@ -100,6 +100,7 @@ jobs:
                 error=$(echo $invite_response | jq -r '.error')
                 error="${error//_/ }"
                 error_message="Failed to invite $email to channel: $error"
+                echo error_message
                 echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
                 exit 1
               fi
@@ -107,6 +108,7 @@ jobs:
               error=$(echo $user_response | jq -r '.error')
               error="${error//_/ }"
               error_message="Could not get user details for $email: $error"
+              echo error_message
               echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
               exit 1 
             fi
