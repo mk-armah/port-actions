@@ -78,7 +78,6 @@ jobs:
         id: add_members
         if: success()
         env:
-        
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: C06QYNQQZU3
         run: |
@@ -86,7 +85,7 @@ jobs:
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
               -H "Authorization: Bearer $SLACK_TOKEN")
-            
+      
             get_user_response=$(echo $user_response | jq -r '.ok')
       
             if [[ "$get_user_response" == "true" ]]; then
@@ -100,15 +99,15 @@ jobs:
               if [[ "$status" == "false" ]]; then
                 error=$(echo $invite_response | jq -r '.error')
                 error="${error//_/ }"
-                error_message = "Failed to invite $email to channel, $error"
-                echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
+                error_message="Failed to invite $email to channel: $error"
+                echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
                 exit 1
               fi
             else
               error=$(echo $user_response | jq -r '.error')
               error="${error//_/ }"
-              error_message = "Could not get user details for $email, $error"
-              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" > $GITHUB_ENV
+              error_message="Could not get user details for $email: $error"
+              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
               exit 1 
             fi
           done
