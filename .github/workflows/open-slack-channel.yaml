@@ -123,7 +123,7 @@ jobs:
       #         exit 1 
       #       fi
       #     done
-
+      
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
@@ -131,60 +131,47 @@ jobs:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: C06QYNQQZU3
         run: |
+          run_id=${{ fromJson(github.event.inputs.port_payload).context.runId }}
           user_ids=""
           MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
+      
+          function report_error {
+            local message=$1
+            echo $message
+            echo "ADD_MEMBER_TO_CHANNEL_ERROR=$message" >> $GITHUB_ENV
+            curl -X POST "https://api.getport.io/v1/actions/runs/$run_id/logs" \
+              -H "Content-Type: application/json" \
+              -d "{\"message\": \"$message\"}"
+          }
+      
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
               -H "Authorization: Bearer $SLACK_TOKEN")
       
-            get_user_response=$(echo $user_response | jq -r '.ok')
-            
-            if [[ "$get_user_response" == "true" ]]; then
+            if [[ "$(echo $user_response | jq -r '.ok')" == "true" ]]; then
               user_id=$(echo $user_response | jq -r '.user.id')
-              # Append user_id to the string, separated by commas
-              user_ids="${user_ids}${user_id},"
-              
+              user_ids+="${user_id},"
             else
-              error=$(echo $user_response | jq -r '.error')
-              error_message="Could not get user details for $email: ${error//_/ }"
-              echo $error_message
-              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
-              exit 1 
+              error_message="Could not get user details for $email: $(echo $user_response | jq -r '.error' | tr '_' ' ')"
+              report_error "$error_message"
             fi
           done
       
-          # Remove the trailing comma from the user_ids string
           user_ids=${user_ids%,}
       
-          # Proceed only if user_ids string is not empty
           if [[ -n "$user_ids" ]]; then
             invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $SLACK_TOKEN" \
               --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_ids\"}")
       
-            status=$(echo $invite_response | jq -r '.ok')
-            if [[ "$status" == "false" ]]; then
-              error=$(echo $invite_response | jq -r '.error')
-              error_message="Failed to invite users to channel: ${error//_/ }"
-              echo $error_message
-              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
-              exit 1
+            if [[ "$(echo $invite_response | jq -r '.ok')" == "false" ]]; then
+              error_message="Failed to invite users to channel: $(echo $invite_response | jq -r '.error' | tr '_' ' ')"
+              report_error "$error_message"
             fi
           else
-            echo "No user IDs found to invite."
+            report_error "No user IDs found to invite."
           fi
-
-      - name: Log If Request to Add Members Fails
-        if: failure()
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "${{env.ADD_MEMBER_TO_CHANNEL_ERROR}}"
 
       - name: Log If Request to Add Members is Successful
         uses: port-labs/port-github-action@v1
