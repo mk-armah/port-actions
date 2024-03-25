@@ -115,7 +115,7 @@ jobs:
           done
 
       - name: Log If Request to Add Members Fails
-        if: failture()
+        if: failure()
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
