@@ -72,7 +72,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Failed to create slack channel >>> ${{env.CREATE_CHANNEL_ERROR}}"
+          logMessage: "Failed to create slack channel >>> ${{env.CREATE_CHANNEL_ERROR}} ❌"
 
       - name: Log If Create Channel Request is Successful
         uses: port-labs/port-github-action@v1
@@ -82,7 +82,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Channel created successfully, channel Id: ${{env.CHANNEL_ID}}"
+          logMessage: "Channel created successfully, channel Id: ${{env.CHANNEL_ID}} ✅"
           
       # - name: Add Members to Slack Channel
       #   id: add_members
@@ -150,7 +150,9 @@ jobs:
       
           # Ensure the access token was obtained successfully
           if [ -z "$PORT_ACCESS_TOKEN" ] || [ "$PORT_ACCESS_TOKEN" == "null" ]; then
-            echo "Failed to obtain Port access token"
+            error_message="Failed to obtain Port access token ❌"
+            echo $error_message
+            report_error "$error_message"
             exit 1
           fi
       
