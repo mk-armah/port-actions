@@ -84,6 +84,46 @@ jobs:
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           logMessage: "Channel created successfully, channel Id: ${{env.CHANNEL_ID}}"
           
+      # - name: Add Members to Slack Channel
+      #   id: add_members
+      #   if: success()
+      #   env:
+      #     SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
+      #     CHANNEL_ID: C06QYNQQZU3
+      #   run: |
+      #     MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
+      #     for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
+      #       user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
+      #         -H "Authorization: Bearer $SLACK_TOKEN")
+      
+      #       get_user_response=$(echo $user_response | jq -r '.ok')
+      
+      #       if [[ "$get_user_response" == "true" ]]; then
+      #         user_id=$(echo $user_response | jq -r '.user.id')
+      #         invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
+      #           -H "Content-Type: application/json" \
+      #           -H "Authorization: Bearer $SLACK_TOKEN" \
+      #           --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}")
+      
+      #         status=$(echo $invite_response | jq -r '.ok')
+      #         if [[ "$status" == "false" ]]; then
+      #           error=$(echo $invite_response | jq -r '.error')
+      #           error="${error//_/ }"
+      #           error_message="Failed to invite $email to channel: $error"
+      #           echo $error_message
+      #           echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
+      #           exit 1
+      #         fi
+      #       else
+      #         error=$(echo $user_response | jq -r '.error')
+      #         error="${error//_/ }"
+      #         error_message="Could not get user details for $email: $error"
+      #         echo $error_message
+      #         echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
+      #         exit 1 
+      #       fi
+      #     done
+
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
@@ -91,38 +131,49 @@ jobs:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: C06QYNQQZU3
         run: |
+          user_ids=""
           MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
           for email in $(echo $MEMBER_EMAILS | jq -r '.[]'); do
             user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
               -H "Authorization: Bearer $SLACK_TOKEN")
       
             get_user_response=$(echo $user_response | jq -r '.ok')
-      
+            
             if [[ "$get_user_response" == "true" ]]; then
               user_id=$(echo $user_response | jq -r '.user.id')
-              invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: Bearer $SLACK_TOKEN" \
-                --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_id\"}")
-      
-              status=$(echo $invite_response | jq -r '.ok')
-              if [[ "$status" == "false" ]]; then
-                error=$(echo $invite_response | jq -r '.error')
-                error="${error//_/ }"
-                error_message="Failed to invite $email to channel: $error"
-                echo $error_message
-                echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
-                exit 1
-              fi
+              # Append user_id to the string, separated by commas
+              user_ids="${user_ids}${user_id},"
+              
             else
               error=$(echo $user_response | jq -r '.error')
-              error="${error//_/ }"
-              error_message="Could not get user details for $email: $error"
+              error_message="Could not get user details for $email: ${error//_/ }"
               echo $error_message
               echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
               exit 1 
             fi
           done
+      
+          # Remove the trailing comma from the user_ids string
+          user_ids=${user_ids%,}
+      
+          # Proceed only if user_ids string is not empty
+          if [[ -n "$user_ids" ]]; then
+            invite_response=$(curl -s -X POST "https://slack.com/api/conversations.invite" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $SLACK_TOKEN" \
+              --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_ids\"}")
+      
+            status=$(echo $invite_response | jq -r '.ok')
+            if [[ "$status" == "false" ]]; then
+              error=$(echo $invite_response | jq -r '.error')
+              error_message="Failed to invite users to channel: ${error//_/ }"
+              echo $error_message
+              echo "ADD_MEMBER_TO_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
+              exit 1
+            fi
+          else
+            echo "No user IDs found to invite."
+          fi
 
       - name: Log If Request to Add Members Fails
         if: failure()
