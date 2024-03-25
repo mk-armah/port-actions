@@ -130,7 +130,27 @@ jobs:
         env:
           SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: C06QYNQQZU3
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
         run: |
+          # Step 1: Get the Port access token
+          PORT_TOKEN_RESPONSE=$(curl -s -X 'POST' \
+            'https://api.getport.io/v1/auth/access_token' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -d '{
+                  clientId: $PORT_CLIENT_ID
+                  clientSecret: $PORT_CLIENT_SECRET
+            }')
+          PORT_ACCESS_TOKEN=$(echo $PORT_TOKEN_RESPONSE | jq -r '.accessToken')
+      
+          # Ensure the access token was obtained successfully
+          if [ -z "$PORT_ACCESS_TOKEN" ] || [ "$PORT_ACCESS_TOKEN" == "null" ]; then
+            echo "Failed to obtain Port access token"
+            exit 1
+          fi
+      
+          # Step 2: The rest of your script
           run_id=${{ fromJson(github.event.inputs.port_payload).context.runId }}
           user_ids=""
           MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
@@ -139,8 +159,9 @@ jobs:
             local message=$1
             echo $message
             echo "ADD_MEMBER_TO_CHANNEL_ERROR=$message" >> $GITHUB_ENV
-            curl -X POST "https://api.getport.io/v1/actions/runs/$run_id/logs" \
+            curl -s -X POST "https://api.getport.io/v1/actions/runs/$run_id/logs" \
               -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $PORT_ACCESS_TOKEN" \
               -d "{\"message\": \"$message\"}"
           }
       
