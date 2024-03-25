@@ -206,4 +206,4 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Successfully added members to channel"
+          logMessage: "Successfully opened slack channel: $channel_id"
