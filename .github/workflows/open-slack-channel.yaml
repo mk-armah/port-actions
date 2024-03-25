@@ -143,6 +143,7 @@ jobs:
                   \"clientId\": \"$clientId\",
                   \"clientSecret\": \"$clientSecret\"
                 }"
+              )
 
           echo $PORT_TOKEN_RESPONSE
           PORT_ACCESS_TOKEN=$(echo $PORT_TOKEN_RESPONSE | jq -r '.accessToken')
