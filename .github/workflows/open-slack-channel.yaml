@@ -53,7 +53,7 @@ jobs:
       #       channel_id=$(echo $response | jq -r '.channel.id')
       #       echo "Channel ID: $channel_id"
       #       echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
-          
+      
       #     else
       #       echo "Failed to create Slack channel. Channel ID is null."
       #       error=$(echo $response | jq -r '.error')
@@ -73,12 +73,22 @@ jobs:
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           logMessage: "Failed to create slack channel >>> ${{env.CREATE_CHANNEL_ERROR}}"
+
+      - name: Log If Create Channel Request is Successful
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
+          logMessage: "Channel created successfully, channel Id: ${{env.CHANNEL_ID}}"
           
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
         env:
-          SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
+        #   SLACK_TOKEN: ${{ secrets.BOT_USER_OAUTH_TOKEN }}
           CHANNEL_ID: C06QYNQQZU3
         run: |
           MEMBER_EMAILS=${{ toJSON(github.event.inputs.members) }}
@@ -124,3 +134,13 @@ jobs:
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           logMessage: "${{env.ADD_MEMBER_TO_CHANNEL_ERROR}}"
+
+      - name: Log If Request to Add Members is Successful
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
+          logMessage: "Successfully added members to channel"
