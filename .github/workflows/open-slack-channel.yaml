@@ -177,7 +177,7 @@ jobs:
               user_id=$(echo $user_response | jq -r '.user.id')
               user_ids+="${user_id},"
             else
-              error_message="Could not get user details for $email: $(echo $user_response | jq -r '.error' | tr '_' ' ')"
+              error_message="Failed to retrieve user id for $email: $(echo $user_response | jq -r '.error' | tr '_' ' ') ⚠️"
               report_error "$error_message"
             fi
           done
@@ -191,7 +191,7 @@ jobs:
               --data "{\"channel\":\"$CHANNEL_ID\",\"users\":\"$user_ids\"}")
       
             if [[ "$(echo $invite_response | jq -r '.ok')" == "false" ]]; then
-              error_message="Failed to invite users to channel: $(echo $invite_response | jq -r '.error' | tr '_' ' ')"
+              error_message="Failed to invite users to channel: $(echo $invite_response | jq -r '.error' | tr '_' ' ') ⚠️"
               report_error "$error_message"
             fi
           else
