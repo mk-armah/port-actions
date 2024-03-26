@@ -30,10 +30,14 @@ jobs:
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
           repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
-          repo_name="${repository_path##*/}"
+          # repo_name="${repository_path##*/}"
+          cleaned_name=$(echo "${repository_path##*/}" | tr -c '[:alnum:]' ' ')
+          title=$(echo "$cleaned_name" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+
+          # export to github enviroment vars
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
           echo "REPOSITORY=$repository_path" >> $GITHUB_ENV
-          echo "TITLE=$repo_name" >> $GITHUB_ENV
+          echo "TITLE=$title" >> $GITHUB_ENV
         shell: bash
 
       - name: Set up Python
