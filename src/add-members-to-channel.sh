@@ -8,7 +8,7 @@ clientSecret=$4
 run_id=$5
 MEMBER_EMAILS_JSON=$6
 
-# Step 1: Get the Port access token
+# Get the Port access token
 PORT_TOKEN_RESPONSE=$(curl -s -X 'POST' \
   'https://api.getport.io/v1/auth/access_token' \
   -H 'accept: application/json' \
@@ -41,7 +41,6 @@ report_error() {
     -d "{\"message\": \"$message\"}"
 }
 
-# Step 2: The rest of your script
 user_ids=""
 
 # Convert MEMBER_EMAILS_JSON to an array
