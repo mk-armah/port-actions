@@ -138,6 +138,7 @@ jobs:
           MEMBER_EMAILS: ${{ toJSON(github.event.inputs.members) }}
         run: |
           chmod +x add-members-to-channel.sh
+          ls
           bash ./src/add-members-to-channel.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
 
       # - name: Add Members to Slack Channel
