@@ -134,7 +134,7 @@ jobs:
           CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
           RUN_ID: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           MEMBER_EMAILS: ${{ toJSON(github.event.inputs.members) }}
-        run: bash ./src/add_members_to_slack.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
+        run: bash ./src/add_members_to_channel.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
 
       # - name: Add Members to Slack Channel
       #   id: add_members
