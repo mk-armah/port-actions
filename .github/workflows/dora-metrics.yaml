@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       repository:
-        description: 'Comma-separated list of repositories to analyze (eg. port-labs/self-service-actions)'
+        description: 'Comma-separated list of repositories to analyze (eg. https://github.com/port-labs/self-service-actions)'
         required: true
       timeframe:
         description: 'Last X weeks'
@@ -26,10 +26,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Convert Weeks to Days
+      - name: Process Inputs
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
+          repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
+          repo_name="${result##*/}"
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
+          echo "REPOSITORY=$repository_path" >> $GITHUB_ENV
+          echo "TITLE=$repo_name" >> $GITHUB_ENV
         shell: bash
 
       - name: Set up Python
@@ -56,7 +60,7 @@ jobs:
       - name: Compute PR Metrics
         env:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}  # Use the automatically provided GITHUB_TOKEN
-          REPOSITORY: ${{ github.event.inputs.repository }}
+          REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/calculate_pr_metrics.py
 
       - name: Log Before Running Deployment Frequency
@@ -74,7 +78,7 @@ jobs:
         env:
           WORKFLOWS: ${{ inputs.workflow }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ${{ github.event.inputs.repository }}
+          REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/deploymentfrequency.py
 
       - name: Log Before Running Lead Time for Changes
@@ -92,7 +96,7 @@ jobs:
         env:
           WORKFLOWS: ${{ inputs.workflow }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ${{ github.event.inputs.repository }}
+          REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/leadtimeforchanges.py
           
       - name: Log Before Upserting Entity
@@ -109,7 +113,7 @@ jobs:
         uses: port-labs/port-github-action@v1
         with:
           identifier: "${{ fromJson(env.metrics).id }}"
-          title: ${{ github.event.inputs.repository }}
+          title: ${{ env.TITLE }}
           blueprint: doraMetrics
           properties: |-
             {
@@ -138,6 +142,17 @@ jobs:
           operation: UPSERT
           runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
+      - name: Log After Upserting Entity
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to upsert entity to port ❌"
+          
       - name: Log After Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
