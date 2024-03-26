@@ -26,6 +26,9 @@ jobs:
   open-slack-channel:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Log Executing Request to Open Channel
         uses: port-labs/port-github-action@v1
         with:
