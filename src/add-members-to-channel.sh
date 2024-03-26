@@ -44,7 +44,7 @@ report_error() {
 user_ids=""
 
 # Convert MEMBER_EMAILS_JSON to an array
-readarray -t MEMBER_EMAILS < <(echo $MEMBER_EMAILS_JSON | jq -r '.[]')
+readarray -t MEMBER_EMAILS < <(echo $MEMBER_EMAILS_JSON | jq -r 'fromjson | .[]')
 
 for email in "${MEMBER_EMAILS[@]}"; do
   user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
