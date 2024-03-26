@@ -47,9 +47,8 @@ jobs:
             --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
           
           echo "API Response: $response"
-          status=$(echo $response | jq -r '.ok')
           
-          if [$status=true]; then
+          if [[ "$(echo $response | jq -r '.ok')" == "true" ]]; then
             channel_id=$(echo $response | jq -r '.channel.id')
             echo "Channel ID: $channel_id"
             echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
