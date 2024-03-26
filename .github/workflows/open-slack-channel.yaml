@@ -72,7 +72,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Failed to create slack channel >>> ${{env.CREATE_CHANNEL_ERROR}} ❌"
+          logMessage: "Failed to create slack channel: ${{env.CREATE_CHANNEL_ERROR}} ❌"
 
       - name: Log If Create Channel Request is Successful
         uses: port-labs/port-github-action@v1
