@@ -26,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Process Inputs
+      - name: Transform Workflow Inputs
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
           repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
@@ -127,7 +127,7 @@ jobs:
               "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
               "deploymentFrequency": "${{ fromJson(env.deployment_frequency_report).deployment_frequency }}",
               "leadTimeForChangesInHours": "${{ fromJson(env.lead_time_for_changes_report).lead_time_for_changes_in_hours }}",
-              "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).lead_time_rating }}",
+              "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).rating }}",
               "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
               "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
               "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
