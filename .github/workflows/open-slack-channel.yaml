@@ -109,4 +109,4 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
-          logMessage: "Successfully opened slack channel: ${{env.channel_id}} ✅"
+          logMessage: "Successfully opened slack channel: ${{env.CHANNEL_ID}} ✅"
