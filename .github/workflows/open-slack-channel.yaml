@@ -56,7 +56,7 @@ jobs:
           else
             echo "Failed to create Slack channel. Channel ID is null."
             error=$(echo $response | jq -r '.error')
-            error_message="${error//_/ }
+            error_message="${error//_/ }"
             echo "Error: $error_message"
             echo "CREATE_CHANNEL_ERROR=$error_message" >> $GITHUB_ENV
             exit 1
