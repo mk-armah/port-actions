@@ -1,22 +1,12 @@
 #!/bin/bash
 
-# Input parameters
-clientId="$1"
-clientSecret="$2"
-SLACK_TOKEN="$3"
-CHANNEL_ID="$4"
-MEMBER_EMAILS="$5"
-
-# Function to report errors
-report_error() {
-  local message="$1"
-  echo "$message"
-  # Reporting error to Port - ensure PORT_ACCESS_TOKEN is available
-  curl -s -X POST "https://api.getport.io/v1/actions/runs/$run_id/logs" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $PORT_ACCESS_TOKEN" \
-    -d "{\"message\": \"$message\"}"
-}
+# Assign arguments to variables
+SLACK_TOKEN=$1
+CHANNEL_ID=$2
+clientId=$3
+clientSecret=$4
+run_id=$5
+MEMBER_EMAILS_JSON=$6
 
 # Step 1: Get the Port access token
 PORT_TOKEN_RESPONSE=$(curl -s -X 'POST' \
@@ -26,20 +16,38 @@ PORT_TOKEN_RESPONSE=$(curl -s -X 'POST' \
   -d "{
         \"clientId\": \"$clientId\",
         \"clientSecret\": \"$clientSecret\"
-      }")
+      }"
+    )
 
+echo $PORT_TOKEN_RESPONSE
 PORT_ACCESS_TOKEN=$(echo $PORT_TOKEN_RESPONSE | jq -r '.accessToken')
 
 # Ensure the access token was obtained successfully
 if [ -z "$PORT_ACCESS_TOKEN" ] || [ "$PORT_ACCESS_TOKEN" == "null" ]; then
-  echo "Failed to obtain Port access token ❌"
+  error_message="Failed to obtain Port access token ❌"
+  echo $error_message
+  report_error "$error_message"
   exit 1
 fi
 
-# Step 2: Iterate over the emails and add members
+# Function to report error
+report_error() {
+  local message=$1
+  echo $message
+  echo "ADD_MEMBER_TO_CHANNEL_ERROR=$message" >> $GITHUB_ENV
+  curl -s -X POST "https://api.getport.io/v1/actions/runs/$run_id/logs" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $PORT_ACCESS_TOKEN" \
+    -d "{\"message\": \"$message\"}"
+}
+
+# Step 2: The rest of your script
 user_ids=""
-IFS=',' read -ra ADDR <<< "$MEMBER_EMAILS"
-for email in "${ADDR[@]}"; do
+
+# Convert MEMBER_EMAILS_JSON to an array
+readarray -t MEMBER_EMAILS < <(echo $MEMBER_EMAILS_JSON | jq -r '.[]')
+
+for email in "${MEMBER_EMAILS[@]}"; do
   user_response=$(curl -s -X GET "https://slack.com/api/users.lookupByEmail?email=$email" \
     -H "Authorization: Bearer $SLACK_TOKEN")
 
