@@ -30,7 +30,7 @@ jobs:
         run: |
           days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
           repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
-          repo_name="${result##*/}"
+          repo_name="${repository_path##*/}"
           echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
           echo "REPOSITORY=$repository_path" >> $GITHUB_ENV
           echo "TITLE=$repo_name" >> $GITHUB_ENV
