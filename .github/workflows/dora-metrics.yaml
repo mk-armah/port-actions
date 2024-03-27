@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Report Failure In Computing PR Metrics
+      - name: Report Failure In Settting Up Dependencies
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
