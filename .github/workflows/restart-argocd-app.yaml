@@ -91,7 +91,7 @@ jobs:
 
       - name: Restart Deployment via Argo CD
         run: |
-          argocd app actions run ${{ github.event.inputs.appName }} restart --kind Deployment
+          argocd app actions run ${{ inputs.application_name }} restart --kind Deployment
 
       - name: Report Failure in Restarting Argo CD Deployment
         if: failure()
