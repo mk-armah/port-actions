@@ -44,11 +44,33 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-      
+
+      - name: Report Failure In Computing PR Metrics
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Installing required packages for the action..."
+          
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
+
+      - name: Report Failure In Computing PR Metrics
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to install required packages for the action ..."
 
       - name: Log Before Running PR Metrics
         uses: port-labs/port-github-action@v1
@@ -66,6 +88,27 @@ jobs:
           REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/calculate_pr_metrics.py
 
+      - name: Report Failure In Computing PR Metrics
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to compute Pull Request Metrics❌"
+
+      - name: Report Success In Computing PR Metrics
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Successfully Computed Pull Request metric for the service ✅"
+          
       - name: Log Before Running Deployment Frequency
         uses: port-labs/port-github-action@v1
         with:
@@ -84,6 +127,27 @@ jobs:
           REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/deploymentfrequency.py
 
+      - name: Report Failure In Computing Deployment Frequency
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to compute Deployment Frequency ❌"
+          
+      - name: Report Success In Computing Deployment Frequency
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Successfully computed deployment frequency ✅"
+          
       - name: Log Before Running Lead Time for Changes
         uses: port-labs/port-github-action@v1
         with:
@@ -101,6 +165,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
           REPOSITORY: ${{ env.REPOSITORY }}
         run: python src/leadtimeforchanges.py
+
+      - name: Report Failure In Lead Time For Changes
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to compute lead time for changes ❌"
+          
+      - name: Report Success In Lead Time For Changes
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Successfully computed lead time for changes ✅"
           
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -110,7 +195,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Upserting dora metrics to Port"
+          logMessage: "Upserting DORA Metrics to Port"
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -145,7 +230,7 @@ jobs:
           operation: UPSERT
           runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
-      - name: Log After Upserting Entity
+      - name: Report Failure In Upserting Entity
         if: failure()
         uses: port-labs/port-github-action@v1
         with:
@@ -156,7 +241,7 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Failed to upsert entity to port ❌"
           
-      - name: Log After Upserting Entity
+      - name: Report Successful Upserting of Entity
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
