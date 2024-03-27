@@ -10,6 +10,11 @@ on:
         description: 'Use insecure connection (true/false)'
         required: false
         default: 'false'
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
 
 jobs:
   restart-deployment:
