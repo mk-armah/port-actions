@@ -3,15 +3,15 @@ name: Restart Deployment in Argo CD
 on:
   workflow_dispatch:
     inputs:
-      appName:
+      application_name:
         description: 'Argo CD Application Name'
         required: true
       insecure:
         description: 'Use insecure connection (true/false)'
         required: false
         default: 'false'
-      appServer:
-        description: 'Argo cd server address'
+      application_host:
+        description: 'Argo cd host address'
         required: false
       port_payload:
         required: true
