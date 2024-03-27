@@ -1,0 +1,36 @@
+name: Restart Deployment in Argo CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      appName:
+        description: 'Argo CD Application Name'
+        required: true
+      insecure:
+        description: 'Use insecure connection (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  restart-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+
+      - name: Login to Argo CD
+        run: |
+          argocd login ${{ secrets.ARGO_CD_SERVER }} --username ${{ secrets.ARGO_CD_USERNAME }} --password ${{ secrets.ARGO_CD_PASSWORD }} ${{ if eq(github.event.inputs.insecure, 'true') }} --insecure{{ endif }}
+        env:
+          ARGO_CD_SERVER: ${{ secrets.ARGO_CD_SERVER }}
+          ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
+          ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
+
+      - name: Restart Deployment via Argo CD
+        run: |
+          argocd app actions run ${{ github.event.inputs.appName }} restart --kind Deployment
