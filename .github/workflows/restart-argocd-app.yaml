@@ -35,7 +35,7 @@ jobs:
         run: |
           argocd login ${{ secrets.ARGO_CD_SERVER }} --username ${{ secrets.ARGO_CD_USERNAME }} --password ${{ secrets.ARGO_CD_PASSWORD }} ${{ if eq(github.event.inputs.insecure, 'true') }} --insecure{{ endif }}
         env:
-          ARGO_CD_SERVER: ${{ secrets.ARGO_CD_SERVER }}
+          ARGO_CD_SERVER: ${{ inputs.application_host }}
           ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
           ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
 
