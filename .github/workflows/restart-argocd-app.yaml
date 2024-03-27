@@ -43,7 +43,6 @@ jobs:
           logMessage: "Failed to install Argo CD CLI ❌"
 
       - name: Report Successful Installation of Argo CD CLI
-        if: failure()
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -81,7 +80,6 @@ jobs:
           logMessage: "Failed to login to Argo CD, please check your provided credentials ❌"
           
       - name: Report Successful Login to Argo CD
-        if: failure()
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -107,7 +105,6 @@ jobs:
           logMessage: "Failed to restart Argo CD Deployment ❌"
 
       - name: Report Successful Login to Argo CD
-        if: failure()
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
