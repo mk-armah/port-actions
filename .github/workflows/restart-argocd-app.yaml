@@ -115,19 +115,37 @@ jobs:
           logMessage: "Successfully restarted Deployment ✅"
 
       - name: Obtain Argo CD Access Token
-        id: get-token
-        run: |
-          RESPONSE=$(curl -k -sSf -X POST "${{ secrets.ARGO_CD_SERVER }}/api/v1/session" \
-            -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
-            -H 'Content-Type: application/json')
-          echo "TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
-        env:
-          ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
-          ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
+        id: get_app_token
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://${{ secrets.ARGO_CD_SERVER }}/api/v1/session'
+          method: 'POST'
+          customHeaders: '{ "Content-Type": "application/json"}'
+          data: '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}'
 
       - name: Get Application Details via API
-        run: |
-          RESPONSE=$(curl -k -sSf -H "Authorization: Bearer $TOKEN" \
-               "${{ secrets.ARGO_CD_SERVER }}/api/v1/applications/${{ github.event.inputs.appName }}")
-          echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
+        id: get_app_details
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ secrets.ARGO_CD_SERVER }}/api/v1/applications/${{ github.event.inputs.appName }}'
+          method: 'GET'
+          customHeaders: '{ "Content-Type": "application/json"}'
+          data: '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}'
+          
+      # - name: Obtain Argo CD Access Token
+      #   id: get-token
+      #   run: |
+      #     RESPONSE=$(curl -k -sSf -X POST "${{ secrets.ARGO_CD_SERVER }}/api/v1/session" \
+      #       -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
+      #       -H 'Content-Type: application/json')
+      #     echo "TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
+      #   env:
+      #     ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
+      #     ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
+
+      # - name: Get Application Details via API
+      #   run: |
+      #     RESPONSE=$(curl -k -sSf -H "Authorization: Bearer $TOKEN" \
+      #          "${{ secrets.ARGO_CD_SERVER }}/api/v1/applications/${{ github.event.inputs.appName }}")
+      #     echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
 
