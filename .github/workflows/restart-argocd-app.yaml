@@ -139,4 +139,57 @@ jobs:
                "https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}")
           echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
           echo $RESPONSE
+            
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Reporting the restarted application back to port ..."
+    
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(steps.synced_application.outputs.response).metadata.uid }}"
+          title: "${{ fromJson(steps.synced_application.outputs.response).metadata.name }}"
+          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          properties: |-
+            {
+              "namespace": "${{ fromJson(steps.get_app_details.outputs.response).metadata.namespace }}",
+              "gitRepo": "${{ fromJson(steps.get_app_details.outputs.response).spec.source.repoURL }}",
+              "gitPath": "${{ fromJson(steps.get_app_details.outputs.response).spec.source.path }}",
+              "destinationServer": "${{ fromJson(steps.get_app_details.outputs.response).spec.destination.server }}",
+              "syncStatus": "${{ fromJson(steps.get_app_details.outputs.response).status.sync.status }}",
+              "healthStatus": "${{ fromJson(steps.get_app_details.outputs.response).status.health.status }}",
+              "createdAt": "${{ fromJson(steps.get_app_details.outputs.response).metadata.creationTimestamp}}"
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+
+      - name: Log If Upsetting Entity Fails 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to upsert restarted argocd application entity to port ..."
+          
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
 
