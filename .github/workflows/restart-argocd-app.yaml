@@ -172,7 +172,7 @@ jobs:
       - name: Fetch Application Details
         id: app_details
         run: |
-          argocd app get ${{ github.event.inputs.appName }} --output json
+          argocd app get ${{ inputs.application_name }} --output json
 
       - name: Report Application Status
         run: |
