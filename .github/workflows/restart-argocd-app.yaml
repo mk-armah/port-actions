@@ -114,31 +114,70 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Successfully restarted Deployment ✅"
 
-      - name: Obtain Argo CD Access Token
-        run: |
-          RESPONSE=$(curl -k -sSf -X POST "https://${{inputs.application_server}}/api/v1/session" \
-            -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
-            -H 'Content-Type: application/json')
-          echo "ARGO_CD_TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
-        env:
-          ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
-          ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
-
-      - name: Get Application Details via API
-        id: get_app_details
-        uses: fjogeleit/http-request-action@v1
+      - name: Report Wait for Application Stability
+        uses: port-labs/port-github-action@v1
         with:
-          url: 'https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}'
-          method: 'GET'
-          customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer ${{env.ARGO_CD_TOKEN}}" }'
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Waiting for application to stabilize ... "
 
-      - name: Get Application Details via API CURL
+      - name: Wait for Application Stability
         run: |
-          echo ${{env.ARGO_CD_TOKEN}}
-          RESPONSE=$(curl -k -sSf -H "Authorization: Bearer ${{env.ARGO_CD_TOKEN}}" \
-               "https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}")
-          echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
-          echo $RESPONSE
+          argocd app wait ${{ github.event.inputs.appName }} --sync
+          argocd app wait ${{ github.event.inputs.appName }} --health
+        timeout-minutes: 60
+
+      - name: Report Healthy State
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Application reach a synchronized state and is Healthy ✅"
+
+      - name: Report Application Instability
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Application failed to stabilize ❌"
+          
+      # - name: Obtain Argo CD Access Token
+      #   run: |
+      #     RESPONSE=$(curl -k -sSf -X POST "https://${{inputs.application_server}}/api/v1/session" \
+      #       -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
+      #       -H 'Content-Type: application/json')
+      #     echo "ARGO_CD_TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
+      #   env:
+      #     ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
+      #     ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
+
+      # - name: Get Application Details via API
+      #   id: get_app_details
+      #   uses: fjogeleit/http-request-action@v1
+      #   with:
+      #     url: 'https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}'
+      #     method: 'GET'
+      #     customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer ${{env.ARGO_CD_TOKEN}}" }'
+
+      - name: Fetch Application Details
+        id: app_details
+        run: |
+          argocd app get ${{ github.event.inputs.appName }} --output json
+
+      - name: Report Application Status
+        run: |
+          echo "Application Status:"
+          echo "${{ steps.app_details.outputs.result }}"
             
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -153,18 +192,18 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.get_app_details.outputs.response).metadata.uid }}"
-          title: "${{ fromJson(steps.get_app_details.outputs.response).metadata.name }}"
+          identifier: "${{ fromJson(steps.app_details.outputs.response).metadata.uid }}"
+          title: "${{ fromJson(steps.app_details.outputs.response).metadata.name }}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |-
             {
-              "namespace": "${{ fromJson(steps.get_app_details.outputs.response).metadata.namespace }}",
-              "gitRepo": "${{ fromJson(steps.get_app_details.outputs.response).spec.source.repoURL }}",
-              "gitPath": "${{ fromJson(steps.get_app_details.outputs.response).spec.source.path }}",
-              "destinationServer": "${{ fromJson(steps.get_app_details.outputs.response).spec.destination.server }}",
-              "syncStatus": "${{ fromJson(steps.get_app_details.outputs.response).status.sync.status }}",
-              "healthStatus": "${{ fromJson(steps.get_app_details.outputs.response).status.health.status }}",
-              "createdAt": "${{ fromJson(steps.get_app_details.outputs.response).metadata.creationTimestamp}}"
+              "namespace": "${{ fromJson(steps.app_details.outputs.response).metadata.namespace }}",
+              "gitRepo": "${{ fromJson(steps.app_details.outputs.response).spec.source.repoURL }}",
+              "gitPath": "${{ fromJson(steps.app_details.outputs.response).spec.source.path }}",
+              "destinationServer": "${{ fromJson(steps.app_details.outputs.response).spec.destination.server }}",
+              "syncStatus": "${{ fromJson(steps.app_details.outputs.response).status.sync.status }}",
+              "healthStatus": "${{ fromJson(steps.app_details.outputs.response).status.health.status }}",
+              "createdAt": "${{ fromJson(steps.app_details.outputs.response).metadata.creationTimestamp}}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
@@ -192,4 +231,3 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Entity upserting was successful ✅"
-
