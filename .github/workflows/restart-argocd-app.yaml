@@ -104,7 +104,7 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Failed to restart Argo CD Deployment ❌"
 
-      - name: Report Successful Login to Argo CD
+      - name: Report Successful Restarting of Argo CD Deployment
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: Obtain Argo CD Access Token
         run: |
-          RESPONSE=$(curl -k -sSf -X POST "${{ inputs.application_server }}/api/v1/session" \
+          RESPONSE=$(curl -k -sSf -X POST "https://${{inputs.application_server}}/api/v1/session" \
             -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
             -H 'Content-Type: application/json')
           echo "ARGO_CD_TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
@@ -128,14 +128,14 @@ jobs:
         id: get_app_details
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ inputs.application_server }}/api/v1/applications/${{ github.event.inputs.appName }}'
+          url: 'https://${{inputs.application_server}}/api/v1/applications/${{ github.event.inputs.appName }}'
           method: 'GET'
           customHeaders: '{ "Content-Type": "application/json"}'
 
       - name: Get Application Details via API CURL
         run: |
           RESPONSE=$(curl -k -sSf -H "Authorization: Bearer $TOKEN" \
-               "${{ inputs.application_server }}/api/v1/applications/${{ github.event.inputs.appName }}")
+               "https://${{inputs.application_server}}/api/v1/applications/${{ github.event.inputs.appName }}")
           echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
           echo $RESPONSE
 
