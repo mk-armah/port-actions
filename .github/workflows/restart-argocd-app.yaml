@@ -130,7 +130,7 @@ jobs:
         with:
           url: 'https://${{inputs.application_server}}/api/v1/applications/${{ github.event.inputs.appName }}'
           method: 'GET'
-          customHeaders: '{ "Content-Type": "application/json"}'
+          customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer $TOKEN" }'
 
       - name: Get Application Details via API CURL
         run: |
