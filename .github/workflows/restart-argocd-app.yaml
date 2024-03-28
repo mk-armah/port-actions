@@ -130,12 +130,12 @@ jobs:
         with:
           url: 'https://${{inputs.application_server}}/api/v1/applications/${{ github.event.inputs.appName }}'
           method: 'GET'
-          customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer $ARGO_CD_TOKEN" }'
+          customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer ${{env.ARGO_CD_TOKEN"}} }'
 
       - name: Get Application Details via API CURL
         run: |
-          RESPONSE=$(curl -k -sSf -H "Authorization: Bearer $ARGO_CD_TOKEN" \
-               "https://${{inputs.application_server}}/api/v1/applications/${{ github.event.inputs.appName }}")
+          RESPONSE=$(curl -k -sSf -H "Authorization: Bearer ${{env.ARGO_CD_TOKEN"}}" \
+               "https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}")
           echo "APP_DETAILS=$(echo $RESPONSE)" >> $GITHUB_ENV
           echo $RESPONSE
 
