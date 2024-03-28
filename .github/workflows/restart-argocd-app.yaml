@@ -128,7 +128,7 @@ jobs:
         id: get_app_details
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ .ARGO_CD_SERVER }}/api/v1/applications/${{ github.event.inputs.appName }}'
+          url: '${{ inputs.application_server }}/api/v1/applications/${{ github.event.inputs.appName }}'
           method: 'GET'
           customHeaders: '{ "Content-Type": "application/json"}'
 
