@@ -153,8 +153,8 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.synced_application.outputs.response).metadata.uid }}"
-          title: "${{ fromJson(steps.synced_application.outputs.response).metadata.name }}"
+          identifier: "${{ fromJson(steps.get_app_details.outputs.response).metadata.uid }}"
+          title: "${{ fromJson(steps.get_app_details.outputs.response).metadata.name }}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |-
             {
