@@ -39,7 +39,7 @@ jobs:
         # with:
           # repository: ${{ matrix.include.repository }}
           
-      # - name: Transform Workflow Inputs
+      # - name: Transform Workflow Parameters
       #   run: |
       #     days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
       #     repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
@@ -53,6 +53,10 @@ jobs:
       #     echo "TITLE=$title" >> $GITHUB_ENV
       #   shell: bash
 
+      - name: Calculate Timeframe in Days
+        id: calc-timeframe
+        run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.include.timeframe }} * 7 ))" >> $GITHUB_ENV
+        
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -65,7 +69,6 @@ jobs:
           
       - name: Compute PR Metrics
         env:
-          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.include.repository }}
         run: python src/calculate_pr_metrics.py
@@ -73,7 +76,6 @@ jobs:
       - name: Deployment Frequency
         id: deployment_frequency
         env:
-          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
           WORKFLOWS: ${{ matrix.include.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.include.repository }}
@@ -82,7 +84,6 @@ jobs:
       - name: Lead Time For Changes
         id: lead_time_for_changes
         env:
-          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
           WORKFLOWS: ${{ matrix.include.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.include.repository }}
