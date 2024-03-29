@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytz  # Make sure to install pytz if you haven't: pip install pytz
 import os
 import base64
 import json
@@ -50,24 +49,6 @@ class DeploymentFrequency:
                     workflow_runs_list.append(run)
                     unique_dates.add(run_date.date())
         return workflow_runs_list, unique_dates
-                
-    # def fetch_workflow_runs(self):
-    #     workflow_runs_list = []
-    #     unique_dates = set()
-    #     now_utc = datetime.datetime.now(pytz.utc)
-
-    #     for workflow_name in self.workflows:
-    #         workflows = self.repo.get_workflows()
-    #         for workflow in workflows:
-    #             if workflow.name == workflow_name:
-    #                 runs = workflow.get_runs(branch=self.branch)
-    #                 for run in runs:
-    #                     run_date = run.created_at.replace(tzinfo=pytz.utc)
-    #                     if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
-    #                         workflow_runs_list.append(run)
-    #                         unique_dates.add(run_date.date())
-
-    #     return workflow_runs_list, unique_dates
 
     def calculate_deployments_per_day(self, workflow_runs_list):
         if self.number_of_days > 0:
@@ -113,7 +94,7 @@ class DeploymentFrequency:
 
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
-    token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
+    token = os.getenv('GITHUB_TOKEN')
     workflows = os.getenv('WORKFLOWS')
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
