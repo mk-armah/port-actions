@@ -3,6 +3,7 @@ import datetime
 import pytz  # Make sure to install pytz if you haven't: pip install pytz
 import os
 import json
+import requests
 
 class DeploymentFrequency:
     def __init__(self, owner_repo, workflows, branch, number_of_days, pat_token=""):
@@ -11,27 +12,60 @@ class DeploymentFrequency:
         self.branch = branch
         self.number_of_days = number_of_days
         self.pat_token = pat_token
-        self.github = Github(pat_token) if pat_token else Github()
         self.owner, self.repo_name = owner_repo.split('/')
-        self.repo = self.github.get_repo(f"{self.owner}/{self.repo_name}")
+        self.auth_header = self.get_auth_header(self.pat_token, actions_token, app_id, app_installation_id, app_private_key)
 
-    def fetch_workflow_runs(self):
+    @property
+    def get_auth_header(self):
+        encoded_credentials = base64.b64encode(f":{self.pat_token}".encode()).decode()
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+        return headers
+    
+    def get_workflows(owner, repo, headers):
+        url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+        response = requests.get(url, headers=self.auth_headers)
+        if response.status_code == 404:
+            print("Repo is not found or you do not have access")
+            exit()
+        return response.json()
+
+    def fetch_workflow_runs(workflows_response, workflow_names, owner, repo, branch, number_of_days, headers):
+        if workflow_names:
+            workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+        else:
+            workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
+            print(f"Found {len(workflows)} workflows in Repo")
         workflow_runs_list = []
-        unique_dates = set()
-        now_utc = datetime.datetime.now(pytz.utc)
-
-        for workflow_name in self.workflows:
-            workflows = self.repo.get_workflows()
-            for workflow in workflows:
-                if workflow.name == workflow_name:
-                    runs = workflow.get_runs(branch=self.branch)
-                    for run in runs:
-                        run_date = run.created_at.replace(tzinfo=pytz.utc)
-                        if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
-                            workflow_runs_list.append(run)
-                            unique_dates.add(run_date.date())
-
+        unique_dates = set()   
+        for workflow_id in workflow_ids:
+            runs_url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+            runs_response = requests.get(runs_url, headers=headers).json()
+            for run in runs_response['workflow_runs']:
+                if run['head_branch'] == branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=number_of_days):
+                    workflow_runs_list.append(run)
+                    unique_dates.add(run_date.date())
         return workflow_runs_list, unique_dates
+                
+    # def fetch_workflow_runs(self):
+    #     workflow_runs_list = []
+    #     unique_dates = set()
+    #     now_utc = datetime.datetime.now(pytz.utc)
+
+    #     for workflow_name in self.workflows:
+    #         workflows = self.repo.get_workflows()
+    #         for workflow in workflows:
+    #             if workflow.name == workflow_name:
+    #                 runs = workflow.get_runs(branch=self.branch)
+    #                 for run in runs:
+    #                     run_date = run.created_at.replace(tzinfo=pytz.utc)
+    #                     if run_date > now_utc - datetime.timedelta(days=self.number_of_days):
+    #                         workflow_runs_list.append(run)
+    #                         unique_dates.add(run_date.date())
+
+    #     return workflow_runs_list, unique_dates
 
     def calculate_deployments_per_day(self, workflow_runs_list):
         if self.number_of_days > 0:
