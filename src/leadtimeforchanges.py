@@ -26,10 +26,11 @@ def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="
     return evaluate_lead_time(pr_processing_result, workflow_processing_result, number_of_days)
 
 def get_auth_header(pat_token):
-    headers = {}
-    if pat_token:
-        encoded_credentials = base64.b64encode(f":{pat_token}".encode()).decode()
-        headers['Authorization'] = f"Basic {encoded_credentials}"
+    encoded_credentials = base64.b64encode(f":{pat_token}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {encoded_credentials}",
+        "Content-Type": "application/json",
+    }
     return headers
 
 def get_pull_requests(owner, repo, branch, headers):
