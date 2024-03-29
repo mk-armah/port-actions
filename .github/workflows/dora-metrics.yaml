@@ -200,7 +200,7 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(env.metrics).id }}"
+          identifier: "12345"
           title: ${{ env.TITLE }}
           blueprint: doraMetrics
           properties: |-
