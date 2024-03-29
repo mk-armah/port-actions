@@ -25,7 +25,7 @@ class DeploymentFrequency:
         return headers
     
     def get_workflows(self):
-        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
+        url = f"https://api.github.com/repos/{self.owner}/{self.repo_name}/actions/workflows"
         response = requests.get(url, headers=self.auth_headers)
         if response.status_code == 404:
             print("Repo is not found or you do not have access")
