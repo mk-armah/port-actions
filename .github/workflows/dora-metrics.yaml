@@ -20,18 +20,19 @@ jobs:
           CONFIG_CONTENT=$(cat src/dora-config.json)
           echo "::set-output name=config::$CONFIG_CONTENT"
 
-      - name: Read Config and Set Matrix using Environment Files
+      - name: Read Config and Output Matrix
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_ENV
+          echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
   compute-dora-metrics:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(env.matrix)}}
+      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
