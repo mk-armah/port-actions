@@ -17,7 +17,7 @@ jobs:
       - name: Read Config
         id: read-config
         run: |
-          CONFIG_CONTENT=$(cat dora-config.json)
+          CONFIG_CONTENT=$(cat src/dora-config.json)
           echo "::set-output name=config::$CONFIG_CONTENT"
 
       - name: Set Job Matrix
