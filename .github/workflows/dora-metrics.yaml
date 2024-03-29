@@ -65,27 +65,27 @@ jobs:
           
       - name: Compute PR Metrics
         env:
-          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
-          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ="${{ matrix.include.repository }}"
+          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
+          REPOSITORY: ${{ matrix.include.repository }}
         run: python src/calculate_pr_metrics.py
-          
+
       - name: Deployment Frequency
-        id: deployment_fequency
+        id: deployment_frequency
         env:
-          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
-          WORKFLOWS: "${{ matrix.include.workflows }}"
-          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ="${{ matrix.include.repository }}"
+          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
+          WORKFLOWS: ${{ matrix.include.workflows }}
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
+          REPOSITORY: ${{ matrix.include.repository }}
         run: python src/deploymentfrequency.py
-          
+
       - name: Lead Time For Changes
         id: lead_time_for_changes
         env:
-          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
-          WORKFLOWS: "${{ matrix.include.workflows }}"
-          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ="${{ matrix.include.repository }}"
+          TIMEFRAME_IN_DAYS: ${{ (matrix.include.timeframe * 7) }}
+          WORKFLOWS: ${{ matrix.include.workflows }}
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
+          REPOSITORY: ${{ matrix.include.repository }}
         run: python src/leadtimeforchanges.py
 
       - name: UPSERT Entity
