@@ -24,27 +24,28 @@ class DeploymentFrequency:
         }
         return headers
     
-    def get_workflows(owner, repo, headers):
-        url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+    def get_workflows(self):
+        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
         response = requests.get(url, headers=self.auth_headers)
         if response.status_code == 404:
             print("Repo is not found or you do not have access")
             exit()
         return response.json()
 
-    def fetch_workflow_runs(workflows_response, workflow_names, owner, repo, branch, number_of_days, headers):
-        if workflow_names:
-            workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+    def fetch_workflow_runs(self):
+        workflows_response = self.get_workflows()
+        if self.workflow_names:
+            workflow_ids = [workflow['id'] for workflow in workflows_response['workflows'] if workfow['name'] in workflow_names]
         else:
             workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
             print(f"Found {len(workflows)} workflows in Repo")
         workflow_runs_list = []
-        unique_dates = set()   
+        unique_dates = set()
         for workflow_id in workflow_ids:
-            runs_url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
-            runs_response = requests.get(runs_url, headers=headers).json()
+            runs_url = f"https://api.github.com/repos/{owner}/{self.repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+            runs_response = requests.get(runs_url, headers=self.auth_header).json()
             for run in runs_response['workflow_runs']:
-                if run['head_branch'] == branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=number_of_days):
+                if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
                     workflow_runs_list.append(run)
                     unique_dates.add(run_date.date())
         return workflow_runs_list, unique_dates
