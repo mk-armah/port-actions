@@ -20,11 +20,12 @@ jobs:
           CONFIG_CONTENT=$(cat src/dora-config.json)
           echo "::set-output name=config::$CONFIG_CONTENT"
 
-      - name: Set Job Matrix
+      - name: Read Config and Set Matrix
         id: set-matrix
         run: |
-          MATRIX_JSON=$(echo '${{ steps.read-config.outputs.config }}' | jq -c '. | map({repository: .repository, timeframe: .timeframe, workflows: .workflows | join(",")})')
-          echo "::set-output name=matrix::{\"include\":$MATRIX_JSON}"
+          CONFIG_JSON=$(jq -c . dora-config.json)
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
+          echo "::set-output name=matrix::$MATRIX_JSON"
 
   compute-dora-metrics:
     needs: setup
