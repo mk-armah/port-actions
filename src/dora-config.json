@@ -1,0 +1,12 @@
+[
+  {
+    "repository": "https://github.com/port-labs/ocean",
+    "timeframe": 4,
+    "workflows": ["Sonarcloud scan framework"]
+  },
+  {
+    "repository": "org/repo2",
+    "timeframe": 2,
+    "workflows": ["workflow3.yml"]
+  }
+]
