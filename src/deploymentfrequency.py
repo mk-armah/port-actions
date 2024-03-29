@@ -42,7 +42,7 @@ class DeploymentFrequency:
         workflow_runs_list = []
         unique_dates = set()
         for workflow_id in workflow_ids:
-            runs_url = f"https://api.github.com/repos/{owner}/{self.repo_name}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+            runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo_name}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
             runs_response = requests.get(runs_url, headers=self.auth_header).json()
             for run in runs_response['workflow_runs']:
                 if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
