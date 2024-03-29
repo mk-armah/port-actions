@@ -4,7 +4,7 @@ import base64
 import json
 import os
 
-def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token="", actions_token="", app_id="", app_installation_id="", app_private_key=""):
+def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
     owner, repo = owner_repo.split('/')
     workflows_array = workflows.split(',')
     if commit_counting_method == "":
@@ -15,7 +15,7 @@ def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="
     print(f"Branch: {branch}")
     print(f"Commit counting method '{commit_counting_method}' being used")
 
-    auth_header = get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key)
+    auth_header = get_auth_header(pat_token)
 
     prs_response = get_pull_requests(owner, repo, branch, auth_header)
     pr_processing_result = process_pull_requests(prs_response, number_of_days, commit_counting_method, owner, repo, auth_header)
@@ -25,14 +25,11 @@ def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="
 
     return evaluate_lead_time(pr_processing_result, workflow_processing_result, number_of_days)
 
-def get_auth_header(pat_token, actions_token, app_id, app_installation_id, app_private_key):
+def get_auth_header(pat_token):
     headers = {}
     if pat_token:
         encoded_credentials = base64.b64encode(f":{pat_token}".encode()).decode()
         headers['Authorization'] = f"Basic {encoded_credentials}"
-    elif actions_token:
-        headers['Authorization'] = f"Bearer {actions_token}"
-    # Add more authentication methods as needed
     return headers
 
 def get_pull_requests(owner, repo, branch, headers):
