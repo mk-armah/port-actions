@@ -72,7 +72,11 @@ def get_workflows(owner, repo, headers):
     return response.json()
 
 def process_workflows(workflows_response, workflow_names, owner, repo, branch, number_of_days, headers):
-    workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+    if workflow_names:
+        workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+    else:
+        workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
+        print(f"Found {len(workflows)} workflows in Repo")
     total_workflow_hours = 0
     workflow_counter = 0
     for workflow_id in workflow_ids:
