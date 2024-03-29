@@ -34,7 +34,7 @@ class DeploymentFrequency:
 
     def fetch_workflow_runs(self):
         workflows_response = self.get_workflows()
-        if self.workflow:
+        if self.workflows:
             workflow_ids = [workflow['id'] for workflow in workflows_response['workflows'] if workfow['name'] in workflow_names]
         else:
             workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
