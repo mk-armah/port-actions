@@ -1,6 +1,7 @@
 import datetime
 import pytz  # Make sure to install pytz if you haven't: pip install pytz
 import os
+import base64
 import json
 import requests
 
