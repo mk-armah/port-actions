@@ -2,11 +2,11 @@
   {
     "repository": "port-labs/ocean",
     "timeframe": 4,
-    "workflows": ["sonarcloud-framework.yml"]
+    "workflows": ["sonarcloud-framework.yml","workflow3.yml"]
   },
   {
     "repository": "org/repo2",
     "timeframe": 2,
-    "workflows": ["workflow3.yml"]
+    "workflows": ["workflow3.yml","workflow3.yml"]
   }
 ]
