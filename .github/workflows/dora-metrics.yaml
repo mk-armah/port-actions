@@ -20,24 +20,24 @@ jobs:
           CONFIG_CONTENT=$(cat src/dora-config.json)
           echo "::set-output name=config::$CONFIG_CONTENT"
 
-      - name: Read Config and Set Matrix
+      - name: Read Config and Set Matrix using Environment Files
         id: set-matrix
         run: |
-          CONFIG_JSON=$(jq -c . src/dora-config.json)
+          CONFIG_JSON=$(jq -c . dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
-          echo "::set-output name=matrix::$MATRIX_JSON"
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_ENV
 
   compute-dora-metrics:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
+      matrix: ${{fromJson(env.matrix)}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          repository: ${{ matrix.repository }}
-        
+        # with:
+          # repository: ${{ matrix.include.repository }}
+          
       # - name: Transform Workflow Inputs
       #   run: |
       #     days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
@@ -64,26 +64,27 @@ jobs:
           
       - name: Compute PR Metrics
         env:
-          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-          REPOSITORY: ${{ env.REPOSITORY }}
+          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
+          REPOSITORY: ="${{ matrix.include.repository }}"
         run: python src/calculate_pr_metrics.py
           
       - name: Deployment Frequency
         id: deployment_fequency
         env:
-          TIMEFRAME_IN_DAYS: $(( ${{ matrix.timeframe }} * 7 ))
-          WORKFLOWS: "${{ matrix.workflows }}"
+          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
+          WORKFLOWS: "${{ matrix.include.workflows }}"
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ="${{ matrix.repository }}"
+          REPOSITORY: ="${{ matrix.include.repository }}"
         run: python src/deploymentfrequency.py
           
       - name: Lead Time For Changes
         id: lead_time_for_changes
         env:
-          TIMEFRAME_IN_DAYS: $(( ${{ matrix.timeframe }} * 7 ))
-          WORKFLOWS: "${{ matrix.workflows }}"
+          TIMEFRAME_IN_DAYS: $(( ${{ matrix.include.timeframe }} * 7 ))
+          WORKFLOWS: "${{ matrix.include.workflows }}"
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }} 
-          REPOSITORY: ="${{ matrix.repository }}"
+          REPOSITORY: ="${{ matrix.include.repository }}"
         run: python src/leadtimeforchanges.py
 
       - name: UPSERT Entity
