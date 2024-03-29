@@ -13,7 +13,7 @@ class DeploymentFrequency:
         self.number_of_days = number_of_days
         self.pat_token = pat_token
         self.owner, self.repo_name = owner_repo.split('/')
-        self.auth_header = self.get_auth_header(self.pat_token, actions_token, app_id, app_installation_id, app_private_key)
+        self.auth_header = self.get_auth_header
 
     @property
     def get_auth_header(self):
