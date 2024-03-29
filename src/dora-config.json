@@ -1,6 +1,6 @@
 [
   {
-    "repository": "https://github.com/port-labs/ocean",
+    "repository": "port-labs/ocean",
     "timeframe": 4,
     "workflows": ["sonarcloud-framework.yml"]
   },
