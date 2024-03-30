@@ -8,9 +8,9 @@
   },
   {
     "owner": "port-labs",
-    "repository": "ocean",
+    "repository": "port-docs",
     "timeframe": 2,
     "branch": "main",
-    "workflows": ["Sonarcloud scan integrations"]
+    "workflows": ["Verify Docs Build"]
   }
 ]
