@@ -2,7 +2,7 @@
   {
     "owner": "port-labs",
     "repository": "ocean",
-    "branch": "main"
+    "branch": "main",
     "timeframe": 4,
     "workflows": ["Sonarcloud scan framework"]
   },
@@ -10,7 +10,7 @@
     "owner": "port-labs",
     "repository": "ocean",
     "timeframe": 2,
-    "branch":"main"
+    "branch": "main",
     "workflows": ["Sonarcloud scan integrations"]
   }
 ]
