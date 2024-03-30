@@ -68,7 +68,7 @@ def get_workflows(owner, repo, headers):
 
 def process_workflows(workflows_response, workflow_names, owner, repo, branch, number_of_days, headers):
     if workflow_names:
-        workflow_ids = [wf['id'] for wf in workflows_response['workflows'] if wf['name'] in workflow_names]
+        workflow_ids = [workflow['id'] for workflow in workflows_response['workflows'] if workflow['name'] in workflow_names]
     else:
         workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
         print(f"Found {len(workflows)} workflows in Repo")
@@ -154,11 +154,10 @@ if __name__ == "__main__":
     owner = os.getenv('OWNER')
     repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
-    workflows = os.getenv('WORKFLOWS')
-    branch = 'main'
-    time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
-    number_of_days = 30 if not time_frame else time_frame
+    workflows = os.getenv('WORKFLOWS',"[]")
+    branch = os.getenv('BRANCH',"main")
+    time_frame = int(os.getenv('TIMEFRAME_IN_DAYS',30))
     
-    report = main(owner,repo, workflows, branch, number_of_days,pat_token=token)
+    report = main(owner,repo, workflows, branch, time_frame, pat_token=token)
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"lead_time_for_changes_report={report}\n")
