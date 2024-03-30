@@ -6,9 +6,9 @@ import json
 
 
 class RepositoryMetrics:
-    def __init__(self, repo_name, time_frame):
+    def __init__(self, owner, repo, time_frame):
         self.github_client = Github(os.getenv("GITHUB_TOKEN"))
-        self.repo_name = repo_name
+        self.repo_name = f"{owner}/{repo}"
         self.time_frame = int(time_frame)
         self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(
             days=self.time_frame
@@ -142,12 +142,13 @@ class RepositoryMetrics:
 
 
 def main():
-    repo_name = os.getenv("REPOSITORY")
+    owner = os.getenv("OWNER")
+    repository = os.getenv("REPOSITORY")
     time_frame = os.getenv("TIMEFRAME_IN_DAYS")  # os.getenv('TIME_FRAME')
     print("Repository Name:", repo_name)
     print("TimeFrame (in weeks):", time_frame)
 
-    repo_metrics = RepositoryMetrics(repo_name, time_frame)
+    repo_metrics = RepositoryMetrics(owner,repository, time_frame)
     metrics = repo_metrics.calculate_pr_metrics()
 
     metrics_json = json.dumps(metrics, default=str)  # Ensure proper serialization
