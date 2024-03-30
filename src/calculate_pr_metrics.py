@@ -145,7 +145,7 @@ def main():
     owner = os.getenv("OWNER")
     repository = os.getenv("REPOSITORY")
     time_frame = os.getenv("TIMEFRAME_IN_DAYS")  # os.getenv('TIME_FRAME')
-    print("Repository Name:", repo_name)
+    print("Repository Name:", f"{owner}/{repo}")
     print("TimeFrame (in weeks):", time_frame)
 
     repo_metrics = RepositoryMetrics(owner,repository, time_frame)
