@@ -6,7 +6,6 @@ import os
 
 def main(owner,repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
     workflows_array = json.loads(workflows)
-    commit_counting_method = "last" if commit_counting_method not in ["last", "first"] else commit_counting_method 
     print(f"Owner/Repo: {owner}/{repo}")
     print(f"Number of days: {number_of_days}")
     print(f"Workflows: {workflows_array}")
@@ -160,6 +159,6 @@ if __name__ == "__main__":
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
     
-    report = main(owner_repo, workflows, branch, number_of_days)
+    report = main(owner,repo, workflows, branch, number_of_days,pat_token=token)
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"lead_time_for_changes_report={report}\n")
