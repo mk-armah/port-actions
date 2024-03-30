@@ -83,7 +83,7 @@ class LeadTimeForChanges:
         else:
             return self.workflows
     
-    def process_workflows(self,workflows_response):
+    def process_workflows(self):
         workflows_ids = self.get_workflows()
         total_workflow_hours = 0
         workflow_counter = 0
