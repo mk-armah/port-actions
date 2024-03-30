@@ -23,6 +23,11 @@ jobs:
           CONFIG_JSON=$(jq -c . src/dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+          
+      - name: Debug Matrix Output
+        run: |
+          echo "Setup Job Matrix Output:"
+          echo "${{ steps.set-matrix.outputs.matrix }}"
 
   compute-dora-metrics:
     needs: setup
