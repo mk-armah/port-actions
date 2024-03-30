@@ -90,7 +90,7 @@ jobs:
 
       - name: Lead Time For Changes
         env:
-          WORKFLOWS: ${{ matrix.workflows }}
+          WORKFLOWS: ${{ toJson(matrix.workflows) }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.repository }}
         run: python src/leadtimeforchanges.py
