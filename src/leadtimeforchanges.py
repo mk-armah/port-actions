@@ -1,13 +1,14 @@
-import requests
+import httpx
 from datetime import datetime, timedelta
 import base64
 import json
 import os
+from loguru import logger
 
-PAGE_SIZE=100
+PAGE_SIZE = 100
 
 class LeadTimeForChanges:
-    def __init__(self,owner,repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
+    def __init__(self, owner, repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
         self.owner = owner
         self.repo = repo
         self.workflows = json.loads(workflows)
@@ -20,11 +21,11 @@ class LeadTimeForChanges:
 
     def __call__(self):
         
-        print(f"Owner/Repo: {self.owner}/{self.repo}")
-        print(f"Number of days: {self.number_of_days}")
-        print(f"Workflows: {self.workflows}")
-        print(f"Branch: {self.branch}")
-        print(f"Commit counting method '{self.commit_counting_method}' being used")
+        logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
+        logger.info(f"Number of days: {self.number_of_days}")
+        logger.info(f"Workflows: {self.workflows}")
+        logger.info(f"Branch: {self.branch}")
+        logger.info(f"Commit counting method '{self.commit_counting_method}' being used")
         
         pr_result = self.process_pull_requests()
         workflow_result = self.process_workflows()
@@ -40,24 +41,33 @@ class LeadTimeForChanges:
         }
         return headers
     
-    def get_pull_requests(self):
-        url = f"{self.github_url}/pulls?state=all&head={self.branch}&per_page={PAGE_SIZE}&state=closed"
-        response = requests.get(url, headers=self.auth_header)
-        if response.status_code == 404:
-            print("Repo is not found or you do not have access")
-            exit()
-        return response.json()
+    async def send_api_requests(self, url, params=None):
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, headers=self.auth_header, params=params)
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                logger.error(f"HTTP error occurred: {e.response.status_code}")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
+
+    async def get_pull_requests(self):
+        url = f"{self.github_url}/pulls"
+        params = {"state": "closed", "head": self.branch, "per_page": PAGE_SIZE}
+        return await self.send_api_requests(url, params=params)
     
-    def process_pull_requests(self):
-        prs = self.get_pull_requests()
+    async def process_pull_requests(self):
+        prs = await self.get_pull_requests()
         pr_counter = 0
         total_pr_hours = 0
         for pr in prs:
             merged_at = pr.get('merged_at')
             if merged_at and datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
                 pr_counter += 1
-                commits_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr['number']}/commits?per_page={PAGE_SIZE}"
-                commits_response = requests.get(commits_url, headers=self.auth_header).json()
+                commits_url = f"{self.github_url}/pulls/{pr['number']}/commits"
+                params = {"per_page": PAGE_SIZE}
+                commits_response = await self.send_api_requests(commits_url, params=params)
                 if commits_response:
                     if self.commit_counting_method == "last":
                         start_date = commits_response[-1]['commit']['committer']['date']
@@ -69,29 +79,27 @@ class LeadTimeForChanges:
                     total_pr_hours += duration.total_seconds() / 3600
         return pr_counter, total_pr_hours
     
-    def get_workflows(self):
+    async def get_workflows(self):
         if not(self.workflows):
             workflow_url = f"{self.github_url}/workflows"
-            response = requests.get(workflow_url, headers=self.auth_header)
-            if response.status_code == 404:
-                print("Repo is not found or you do not have access")
-                exit()
-            workflows = response.json()
-            workflow_ids = [workflow['id'] for workflow in workflows['workflows']]
-            print(f"Found {len(workflow_ids)} workflows in Repo")
-            return workflow_ids
+            workflows = await self.send_api_requests(workflow_url)
+            if workflows:
+                workflow_ids = [workflow['id'] for workflow in workflows['workflows']]
+                logger.info(f"Found {len(workflow_ids)} workflows in Repo")
+                return workflow_ids
         else:
             return self.workflows
     
-    def process_workflows(self):
-        workflow_ids = self.get_workflows()
+    async def process_workflows(self):
+        workflow_ids = await self.get_workflows()
         total_workflow_hours = 0
         workflow_counter = 0
         for workflow_id in workflow_ids:
-            runs_url = f"{self.github_url}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
-            runs_response = requests.get(runs_url, headers=self.auth_header).json()
+            runs_url = f"{self.github_url}/actions/workflows/{workflow_id}/runs"
+            params = {"per_page": 100, "status": "completed"}
+            runs_response = await self.send_api_requests(runs_url, params=params)
             for run in runs_response['workflow_runs']:
-                if run['head_branch'] == branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
+                if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
                     workflow_counter += 1
                     start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
                     end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
@@ -149,9 +157,9 @@ class LeadTimeForChanges:
         pr_average = total_pr_hours / pr_counter
         workflow_average = total_workflow_hours / workflow_counter
         lead_time_for_changes_in_hours = pr_average + workflow_average
-        print(f"PR average time duration: {pr_average} hours")
-        print(f"Workflow average time duration: {workflow_average} hours")
-        print(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
+        logger.info(f"PR average time duration: {pr_average} hours")
+        logger.info(f"Workflow average time duration: {workflow_average} hours")
+        logger.info(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
     
         report = {
                 "pr_average_time_duration" : round(pr_average,2),
