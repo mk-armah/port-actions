@@ -49,7 +49,7 @@ class LeadTimeForChanges:
         return response.json()
     
     def process_pull_requests(self):
-        prs = get_pull_requests()
+        prs = self.get_pull_requests()
         pr_counter = 0
         total_pr_hours = 0
         for pr in prs:
