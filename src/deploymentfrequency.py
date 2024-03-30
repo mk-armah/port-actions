@@ -7,7 +7,7 @@ import requests
 class DeploymentFrequency:
     def __init__(self, owner_repo, workflows, branch, number_of_days, pat_token=""):
         self.owner_repo = owner_repo
-        self.workflows = workflows.split(',')
+        self.workflows = workflows #.split(',')
         self.branch = branch
         self.number_of_days = number_of_days
         self.pat_token = pat_token
