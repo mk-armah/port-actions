@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 2 * * 1'  # At 02:00 on Monday
   workflow_dispatch:
-      
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -13,19 +13,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-      - name: Read Config
-        id: read-config
-        run: |
-          CONFIG_CONTENT=$(cat src/dora-config.json)
-          echo "::set-output name=config::$CONFIG_CONTENT"
+
+      - name: Install jq
+        run: sudo apt-get install jq
 
       - name: Read Config and Output Matrix
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
-          echo "matrix=$MATRIX_JSON" >> $GITHUB_ENV
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
   compute-dora-metrics:
@@ -39,25 +35,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{ matrix.include.repository }}
-          
-      # - name: Transform Workflow Parameters
-      #   run: |
-      #     days=$(( ${{ github.event.inputs.timeframe }} * 7 ))
-      #     repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
-      #     # repo_name="${repository_path##*/}"
-      #     cleaned_name=$(echo "${repository_path##*/}" | tr -c '[:alnum:]' ' ')
-      #     title=$(echo "$cleaned_name" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-
-      #     # export to github enviroment vars
-      #     echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
-      #     echo "REPOSITORY=$repository_path" >> $GITHUB_ENV
-      #     echo "TITLE=$title" >> $GITHUB_ENV
-      #   shell: bash
 
       - name: Calculate Timeframe in Days
-        id: calc-timeframe
-        run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.include.timeframe }} * 7 ))" >> $GITHUB_ENV
-        
+        run: echo "TIMEFRAME_IN_DAYS=$(( ${MATRIX_TIMEFRAME:-0} * 7 ))" >> $GITHUB_ENV
+        env:
+          MATRIX_TIMEFRAME: ${{ matrix.include.timeframe }}
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -67,7 +50,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          
+
       - name: Compute PR Metrics
         env:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
@@ -75,7 +58,6 @@ jobs:
         run: python src/calculate_pr_metrics.py
 
       - name: Deployment Frequency
-        id: deployment_frequency
         env:
           WORKFLOWS: ${{ matrix.include.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
@@ -83,7 +65,6 @@ jobs:
         run: python src/deploymentfrequency.py
 
       - name: Lead Time For Changes
-        id: lead_time_for_changes
         env:
           WORKFLOWS: ${{ matrix.include.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
@@ -94,28 +75,27 @@ jobs:
         uses: port-labs/port-github-action@v1
         with:
           identifier: "12345"
-          title: ${{ env.TITLE }}
           blueprint: doraMetrics
           properties: |-
             {
-              "timeFrameInWeeks": ${{ github.event.inputs.timeframe }},
-              "totalDeployments": "${{ fromJson(env.deployment_frequency_report).total_deployments }}",
-              "deploymentRating": "${{ fromJson(env.deployment_frequency_report).rating }}",
-              "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
-              "deploymentFrequency": "${{ fromJson(env.deployment_frequency_report).deployment_frequency }}",
-              "leadTimeForChangesInHours": "${{ fromJson(env.lead_time_for_changes_report).lead_time_for_changes_in_hours }}",
-              "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).rating }}",
-              "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
-              "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
-              "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-              "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
-              "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
-              "prsOpened": "${{ fromJson(env.metrics).prs_opened }}",
-              "weeklyPrsMerged": "${{ fromJson(env.metrics).weekly_prs_merged }}",
-              "averageReviewsPerPr": "${{ fromJson(env.metrics).average_reviews_per_pr }}",
-              "averageCommitsPerPr": "${{ fromJson(env.metrics).average_commits_per_pr }}",
-              "averageLocChangedPerPr": "${{ fromJson(env.metrics).average_loc_changed_per_pr }}",
-              "averagePrsReviewedPerWeek": "${{ fromJson(env.metrics).average_prs_reviewed_per_week }}"
+              "timeFrameInWeeks": ${{ matrix.include.timeframe }},
+              "totalDeployments": "${{ steps.deployment_frequency.outputs.total_deployments }}",
+              "deploymentRating": "${{ steps.deployment_frequency.outputs.rating }}",
+              "numberOfUniqueDeploymentDays": "${{ steps.deployment_frequency.outputs.number_of_unique_deployment_days }}",
+              "deploymentFrequency": "${{ steps.deployment_frequency.outputs.deployment_frequency }}",
+              "leadTimeForChangesInHours": "${{ steps.lead_time_for_changes.outputs.lead_time_for_changes_in_hours }}",
+              "leadTimeRating": "${{ steps.lead_time_for_changes.outputs.rating }}",
+              "workflowAverageTimeDuration": "${{ steps.lead_time_for_changes.outputs.workflow_average_time_duration }}",
+              "prAverageTimeDuration": "${{ steps.lead_time_for_changes.outputs.pr_average_time_duration }}",
+              "averageOpenToCloseTime": "${{ steps.compute_pr_metrics.outputs.average_open_to_close_time }}",
+              "averageTimeToFirstReview": "${{ steps.compute_pr_metrics.outputs.average_time_to_first_review }}",
+              "averageTimeToApproval": "${{ steps.compute_pr_metrics.outputs.average_time_to_approval }}",
+              "prsOpened": "${{ steps.compute_pr_metrics.outputs.prs_opened }}",
+              "weeklyPrsMerged": "${{ steps.compute_pr_metrics.outputs.weekly_prs_merged }}",
+              "averageReviewsPerPr": "${{ steps.compute_pr_metrics.outputs.average_reviews_per_pr }}",
+              "averageCommitsPerPr": "${{ steps.compute_pr_metrics.outputs.average_commits_per_pr }}",
+              "averageLocChangedPerPr": "${{ steps.compute_pr_metrics.outputs.average_loc_changed_per_pr }}",
+              "averagePrsReviewedPerWeek": "${{ steps.compute_pr_metrics.outputs.average_prs_reviewed_per_week }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
