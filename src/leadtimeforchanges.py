@@ -26,8 +26,8 @@ class LeadTimeForChanges:
         print(f"Branch: {self.branch}")
         print(f"Commit counting method '{self.commit_counting_method}' being used")
         
-        pr_result = process_pull_requests()
-        workflow_result = process_workflows()
+        pr_result = self.process_pull_requests()
+        workflow_result = self.process_workflows()
     
         return evaluate_lead_time(pr_result, workflow_result)
 
