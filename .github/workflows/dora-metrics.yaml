@@ -23,11 +23,6 @@ jobs:
           CONFIG_JSON=$(jq -c . src/dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
-          
-      - name: Debug Matrix Output
-        run: |
-          echo "Setup Job Matrix Output:"
-          echo "${{ steps.set-matrix.outputs.matrix }}"
 
   compute-dora-metrics:
     needs: setup
@@ -40,12 +35,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{ matrix.include.repository }}
-
-      - name: Debug Matrix Output
-        run: |
-          echo "Repository: ${{ matrix.repository }}"
-          echo "Timeframe: ${{ matrix.timeframe }}"
-          echo "Workflows: ${{ join(matrix.workflows, ', ') }}"
           
       - name: Calculate Timeframe in Days
         run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
@@ -78,6 +67,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.repository }}
+          OWNER: ${{ matrix.owner }}
         run: |
           python src/calculate_pr_metrics.py
 
@@ -86,6 +76,7 @@ jobs:
           WORKFLOWS: ${{ toJson(matrix.workflows) }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.repository }}
+          OWNER: ${{ matrix.owner }}
         run: python src/deploymentfrequency.py
 
       - name: Lead Time For Changes
@@ -93,6 +84,7 @@ jobs:
           WORKFLOWS: ${{ toJson(matrix.workflows) }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.repository }}
+          OWNER: ${{ matrix.owner }}
         run: python src/leadtimeforchanges.py
 
       - name: UPSERT Entity
