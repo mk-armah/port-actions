@@ -4,8 +4,7 @@ import base64
 import json
 import os
 
-def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
-    owner, repo = owner_repo.split('/')
+def main(owner,repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
     workflows_array = json.loads(workflows)
     commit_counting_method = "last" if commit_counting_method not in ["last", "first"] else commit_counting_method 
     print(f"Owner/Repo: {owner}/{repo}")
@@ -153,7 +152,8 @@ def evaluate_lead_time(pr_result, workflow_result, number_of_days):
     return json.dumps(report, default=str)
     
 if __name__ == "__main__":
-    owner_repo = os.getenv('REPOSITORY')
+    owner = os.getenv('OWNER')
+    repo = os.getenv('REPOSITORY')
     token = os.getenv('GITHUB_TOKEN')  # Your personal access token or GitHub App token
     workflows = os.getenv('WORKFLOWS')
     branch = 'main'
