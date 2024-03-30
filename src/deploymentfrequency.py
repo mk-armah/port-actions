@@ -23,7 +23,7 @@ class DeploymentFrequency:
         return headers
     
     def get_workflows(self):
-        url = f"https://api.github.com/repos/{self.owner}/{self.repo_name}/actions/workflows"
+        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
         response = requests.get(url, headers=self.auth_header)
         if response.status_code == 404:
             print("Repo is not found or you do not have access")
@@ -40,7 +40,7 @@ class DeploymentFrequency:
         workflow_runs_list = []
         unique_dates = set()
         for workflow_id in workflow_ids:
-            runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo_name}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+            runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
             runs_response = requests.get(runs_url, headers=self.auth_header).json()
             for run in runs_response['workflow_runs']:
                 run_date = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
@@ -83,7 +83,7 @@ class DeploymentFrequency:
             "total_deployments": len(workflow_runs_list)
         }
 
-        print(f"Owner/Repo: {self.owner}/{self.repo_name}")
+        print(f"Owner/Repo: {self.owner}/{self.repo}")
         print(f"Workflows: {self.workflows}")
         print(f"Branch: {self.branch}")
         print(f"Number of days: {self.number_of_days}")
