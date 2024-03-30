@@ -143,12 +143,12 @@ class RepositoryMetrics:
 
 def main():
     owner = os.getenv("OWNER")
-    repository = os.getenv("REPOSITORY")
+    repo = os.getenv("REPOSITORY")
     time_frame = os.getenv("TIMEFRAME_IN_DAYS")  # os.getenv('TIME_FRAME')
     print("Repository Name:", f"{owner}/{repo}")
     print("TimeFrame (in days):", time_frame)
 
-    repo_metrics = RepositoryMetrics(owner,repository, time_frame)
+    repo_metrics = RepositoryMetrics(owner,repo, time_frame)
     metrics = repo_metrics.calculate_pr_metrics()
 
     metrics_json = json.dumps(metrics, default=str)  # Ensure proper serialization
