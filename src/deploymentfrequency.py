@@ -93,13 +93,13 @@ class DeploymentFrequency:
 
 if __name__ == "__main__":
     owner_repo = os.getenv('REPOSITORY')
-    token = os.getenv('GITHUB_TOKEN')
+    pat_token = os.getenv('GITHUB_TOKEN')
     workflows = os.getenv('WORKFLOWS')
     branch = 'main'
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS'))
     number_of_days = 30 if not time_frame else time_frame
     
-    df = DeploymentFrequency(owner_repo,workflows, branch, number_of_days, pat_token=token)
+    df = DeploymentFrequency( owner,repo, workflows, branch, number_of_days,pat_token)
     report = df.report()
     
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
