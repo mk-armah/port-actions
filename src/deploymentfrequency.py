@@ -85,7 +85,7 @@ class DeploymentFrequency:
         else:
             return "None", "lightgrey"
 
-    async def report(self):
+    async def __call__(self):
         workflow_runs_list, unique_dates = await self.fetch_workflow_runs()
         deployments_per_day = self.calculate_deployments_per_day(workflow_runs_list)
         rating, color = self.compute_rating(deployments_per_day)
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     branch = os.getenv('BRANCH', "main")
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS', 30))
     
-    df = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
-    report = asyncio.run(df.report())
+    deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
+    report = asyncio.run(deployment_frequency())
     
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"deployment_frequency_report={report}\n")
