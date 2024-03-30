@@ -1,12 +1,12 @@
 [
   {
-    "owner": "port-labs"
+    "owner": "port-labs",
     "repository": "ocean",
     "timeframe": 4,
     "workflows": ["Sonarcloud scan framework"]
   },
   {
-    "owner": "port-labs"
+    "owner": "port-labs",
     "repository": "ocean",
     "timeframe": 2,
     "workflows": ["Sonarcloud scan integrations"]
