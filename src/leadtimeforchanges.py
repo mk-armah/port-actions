@@ -40,8 +40,8 @@ class LeadTimeForChanges:
         }
         return headers
     
-    def get_pull_requests(self owner, repo, branch, headers):
-        url = f"{self.github_url}/pulls?state=all&head={self.branch}&per_page=100&state=closed"
+    def get_pull_requests(self):
+        url = f"{self.github_url}/pulls?state=all&head={self.branch}&per_page={PAGE_SIZE}&state=closed"
         response = requests.get(url, headers=self.auth_header)
         if response.status_code == 404:
             print("Repo is not found or you do not have access")
@@ -56,7 +56,7 @@ class LeadTimeForChanges:
             merged_at = pr.get('merged_at')
             if merged_at and datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
                 pr_counter += 1
-                commits_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr['number']}/commits?per_page=PAGE_SIZE"
+                commits_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr['number']}/commits?per_page={PAGE_SIZE}"
                 commits_response = requests.get(commits_url, headers=self.auth_header).json()
                 if commits_response:
                     if self.commit_counting_method == "last":
