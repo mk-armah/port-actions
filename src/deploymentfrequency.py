@@ -95,7 +95,7 @@ class DeploymentFrequency:
     #     return 0
 
     def fetch_workflow_runs(self):
-        workflows = self.get_workflows()
+        workflow_ids = self.get_workflows()
         workflow_runs_list = []
         unique_dates = set()
         for workflow_id in workflow_ids:
