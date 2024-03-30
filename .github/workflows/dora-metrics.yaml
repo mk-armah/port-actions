@@ -83,16 +83,16 @@ jobs:
 
       - name: Deployment Frequency
         env:
-          WORKFLOWS: ${{ matrix.include.workflows }}
+          WORKFLOWS: ${{ matrix.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-          REPOSITORY: ${{ matrix.include.repository }}
+          REPOSITORY: ${{ matrix.repository }}
         run: python src/deploymentfrequency.py
 
       - name: Lead Time For Changes
         env:
-          WORKFLOWS: ${{ matrix.include.workflows }}
+          WORKFLOWS: ${{ matrix.workflows }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-          REPOSITORY: ${{ matrix.include.repository }}
+          REPOSITORY: ${{ matrix.repository }}
         run: python src/leadtimeforchanges.py
 
       - name: UPSERT Entity
