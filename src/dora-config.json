@@ -2,7 +2,7 @@
   {
     "repository": "port-labs/ocean",
     "timeframe": 4,
-    "workflows": ["sonarcloud-framework.yml","workflow3.yml"]
+    "workflows": ["Sonarcloud scan framework"]
   },
   {
     "repository": "org/repo2",
