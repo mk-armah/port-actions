@@ -44,7 +44,7 @@ jobs:
       - name: Debug Matrix Output
         run: |
           echo "Setup Job Matrix Output:"
-          echo "${{ ${{ matrix.include }}"
+          echo "${{ matrix.include }}"
           
       # - name: Calculate Timeframe in Days
       #   run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.include.timeframe }} * 7 ))" >> $GITHUB_ENV
