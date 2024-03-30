@@ -5,13 +5,12 @@ import json
 import requests
 
 class DeploymentFrequency:
-    def __init__(self, owner_repo, workflows, branch, number_of_days, pat_token=""):
-        self.owner_repo = owner_repo
-        self.workflows = json.loads(workflows) #.split(',')
+    def __init__(self, owner,repo, workflows, branch, number_of_days, pat_token=""):
+        self.owner, self.repo = owner, repo
+        self.workflows = json.loads(workflows)
         self.branch = branch
         self.number_of_days = number_of_days
         self.pat_token = pat_token
-        self.owner, self.repo_name = owner_repo.split('/')
         self.auth_header = self.get_auth_header
 
     @property
