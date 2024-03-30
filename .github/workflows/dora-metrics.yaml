@@ -40,9 +40,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{ matrix.include.repository }}
-
+  
       - name: Calculate Timeframe in Days
-        run: echo "TIMEFRAME_IN_DAYS=$(( ${MATRIX_TIMEFRAME:-0} * 7 ))" >> $GITHUB_ENV
+        run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.include.timeframe }} * 7 ))" >> $GITHUB_ENV
         env:
           MATRIX_TIMEFRAME: ${{ matrix.include.timeframe }}
 
@@ -60,7 +60,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.include.repository }}
-        run: python src/calculate_pr_metrics.py
+        run: |
+          TIMEFRAME_IN_DAYS=$(( ${{ matrix.include.timeframe }} * 7 ))
+          python src/calculate_pr_metrics.py
 
       - name: Deployment Frequency
         env:
