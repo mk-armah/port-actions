@@ -6,12 +6,11 @@ import os
 
 def main(owner_repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
     owner, repo = owner_repo.split('/')
-    workflows_array = workflows.split(',')
-    if commit_counting_method == "":
-        commit_counting_method = "last"
+    workflows_array = json.loads(workflows)
+    commit_counting_method = "last" if commit_counting_method not in ["last", "first"] else commit_counting_method 
     print(f"Owner/Repo: {owner}/{repo}")
     print(f"Number of days: {number_of_days}")
-    print(f"Workflows: {workflows_array[0]}")
+    print(f"Workflows: {workflows_array}")
     print(f"Branch: {branch}")
     print(f"Commit counting method '{commit_counting_method}' being used")
 
