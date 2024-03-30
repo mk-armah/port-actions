@@ -9,7 +9,7 @@ PAGE_SIZE = 100
 class DeploymentFrequency:
     def __init__(self, owner,repo, workflows, branch, number_of_days, pat_token=""):
         self.owner, self.repo = owner, repo
-        self.workflow_url = "https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
+        self.workflow_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
         self.workflows = json.loads(workflows)
         self.branch = branch
         self.number_of_days = number_of_days
