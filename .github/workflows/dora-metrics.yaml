@@ -36,25 +36,11 @@ jobs:
         with:
           repository: ${{ matrix.include.repository }}
           
-      - name: Calculate Timeframe in Days
+      - name: Transform Workflow Parameters
         run: |
           echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
           TITLE=$(echo "${{ matrix.repository }}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
           echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
-        
-      # - name: Transform Workflow Parameters
-      #   run: |
-      #     days=$(( ${{ matrix.timeframe }} * 7 ))"
-      #     repository_path=$(echo "${{ github.event.inputs.repository }}" | awk -F'com/' '{print $NF}')
-      #     # repo_name="${repository_path##*/}"
-      #     cleaned_name=$(echo "${repository_path##*/}" | tr -c '[:alnum:]' ' ')
-      #     title=$(echo "$cleaned_name" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-
-      #     # export to github enviroment vars
-      #     echo "TIMEFRAME_IN_DAYS=$days" >> $GITHUB_ENV
-      #     echo "REPOSITORY=$repository_path" >> $GITHUB_ENV
-      #     echo "TITLE=$title" >> $GITHUB_ENV
-      #   shell: bash
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -96,7 +82,7 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "12345"
+          identifier: ${{ fromJson(env.metrics).id }}
           title: ${{ env.ENTITY_TITLE }}
           blueprint: doraMetrics
           properties: |-
