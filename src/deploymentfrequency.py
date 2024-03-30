@@ -4,9 +4,12 @@ import base64
 import json
 import requests
 
+PAGE_SIZE = 100
+
 class DeploymentFrequency:
     def __init__(self, owner,repo, workflows, branch, number_of_days, pat_token=""):
         self.owner, self.repo = owner, repo
+        self.workflow_url = "https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
         self.workflows = json.loads(workflows)
         self.branch = branch
         self.number_of_days = number_of_days
@@ -23,24 +26,80 @@ class DeploymentFrequency:
         return headers
     
     def get_workflows(self):
-        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
-        response = requests.get(url, headers=self.auth_header)
-        if response.status_code == 404:
-            print("Repo is not found or you do not have access")
-            exit()
-        return response.json()
+        if not(self.workflows):
+            response = requests.get(self.workflow_url, headers=self.auth_header)
+            if response.status_code == 404:
+                print("Repo is not found or you do not have access")
+                exit()
+            workflows = response.json()
+            workflow_ids = [workflow['id'] for workflow in workflows['workflows']]
+            print(f"Found {len(workflow_ids)} workflows in Repo")
+        else:
+            return self.workflows
+
+    # async def send_api_request(
+    #     self,
+    #     endpoint: str,
+    #     method: str = "GET",
+    #     query_params: Optional[dict[str, Any]] = None,
+    #     json_data: Optional[dict[str, Any]] = None,
+    # ) -> dict[str, Any]:
+    #     try:
+    #         url = f"{self.api_url}/{endpoint}"
+    #         logger.debug(
+    #             f"URL: {url}, Method: {method}, Params: {query_params}, Body: {json_data}"
+    #         )
+    #         response = await self.http_client.request(
+    #             method=method,
+    #             url=url,
+    #             params=query_params,
+    #             json=json_data,
+    #         )
+    #         response.raise_for_status()
+            
+    #         logger.debug(f"Successfully retrieved data for endpoint: {endpoint}")
+
+    #         return response.json()
+
+    #     except httpx.HTTPStatusError as e:
+    #         logger.error(
+    #             f"HTTP error on {endpoint}: {e.response.status_code} - {e.response.text}"
+    #         )
+    #         raise
+    #     except httpx.HTTPError as e:
+    #         logger.error(f"HTTP error on {endpoint}: {str(e)}")
+    #         raise
+            
+    # def fetch_workflow_runs(self):
+    #     workflows_response = self.get_workflows()
+    #     if self.workflows:
+    #         workflow_ids = [workflow['id'] for workflow in workflows_response['workflows'] if workflow['name'] in self.workflows]
+    #     else:
+    #         workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
+    #         print(f"Found {len(workflows)} workflows in Repo")
+    #     workflow_runs_list = []
+    #     unique_dates = set()
+    #     for workflow_id in workflow_ids:
+    #         runs_url = f"{self.workflow_url}/{workflow_id}/runs?per_page={PAGE_SIZE}&status=completed"
+    #         runs_response = requests.get(runs_url, headers=self.auth_header).json()
+    #         for run in runs_response['workflow_runs']:
+    #             run_date = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+    #             if run['head_branch'] == self.branch and run_date > datetime.now() - timedelta(days=self.number_of_days):
+    #                 workflow_runs_list.append(run)
+    #                 unique_dates.add(run_date.date())
+    #     return workflow_runs_list, unique_dates
+
+    # def calculate_deployments_per_day(self, workflow_runs_list):
+    #     if self.number_of_days > 0:
+    #         return len(workflow_runs_list) / self.number_of_days
+    #     return 0
 
     def fetch_workflow_runs(self):
-        workflows_response = self.get_workflows()
-        if self.workflows:
-            workflow_ids = [workflow['id'] for workflow in workflows_response['workflows'] if workflow['name'] in self.workflows]
-        else:
-            workflow_ids = [workflow['id'] for workflow in workflows_response['workflows']]
-            print(f"Found {len(workflows)} workflows in Repo")
+        workflows = self.get_workflows()
         workflow_runs_list = []
         unique_dates = set()
         for workflow_id in workflow_ids:
-            runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows/{workflow_id}/runs?per_page=100&status=completed"
+            runs_url = f"{self.workflow_url}/{workflow_id}/runs?per_page={PAGE_SIZE}&status=completed"
             runs_response = requests.get(runs_url, headers=self.auth_header).json()
             for run in runs_response['workflow_runs']:
                 run_date = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
