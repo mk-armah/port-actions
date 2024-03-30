@@ -92,7 +92,8 @@ class DeploymentFrequency:
         return json.dumps(results, default=str)
 
 if __name__ == "__main__":
-    owner_repo = os.getenv('REPOSITORY')
+    owner = os.getenv('OWNER')
+    repo = os.getenv('REPOSITORY')
     pat_token = os.getenv('GITHUB_TOKEN')
     workflows = os.getenv('WORKFLOWS')
     branch = 'main'
