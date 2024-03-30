@@ -37,8 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        # with:
-          # repository: ${{ matrix.include.repository }}
+        with:
+          repository: ${{ matrix.include.repository }}
           
       # - name: Transform Workflow Parameters
       #   run: |
