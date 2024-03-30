@@ -7,7 +7,7 @@ import requests
 class DeploymentFrequency:
     def __init__(self, owner_repo, workflows, branch, number_of_days, pat_token=""):
         self.owner_repo = owner_repo
-        self.workflows = workflows #.split(',')
+        self.workflows = json.loads(workflows) #.split(',')
         self.branch = branch
         self.number_of_days = number_of_days
         self.pat_token = pat_token
@@ -85,7 +85,7 @@ class DeploymentFrequency:
         }
 
         print(f"Owner/Repo: {self.owner}/{self.repo_name}")
-        print(f"Workflows: {', '.join(self.workflows)}")
+        print(f"Workflows: {self.workflows}")
         print(f"Branch: {self.branch}")
         print(f"Number of days: {self.number_of_days}")
         print(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
