@@ -29,7 +29,7 @@ class LeadTimeForChanges:
         pr_result = self.process_pull_requests()
         workflow_result = self.process_workflows()
     
-        return evaluate_lead_time(pr_result, workflow_result)
+        return self.evaluate_lead_time(pr_result, workflow_result)
 
     @property
     def get_auth_header(self):
@@ -69,7 +69,7 @@ class LeadTimeForChanges:
                     total_pr_hours += duration.total_seconds() / 3600
         return pr_counter, total_pr_hours
     
-    def get_workflows(self,owner):
+    def get_workflows(self):
         if not(self.workflows):
             workflow_url = f"{self.github_url}/workflows"
             response = requests.get(workflow_url, headers=self.auth_header)
@@ -99,7 +99,7 @@ class LeadTimeForChanges:
                     total_workflow_hours += duration.total_seconds() / 3600
         return workflow_counter, total_workflow_hours
     
-    def calculate_rating(lead_time_for_changes_in_hours):
+    def calculate_rating(self,lead_time_for_changes_in_hours):
         daily_deployment=24
         weekly_deployment=24*7
         monthly_deployment=24*30
@@ -158,7 +158,7 @@ class LeadTimeForChanges:
                 "workflow_average_time_duration" : round(workflow_average,2),
                 "lead_time_for_changes_in_hours": round(lead_time_for_changes_in_hours,2)
         }
-        rating = calculate_rating(lead_time_for_changes_in_hours)
+        rating = self.calculate_rating(lead_time_for_changes_in_hours)
         report.update(rating)
     
         return json.dumps(report, default=str)
