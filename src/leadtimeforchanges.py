@@ -4,6 +4,7 @@ import base64
 import json
 import os
 from loguru import logger
+import asyncio
 
 PAGE_SIZE = 100
 
@@ -19,7 +20,7 @@ class LeadTimeForChanges:
         self.auth_header = self.get_auth_header
         self.github_url = f"https://api.github.com/repos/{self.owner}/{self.repo}"
 
-    def __call__(self):
+    async def __call__(self):
         
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
         logger.info(f"Number of days: {self.number_of_days}")
@@ -27,10 +28,10 @@ class LeadTimeForChanges:
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Commit counting method '{self.commit_counting_method}' being used")
         
-        pr_result = self.process_pull_requests()
-        workflow_result = self.process_workflows()
+        pr_result = await self.process_pull_requests()
+        workflow_result = await self.process_workflows()
     
-        return self.evaluate_lead_time(pr_result, workflow_result)
+        return await self.evaluate_lead_time(pr_result, workflow_result)
 
     @property
     def get_auth_header(self):
@@ -180,6 +181,6 @@ if __name__ == "__main__":
     time_frame = int(os.getenv('TIMEFRAME_IN_DAYS',30))
 
     lead_time_for_changes = LeadTimeForChanges(owner,repo, workflows, branch, time_frame, pat_token=token)
-    report = lead_time_for_changes()
+    report = asyncio.run(lead_time_for_changes())
     with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
         github_env.write(f"lead_time_for_changes_report={report}\n")
