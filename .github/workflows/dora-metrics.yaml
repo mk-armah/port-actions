@@ -37,7 +37,10 @@ jobs:
           repository: ${{ matrix.include.repository }}
           
       - name: Calculate Timeframe in Days
-        run: echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
+        run: |
+          echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
+          TITLE=$(echo "${{ matrix.repository }}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+          echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
         
       # - name: Transform Workflow Parameters
       #   run: |
@@ -94,7 +97,7 @@ jobs:
         uses: port-labs/port-github-action@v1
         with:
           identifier: "12345"
-          title: $(echo "${{ matrix.repository }}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+          title: ${{ env.ENTITY_TITLE }}
           blueprint: doraMetrics
           properties: |-
             {
