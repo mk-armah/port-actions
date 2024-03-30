@@ -6,8 +6,9 @@
     "workflows": ["Sonarcloud scan framework"]
   },
   {
-    "repository": "org/repo2",
+    "owner": "port-labs"
+    "repository": "ocean",
     "timeframe": 2,
-    "workflows": ["workflow3.yml","workflow3.yml"]
+    "workflows": ["Sonarcloud scan integrations"]
   }
 ]
