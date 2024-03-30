@@ -148,9 +148,9 @@ class LeadTimeForChanges:
         }
     
     
-    def evaluate_lead_time(self,pr_result, workflow_result):
-        pr_counter, total_pr_hours = pr_result
-        workflow_counter, total_workflow_hours = workflow_result
+    async def evaluate_lead_time(self,pr_result, workflow_result):
+        pr_counter, total_pr_hours = await pr_result
+        workflow_counter, total_workflow_hours = await workflow_result
         if pr_counter == 0:
             pr_counter = 1
         if workflow_counter == 0:
