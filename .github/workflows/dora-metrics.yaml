@@ -39,7 +39,8 @@ jobs:
       - name: Transform Workflow Parameters
         run: |
           echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
-          TITLE=$(echo "${{ matrix.repository }}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+          cleaned_name=$(echo "${{ matrix.repository }}" | tr -c '[:alnum:]' ' ')
+          TITLE=$(echo "${cleaned_name}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
           echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
 
       - name: Set up Python
