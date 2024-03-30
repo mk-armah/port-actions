@@ -83,7 +83,7 @@ jobs:
 
       - name: Deployment Frequency
         env:
-          WORKFLOWS: ${{ matrix.workflows }}
+          WORKFLOWS: ${{ toJson(matrix.workflows) }}
           GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
           REPOSITORY: ${{ matrix.repository }}
         run: python src/deploymentfrequency.py
