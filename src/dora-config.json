@@ -4,13 +4,13 @@
     "repository": "ocean",
     "branch": "main",
     "timeframe": 4,
-    "workflows": ["Sonarcloud scan framework"]
+    "workflows": ["sonarcloud-framework.yml"]
   },
   {
     "owner": "port-labs",
     "repository": "port-docs",
     "timeframe": 2,
     "branch": "main",
-    "workflows": ["Verify Docs Build"]
+    "workflows": ["verify-docs-build.yml"]
   }
 ]
