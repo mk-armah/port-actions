@@ -58,7 +58,7 @@ class DeploymentFrequency:
             runs_response = await self.send_api_requests(runs_url, params=params)
             for run in runs_response['workflow_runs']:
                 run_date = datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
-                if run['head_branch'] == self.branch and run_date > datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=self.number_of_days):
+                if run['head_branch'] == self.branch and run_date > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
                     workflow_runs_list.append(run)
                     unique_dates.add(run_date.date())
         return workflow_runs_list, unique_dates
