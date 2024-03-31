@@ -140,7 +140,7 @@ class LeadTimeForChanges:
             params = {"per_page": 100, "status": "completed"}
             runs_response = await self.send_api_requests(runs_url, params=params)
             for run_batch in runs_response:
-                for run in runs_batch['workflow_runs']:
+                for run in run_batch['workflow_runs']:
                     if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
                         workflow_counter += 1
                         start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
