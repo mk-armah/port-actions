@@ -98,7 +98,7 @@ class LeadTimeForChanges:
         total_pr_hours = 0
         for pr in prs:
             merged_at = pr.get('merged_at')
-            if merged_at and datetime.datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
+            if merged_at and datetime.datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now() - datetime.datetime.timedelta(days=self.number_of_days):
                 pr_counter += 1
                 commits_url = f"{self.github_url}/pulls/{pr['number']}/commits"
                 params = {"per_page": PAGE_SIZE}
@@ -134,7 +134,7 @@ class LeadTimeForChanges:
             params = {"per_page": PAGE_SIZE, "status": "completed"}
             runs_response = await self.send_api_requests(runs_url, params=params)
             for run in runs_response['workflow_runs']:
-                if run['head_branch'] == self.branch and datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now(datetime.UTC) - timedelta(days=self.number_of_days):
+                if run['head_branch'] == self.branch and datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now(datetime.UTC) - datetime.datetime.timedelta(days=self.number_of_days):
                     workflow_counter += 1
                     start_time = datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
                     end_time = datetime.datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
