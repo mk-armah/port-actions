@@ -19,16 +19,15 @@ def with_pagination(func):
     async def wrapper(url, headers, params=None):
         items = []
         while url:
-            print("Extracted or Request URL",url)
             response = await func(url, headers, params)
             items.extend(response.json())
             url = get_next_link_from_headers(response.headers)
-            logger.info("The Next Link URL >>> ",url)
         return items
     return wrapper
 
 def with_rate_limit_handling(func):
     async def wrapper(url, headers, params=None):
+        logger.info("URL AT RATE LIMIT FUNCTION",url)
         backoff_time = 1  # Starting backoff time in seconds
         max_backoff_time = 60  # Maximum backoff time in seconds
         while True:
@@ -47,13 +46,14 @@ def with_rate_limit_handling(func):
     return wrapper
 
 def get_next_link_from_headers(headers):
-    links = headers.get('link', '')
+    links = headers.get('Link', '')
     next_link = [link.split(';')[0].strip('<>') for link in links.split(',') if 'rel="next"' in link]
     return next_link[0] if next_link else None
 
 @with_pagination
 @with_rate_limit_handling
 async def send_api_request_with_enhancements(url, headers, params=None):
+    logger.info("URL AT SEND API REQUEST ENHANCEMENT", url)
     return await send_api_request(url, headers, params)
 
 class LeadTimeForChanges:
