@@ -63,7 +63,7 @@ class LeadTimeForChanges:
                     response = await client.get(url, headers=self.auth_header, params=params)
                     
                     # Check for rate limiting (HTTP status 429)
-                    if response.status_code == 429:
+                    if response.status_code == 429 or 403:
                         reset_time = float(response.headers.get('X-RateLimit-Reset', 0))
                         current_time = time.time()
                         wait_time = max(reset_time - current_time, 3)
