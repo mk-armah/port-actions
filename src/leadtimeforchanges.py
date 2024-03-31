@@ -6,7 +6,7 @@ import os
 from loguru import logger
 import asyncio
 
-PAGE_SIZE = 10
+PAGE_SIZE = 100
 
 class LeadTimeForChanges:
     def __init__(self, owner, repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
@@ -41,57 +41,17 @@ class LeadTimeForChanges:
             "Content-Type": "application/json",
         }
         return headers
-
+    
     async def send_api_requests(self, url, params=None):
-        items = []
-        backoff_time = 1  # Initial backoff time in seconds
-        max_backoff_time = 60  # Maximum backoff time in seconds
-
         async with httpx.AsyncClient() as client:
-            while url:
-                try:
-                    response = await client.get(url, headers=self.auth_header, params=params)
-                    if response.status_code == 429:  # Rate limit exceeded
-                        reset_time = float(response.headers.get('X-RateLimit-Reset', 0))
-                        wait_time = max(reset_time - time.time(), 3)  # Ensure at least a 3-second wait
-                        logger.warning(f"Rate limit exceeded. Waiting for {wait_time} seconds.")
-                        await asyncio.sleep(wait_time)
-                        continue  # Retry the request
-                    response.raise_for_status()
-                    items.extend(response.json())
-
-                    # Check for the 'next' link in the 'Link' header
-                    if 'Link' in response.headers:
-                        links = response.headers['Link']
-                        next_link = [link.split(';')[0].strip('<>') for link in links.split(',') if 'rel="next"' in link]
-                        url = next_link[0] if next_link else None
-                    else:
-                        break  # No more pages to fetch
-                    backoff_time = 1  # Reset backoff time after a successful request
-                except httpx.HTTPStatusError as e:
-                    if e.response.status_code in {500, 502, 503, 504}:
-                        # Server error, apply exponential backoff strategy
-                        logger.error(f"Server error ({e.response.status_code}). Retrying in {backoff_time} seconds.")
-                        await asyncio.sleep(backoff_time)
-                        backoff_time = min(backoff_time * 2, max_backoff_time)  # Exponential backoff with cap
-                    else:
-                        logger.error(f"HTTP error occurred: {e.response.status_code}")
-                        break
-                except Exception as e:
-                    logger.error(f"An error occurred: {e}")
-                    break
-        return items
-        
-    # async def send_api_requests(self, url, params=None):
-    #     async with httpx.AsyncClient() as client:
-    #         try:
-    #             response = await client.get(url, headers=self.auth_header, params=params)
-    #             response.raise_for_status()
-    #             return response.json()
-    #         except httpx.HTTPStatusError as e:
-    #             logger.error(f"HTTP error occurred: {e.response.status_code}")
-    #         except Exception as e:
-    #             logger.error(f"An error occurred: {e}")
+            try:
+                response = await client.get(url, headers=self.auth_header, params=params)
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                logger.error(f"HTTP error occurred: {e.response.status_code}")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
 
     async def get_pull_requests(self):
         url = f"{self.github_url}/pulls"
@@ -137,17 +97,15 @@ class LeadTimeForChanges:
         workflow_counter = 0
         for workflow_id in workflow_ids:
             runs_url = f"{self.github_url}/actions/workflows/{workflow_id}/runs"
-            params = {"per_page": 100, "status": "completed"}
+            params = {"per_page": PAGE_SIZE, "status": "completed"}
             runs_response = await self.send_api_requests(runs_url, params=params)
-            for run_batch in runs_response:
-                print(run_batch)
-                for run in run_batch['workflow_runs']:
-                    if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
-                        workflow_counter += 1
-                        start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
-                        end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
-                        duration = end_time - start_time
-                        total_workflow_hours += duration.total_seconds() / 3600
+            for run in runs_response['workflow_runs']:
+                if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
+                    workflow_counter += 1
+                    start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                    end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
+                    duration = end_time - start_time
+                    total_workflow_hours += duration.total_seconds() / 3600
         return workflow_counter, total_workflow_hours
     
     def calculate_rating(self,lead_time_for_changes_in_hours):
