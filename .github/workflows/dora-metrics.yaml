@@ -2,7 +2,7 @@ name: Ingest DORA Metrics
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  # At 02:00 on Monday
+    - cron: '0 2 * * 1'
   workflow_dispatch:
 
 jobs:
