@@ -8,10 +8,13 @@ import asyncio
 
 PAGE_SIZE = 100
 
+
 class DeploymentFrequency:
     def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
         self.owner, self.repo = owner, repo
-        self.workflow_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
+        self.workflow_url = (
+            f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows"
+        )
         self.workflows = json.loads(workflows)
         self.branch = branch
         self.number_of_days = number_of_days
@@ -26,11 +29,13 @@ class DeploymentFrequency:
             "Content-Type": "application/json",
         }
         return headers
-    
+
     async def send_api_requests(self, url, params=None):
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(url, headers=self.auth_header, params=params)
+                response = await client.get(
+                    url, headers=self.auth_header, params=params
+                )
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPStatusError as e:
@@ -39,10 +44,10 @@ class DeploymentFrequency:
                 logger.error(f"An error occurred: {e}")
 
     async def get_workflows(self):
-        if not(self.workflows):
+        if not (self.workflows):
             workflows = await self.send_api_requests(self.workflow_url)
             if workflows:
-                workflow_ids = [workflow['id'] for workflow in workflows['workflows']]
+                workflow_ids = [workflow["id"] for workflow in workflows["workflows"]]
                 logger.info(f"Found {len(workflow_ids)} workflows in Repo")
                 return workflow_ids
         else:
@@ -56,9 +61,15 @@ class DeploymentFrequency:
             runs_url = f"{self.workflow_url}/{workflow_id}/runs"
             params = {"per_page": PAGE_SIZE, "status": "completed"}
             runs_response = await self.send_api_requests(runs_url, params=params)
-            for run in runs_response['workflow_runs']:
-                run_date = datetime.datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
-                if run['head_branch'] == self.branch and run_date > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
+            for run in runs_response["workflow_runs"]:
+                run_date = datetime.datetime.strptime(
+                    run["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+                )
+                if run[
+                    "head_branch"
+                ] == self.branch and run_date > datetime.datetime.now() - datetime.timedelta(
+                    days=self.number_of_days
+                ):
                     workflow_runs_list.append(run)
                     unique_dates.add(run_date.date())
         return workflow_runs_list, unique_dates
@@ -94,26 +105,34 @@ class DeploymentFrequency:
         logger.info(f"Workflows: {self.workflows}")
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Number of days: {self.number_of_days}")
-        logger.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
+        logger.info(
+            f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day"
+        )
         logger.info(f"Rating: {rating} ({color})")
 
-        return json.dumps({
-            "deployment_frequency": round(deployments_per_day, 2),
-            "rating": rating,
-            "number_of_unique_deployment_days": len(unique_dates),
-            "total_deployments": len(workflow_runs_list)
-        }, default=str)
+        return json.dumps(
+            {
+                "deployment_frequency": round(deployments_per_day, 2),
+                "rating": rating,
+                "number_of_unique_deployment_days": len(unique_dates),
+                "total_deployments": len(workflow_runs_list),
+            },
+            default=str,
+        )
+
 
 if __name__ == "__main__":
-    owner = os.getenv('OWNER')
-    repo = os.getenv('REPOSITORY')
-    pat_token = os.getenv('GITHUB_TOKEN')
-    workflows = os.getenv('WORKFLOWS', "[]")
-    branch = os.getenv('BRANCH', "main")
-    time_frame = int(os.getenv('TIMEFRAME_IN_DAYS', 30))
-    
-    deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
+    owner = os.getenv("OWNER")
+    repo = os.getenv("REPOSITORY")
+    pat_token = os.getenv("GITHUB_TOKEN")
+    workflows = os.getenv("WORKFLOWS", "[]")
+    branch = os.getenv("BRANCH", "main")
+    time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
+
+    deployment_frequency = DeploymentFrequency(
+        owner, repo, workflows, branch, time_frame, pat_token
+    )
     report = asyncio.run(deployment_frequency())
-    
-    with open(os.getenv('GITHUB_ENV'), 'a') as github_env:
+
+    with open(os.getenv("GITHUB_ENV"), "a") as github_env:
         github_env.write(f"deployment_frequency_report={report}\n")
