@@ -19,6 +19,7 @@ def with_pagination(func):
     async def wrapper(url, headers, params=None):
         items = []
         while url:
+            print("Extracted or Request URL",url)
             response = await func(url, headers, params)
             items.extend(response.json())
             url = get_next_link_from_headers(response.headers)
