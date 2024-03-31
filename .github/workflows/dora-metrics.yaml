@@ -12,10 +12,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install jq
-        run: sudo apt-get install jq
+        uses: actions/checkout@v5
 
       - name: Read Config and Output Matrix
         id: set-matrix
@@ -44,7 +41,7 @@ jobs:
           echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
