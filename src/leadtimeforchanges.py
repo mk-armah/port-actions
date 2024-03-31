@@ -46,7 +46,7 @@ def with_rate_limit_handling(func):
     return wrapper
 
 def get_next_link_from_headers(headers):
-    links = headers.get('Link', '')
+    links = headers.get('link', '')
     next_link = [link.split(';')[0].strip('<>') for link in links.split(',') if 'rel="next"' in link]
     return next_link[0] if next_link else None
 
