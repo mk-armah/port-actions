@@ -33,9 +33,9 @@ class RepositoryMetrics:
 
     def process_pr(self, pr):
         pr_metrics = {
-            "open_to_close_time": timedelta(0),
-            "time_to_first_review": timedelta(0),
-            "time_to_approval": timedelta(0),
+            "open_to_close_time": datetime.timedelta(0),
+            "time_to_first_review": datetime.timedelta(0),
+            "time_to_approval": datetime.timedelta(0),
             "prs_opened": 1,
             "prs_merged": int(pr.merged),
             "total_reviews": 0,
@@ -56,22 +56,22 @@ class RepositoryMetrics:
             if review.state in ["APPROVED", "CHANGES_REQUESTED", "COMMENTED"]:
                 pr_metrics["review_dates"].append(review.submitted_at)
                 pr_metrics["total_reviews"] += 1
-                if pr_metrics["time_to_first_review"] == timedelta(0):
+                if pr_metrics["time_to_first_review"] == datetime.timedelta(0):
                     pr_metrics["time_to_first_review"] = (
                         review.submitted_at - pr.created_at
                     )
                 if review.state == "APPROVED" and pr_metrics[
                     "time_to_approval"
-                ] == timedelta(0):
+                ] == datetime.timedelta(0):
                     pr_metrics["time_to_approval"] = review.submitted_at - pr.created_at
 
         return pr_metrics
 
     def aggregate_results(self, results):
         aggregated = {
-            "total_open_to_close_time": timedelta(0),
-            "total_time_to_first_review": timedelta(0),
-            "total_time_to_approval": timedelta(0),
+            "total_open_to_close_time": datetime.timedelta(0),
+            "total_time_to_first_review": datetime.timedelta(0),
+            "total_time_to_approval": datetime.timedelta(0),
             "prs_opened": 0,
             "prs_merged": 0,
             "total_reviews": 0,
