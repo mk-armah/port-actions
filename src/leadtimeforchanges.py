@@ -6,7 +6,7 @@ import os
 from loguru import logger
 import asyncio
 
-PAGE_SIZE = 100
+PAGE_SIZE = 10
 
 class LeadTimeForChanges:
     def __init__(self, owner, repo, workflows, branch, number_of_days, commit_counting_method="last", pat_token=""):
