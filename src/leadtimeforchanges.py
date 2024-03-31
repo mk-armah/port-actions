@@ -98,7 +98,7 @@ class LeadTimeForChanges:
         total_pr_hours = 0
         for pr in prs:
             merged_at = pr.get('merged_at')
-            if merged_at and datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
+            if merged_at and datetime.datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ") > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
                 pr_counter += 1
                 commits_url = f"{self.github_url}/pulls/{pr['number']}/commits"
                 params = {"per_page": PAGE_SIZE}
@@ -108,8 +108,8 @@ class LeadTimeForChanges:
                         start_date = commits_response[-1]['commit']['committer']['date']
                     elif self.commit_counting_method == "first":
                         start_date = commits_response[0]['commit']['committer']['date']
-                    start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%SZ")
-                    merged_at = datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ")
+                    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%SZ")
+                    merged_at = datetime.datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%SZ")
                     duration = merged_at - start_date
                     total_pr_hours += duration.total_seconds() / 3600
         return pr_counter, total_pr_hours
