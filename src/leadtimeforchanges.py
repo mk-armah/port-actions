@@ -139,13 +139,14 @@ class LeadTimeForChanges:
             runs_url = f"{self.github_url}/actions/workflows/{workflow_id}/runs"
             params = {"per_page": 100, "status": "completed"}
             runs_response = await self.send_api_requests(runs_url, params=params)
-            for run in runs_response['workflow_runs']:
-                if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
-                    workflow_counter += 1
-                    start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
-                    end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
-                    duration = end_time - start_time
-                    total_workflow_hours += duration.total_seconds() / 3600
+            for run_batch in runs_response:
+                for run in runs_batch['workflow_runs']:
+                    if run['head_branch'] == self.branch and datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ") > datetime.utcnow() - timedelta(days=self.number_of_days):
+                        workflow_counter += 1
+                        start_time = datetime.strptime(run['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                        end_time = datetime.strptime(run['updated_at'], "%Y-%m-%dT%H:%M:%SZ")
+                        duration = end_time - start_time
+                        total_workflow_hours += duration.total_seconds() / 3600
         return workflow_counter, total_workflow_hours
     
     def calculate_rating(self,lead_time_for_changes_in_hours):
