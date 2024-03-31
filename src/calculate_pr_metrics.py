@@ -10,9 +10,9 @@ class RepositoryMetrics:
         self.github_client = Github(os.getenv("GITHUB_TOKEN"))
         self.repo_name = f"{owner}/{repo}"
         self.time_frame = int(time_frame)
-        self.start_date = datetime.datetime.now(datetime.UTC).replace(tzinfo=datetime.timezone.utc) - datetime.timedelta(
-            days=self.time_frame
-        )
+        self.start_date = datetime.datetime.now(datetime.UTC).replace(
+            tzinfo=datetime.timezone.utc
+        ) - datetime.timedelta(days=self.time_frame)
         self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
@@ -120,19 +120,22 @@ class RepositoryMetrics:
             )
             if aggregated["prs_merged"]
             else 0,
-            "average_reviews_per_pr": round(aggregated["total_reviews"]
-            / aggregated["prs_opened"],2)
+            "average_reviews_per_pr": round(
+                aggregated["total_reviews"] / aggregated["prs_opened"], 2
+            )
             if aggregated["prs_opened"]
             else 0,
-            "average_commits_per_pr": round(aggregated["total_commits"]
-            / aggregated["prs_opened"],2)
+            "average_commits_per_pr": round(
+                aggregated["total_commits"] / aggregated["prs_opened"], 2
+            )
             if aggregated["prs_opened"]
             else 0,
-            "average_loc_changed_per_pr": round(aggregated["total_loc_changed"]
-            / aggregated["prs_opened"],2)
+            "average_loc_changed_per_pr": round(
+                aggregated["total_loc_changed"] / aggregated["prs_opened"], 2
+            )
             if aggregated["prs_opened"]
             else 0,
-            "average_prs_reviewed_per_week": round(average_prs_reviewed_per_week,2),
+            "average_prs_reviewed_per_week": round(average_prs_reviewed_per_week, 2),
         }
 
         return metrics
@@ -148,7 +151,7 @@ def main():
     print("Repository Name:", f"{owner}/{repo}")
     print("TimeFrame (in days):", time_frame)
 
-    repo_metrics = RepositoryMetrics(owner,repo, time_frame)
+    repo_metrics = RepositoryMetrics(owner, repo, time_frame)
     metrics = repo_metrics.calculate_pr_metrics()
 
     metrics_json = json.dumps(metrics, default=str)  # Ensure proper serialization
