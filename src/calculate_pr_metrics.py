@@ -1,6 +1,6 @@
 import os
 from github import Github
-from datetime import datetime, timedelta, timezone
+import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 
@@ -10,7 +10,7 @@ class RepositoryMetrics:
         self.github_client = Github(os.getenv("GITHUB_TOKEN"))
         self.repo_name = f"{owner}/{repo}"
         self.time_frame = int(time_frame)
-        self.start_date = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(
+        self.start_date = datetime.datetime.utcnow(datetime.UTC).replace(tzinfo=datetime.timezone.utc) - datetime.timedelta(
             days=self.time_frame
         )
         self.repo = self.github_client.get_repo(f"{self.repo_name}")
