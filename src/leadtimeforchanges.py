@@ -22,6 +22,7 @@ def with_pagination(func):
             response = await func(url, headers, params)
             items.extend(response.json())
             url = get_next_link_from_headers(response.headers)
+            logger.info("The Next Link URL >>> ",url)
         return items
     return wrapper
 
