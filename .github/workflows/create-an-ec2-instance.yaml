@@ -1,0 +1,76 @@
+name: Provision AN EC2 Instance
+
+on:
+  workflow_dispatch:
+    inputs:
+      ec2_name:
+        description: EC2 name
+        required: true
+        default: 'App Server'
+        type: string
+      ec2_instance_type:
+        description: EC2 instance type
+        required: false
+        default: "t3.micro"
+        type: string
+      pem_key_name:
+        description: EC2 pem key
+        required: true
+        type: string
+      port_payload:
+        required: true
+        type: string
+jobs:
+  provision-ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Log starting of EC2 Instance creation 
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          logMessage: |
+              About to create ec2 instance ${{ github.event.inputs.ec2_name }} .. ⛴️
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: '${{ secrets.TF_USER_AWS_KEY }}'
+          aws-secret-access-key: '${{ secrets.TF_USER_AWS_SECRET }}'
+          aws-region: '${{ secrets.TF_USER_AWS_REGION }}'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+          
+      - name: Terraform Apply
+        id:   apply
+        env:
+          TF_VAR_ec2_name:  "${{ github.event.inputs.ec2_name }}"
+          TF_VAR_pem_key_name: "${{ github.event.inputs.pem_key_name}}"
+          TF_VAR_aws_region: "${{ secrets.TF_USER_AWS_REGION }}"
+          TF_VAR_ec2_instance_type: "${{ github.event.inputs.ec2_instance_type}}"
+        run: |
+          cd terraform
+          terraform init
+          terraform validate
+          terraform plan 
+          terraform apply -auto-approve
+
+      - name: Create a log message
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          logMessage: |
+              EC2 Instance created successfully ✅
