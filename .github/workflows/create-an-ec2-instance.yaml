@@ -137,7 +137,7 @@ jobs:
               "security_group_ids": ${{ to_json(env.security_group_ids) }},
               "key_name": "${{ env.key_name }}",
               "subnet_id": "${{ env.subnet_id }}",
-              "tags": "${{ toJson(env.tags) }}" 
+              "tags": ${{ toJson(env.tags) }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
