@@ -149,6 +149,7 @@ class DeploymentFrequency:
         )
         logger.info(f"Rating: {rating} ({color})")
 
+        print("Unique Dates", unique_dates)
         return json.dumps(
             {
                 "deployment_frequency": round(deployments_per_day, 2),
