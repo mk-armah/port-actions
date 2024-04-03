@@ -78,16 +78,19 @@ jobs:
       #     echo "instance_id=$(terraform output -raw instance_id)" >> $GITHUB_OUTPUT
 
       - name: Display Terraform Outputs
-        id: display_outputs
         run: |
           cd src
-          echo "Instance State: $(terraform output -raw instance_state)"
-          echo "Instance Public IP: $(terraform output -raw instance_public_ip)"
-          echo "Instance Private IP: $(terraform output -raw instance_private_ip)"
-          echo "Subnet ID: $(terraform output -raw subnet_id)"
-          echo "Tags: $(terraform output -json tags)"
-          echo "Security Groups: $(terraform output -json security_groups)"
           echo "Instance ID: $(terraform output -raw instance_id)"
+          echo "Instance State: $(terraform output -raw instance_state)"
+          echo "Instance Type: $(terraform output -raw instance_type)"
+          echo "Availability Zone: $(terraform output -raw availability_zone)"
+          echo "Public DNS: $(terraform output -raw public_dns)"
+          echo "Public IP: $(terraform output -raw public_ip)"
+          echo "Private DNS: $(terraform output -raw private_dns)"
+          echo "Private IP: $(terraform output -raw private_ip)"
+          echo "Monitoring: $(terraform output -raw monitoring)"
+          echo "Security Group IDs: $(terraform output -raw security_group_ids)"
+          echo "Key Name: $(terraform output -raw key_name)"
           
       - name: Create a log message
         uses: port-labs/port-github-action@v1
