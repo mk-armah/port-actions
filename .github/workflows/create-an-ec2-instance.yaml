@@ -134,7 +134,7 @@ jobs:
               "private_dns": "${{ env.private_dns }}",
               "private_ip": "${{ env.private_ip }}",
               "monitoring": ${{ env.monitoring }},
-              "security_group_ids": ${{ to_json(env.security_group_ids) }},
+              "security_group_ids": ${{ toJson(env.security_group_ids) }},
               "key_name": "${{ env.key_name }}",
               "subnet_id": "${{ env.subnet_id }}",
               "tags": ${{ toJson(env.tags) }}
