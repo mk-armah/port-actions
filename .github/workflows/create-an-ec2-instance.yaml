@@ -110,7 +110,7 @@ jobs:
         with:
           identifier: "${{ steps.display_outputs.outputs.instance_id }}"
           title: "${{ inputs.ec2_name }}"
-          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          blueprint: ec2Instance
           properties: |-
             {
               "instance_state": "${{ env.instance_state }}",
