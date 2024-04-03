@@ -78,25 +78,12 @@ jobs:
           echo "private_dns=$(terraform output -raw private_dns)" >> $GITHUB_ENV
           echo "private_ip=$(terraform output -raw private_ip)" >> $GITHUB_ENV
           echo "monitoring=$(terraform output -raw monitoring)" >> $GITHUB_ENV
-          echo "security_group_ids=$(terraform output -json security_group_ids | jq -r '. | join(",")')" >> $GITHUB_ENV
+          security_group_ids_json=$(terraform output -json security_group_ids | jq -c .)
+          echo "security_group_ids=$security_group_ids_json" >> $GITHUB_ENV
           echo "key_name=$(terraform output -raw key_name)" >> $GITHUB_ENV
           echo "subnet_id=$(terraform output -raw subnet_id)" >> $GITHUB_ENV
-          echo "tags=$(terraform output -json tags | jq -r '. | join(",")')" >> $GITHUB_ENV
-
-      - name: Display Terraform Outputs
-        run: |
-          cd src
-          echo "Instance ID: $(terraform output -raw instance_id)"
-          echo "Instance State: $(terraform output -raw instance_state)"
-          echo "Instance Type: $(terraform output -raw instance_type)"
-          echo "Availability Zone: $(terraform output -raw availability_zone)"
-          echo "Public DNS: $(terraform output -raw public_dns)"
-          echo "Public IP: $(terraform output -raw public_ip)"
-          echo "Private DNS: $(terraform output -raw private_dns)"
-          echo "Private IP: $(terraform output -raw private_ip)"
-          echo "Monitoring: $(terraform output -raw monitoring)"
-          echo "Security Group IDs: $(terraform output -raw security_group_ids)"
-          echo "Key Name: $(terraform output -raw key_name)"
+          tags=$(terraform output -json tags | jq -c .)
+          echo "tags=$tags" >> $GITHUB_ENV
           
       - name: Create a log message
         uses: port-labs/port-github-action@v1
