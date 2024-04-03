@@ -121,10 +121,10 @@ jobs:
               "private_dns": "${{ env.private_dns }}",
               "private_ip": "${{ env.private_ip }}",
               "monitoring": ${{ env.monitoring }},
-              "security_group_ids": ${{ fromJson(env.security_group_ids) }},
+              "security_group_ids": ${{ env.security_group_ids }},
               "key_name": "${{ env.key_name }}",
               "subnet_id": "${{ env.subnet_id }}",
-              "tags": ${{ fromJson(env.tags) }}
+              "tags": ${{ env.tags }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
