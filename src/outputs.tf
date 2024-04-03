@@ -52,3 +52,13 @@ output "key_name" {
   description = "The name of the key pair associated with the EC2 instance."
   value       = aws_instance.app_server.key_name
 }
+
+output "subnet_id" {
+  description = "The ID of the subnet to which the instance is attached."
+  value       = aws_instance.app_server.subnet_id
+}
+
+output "tags" {
+  description = "A map of tags assigned to the resource."
+  value       = aws_instance.app_server.tags
+}
