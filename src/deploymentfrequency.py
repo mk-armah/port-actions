@@ -141,7 +141,7 @@ class DeploymentFrequency:
         rating, color = self.compute_rating(deployments_per_day)
 
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
-        logger.info(f"Workflows: {self.workflows}")
+        logger.info(f"Workflows: {self.get_workflows()}")
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Number of days: {self.number_of_days}")
         logger.info(
@@ -156,7 +156,7 @@ class DeploymentFrequency:
                 "rating": rating,
                 "number_of_unique_deployment_days": len(unique_dates),
                 "number_of_unique_deployment_month":len(unique_months = {date.month for date in unique_dates}),
-                "number_of_unique_deployment_weeks": len({date.isocalendar()[1] for date in unique_dates})
+                "number_of_unique_deployment_weeks": len({date.isocalendar()[1] for date in unique_dates}),
                 "total_deployments": len(workflow_runs_list),
             },
             default=str,
