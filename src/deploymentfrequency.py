@@ -141,7 +141,7 @@ class DeploymentFrequency:
         rating, color = self.compute_rating(deployments_per_day)
 
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
-        logger.info(f"Workflows: {self.get_workflows()}")
+        logger.info(f"Workflows: {await self.get_workflows()}")
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Number of days: {self.number_of_days}")
         logger.info(
