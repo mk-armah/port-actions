@@ -65,17 +65,29 @@ jobs:
           terraform plan 
           terraform apply -auto-approve
 
-      - name: Set Outputs for Other Jobs
-        id: terraform_outputs
+      # - name: Set Outputs for Other Jobs
+      #   id: terraform_outputs
+      #   run: |
+      #     cd src
+      #     echo "instance_state=$(terraform output -raw instance_state)" >> $GITHUB_OUTPUT
+      #     echo "instance_public_ip=$(terraform output -raw instance_public_ip)" >> $GITHUB_OUTPUT
+      #     echo "instance_private_ip=$(terraform output -raw instance_private_ip)" >> $GITHUB_OUTPUT
+      #     echo "subnet_id=$(terraform output -raw subnet_id)" >> $GITHUB_OUTPUT
+      #     echo "tags=$(terraform output -json tags)" >> $GITHUB_OUTPUT
+      #     echo "security_groups=$(terraform output -json security_groups)" >> $GITHUB_OUTPUT
+      #     echo "instance_id=$(terraform output -raw instance_id)" >> $GITHUB_OUTPUT
+
+      - name: Display Terraform Outputs
+        id: display_outputs
         run: |
           cd src
-          echo "instance_state=$(terraform output -raw instance_state)" >> $GITHUB_OUTPUT
-          echo "instance_public_ip=$(terraform output -raw instance_public_ip)" >> $GITHUB_OUTPUT
-          echo "instance_private_ip=$(terraform output -raw instance_private_ip)" >> $GITHUB_OUTPUT
-          echo "subnet_id=$(terraform output -raw subnet_id)" >> $GITHUB_OUTPUT
-          echo "tags=$(terraform output -json tags)" >> $GITHUB_OUTPUT
-          echo "security_groups=$(terraform output -json security_groups)" >> $GITHUB_OUTPUT
-          echo "instance_id=$(terraform output -raw instance_id)" >> $GITHUB_OUTPUT
+          echo "Instance State: $(terraform output -raw instance_state)"
+          echo "Instance Public IP: $(terraform output -raw instance_public_ip)"
+          echo "Instance Private IP: $(terraform output -raw instance_private_ip)"
+          echo "Subnet ID: $(terraform output -raw subnet_id)"
+          echo "Tags: $(terraform output -json tags)"
+          echo "Security Groups: $(terraform output -json security_groups)"
+          echo "Instance ID: $(terraform output -raw instance_id)"
           
       - name: Create a log message
         uses: port-labs/port-github-action@v1
