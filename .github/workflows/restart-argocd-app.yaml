@@ -187,12 +187,12 @@ jobs:
         uses: port-labs/port-github-action@v1
         with:
           identifier: ${{env.response.metadata.uid}}
-          title: $(echo $response | jq -r '.metadata.name')
+          title: "${{env.response.metadata.name}}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |
             {
               "namespace": "${{env.response.metadata.namespace}}",
-              "gitRepo": "${{env.response..spec.source.repoURL}}",
+              "gitRepo": "${{env.response.spec.source.repoURL}}",
               "gitPath": "${{response.spec.source.path}}",
               "destinationServer": "${{env.response.spec.destination.server}}",
               "syncStatus": "${{env.response.status.sync.status}}",
