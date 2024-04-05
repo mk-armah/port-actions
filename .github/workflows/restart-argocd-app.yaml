@@ -194,7 +194,7 @@ jobs:
               "namespace": "${{env.response.metadata.namespace}}",
               "gitRepo": "${{env.response..spec.source.repoURL}}",
               "gitPath": "${{response.spec.source.path}}",
-              "destinationServer": "$env.response.spec.destination.server}}",
+              "destinationServer": "${{env.response.spec.destination.server}}",
               "syncStatus": "${{env.response.status.sync.status}}",
               "healthStatus": "${{env.response.status.health.status}}",
               "createdAt": "${{env.response.metadata.creationTimestamp}}"
