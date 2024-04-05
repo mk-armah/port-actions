@@ -89,7 +89,7 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Successfully logged in to Argo CD via the CLI ✅"
 
-      - name: Restart Deployment via Argo CD
+      - name: Restart Argo CD Deployment
         run: |
           argocd app actions run ${{ inputs.application_name }} restart --kind Deployment
 
@@ -138,7 +138,7 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-          logMessage: "Application reach a synchronized state and is Healthy ✅"
+          logMessage: "Application reached a synchronized state and is Healthy ✅"
 
       - name: Report Application Instability
         if: failure()
@@ -151,10 +151,6 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Application failed to stabilize ❌"
 
-      # - name: Fetch Application Details
-      #   id: app_details
-      #   run: |
-      #     argocd app get ${{ inputs.application_name }} --output json
 
       - name: Fetch Application Details
         id: app_details
@@ -163,11 +159,6 @@ jobs:
           echo "response<<EOF" >> $GITHUB_ENV
           cat app_details.json >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-      - name: Report Application Status
-        run: |
-          echo "Application Status:"
-          echo "${{ steps.app_details.outputs.result }}"
             
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -178,10 +169,6 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Reporting the restarted application back to port ..."
-
-      - name: Use Application Details
-        run: |
-          echo "Application Details: $response"
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
