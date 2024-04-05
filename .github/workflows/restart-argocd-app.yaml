@@ -11,7 +11,7 @@ on:
         required: false
         default: 'false'
       application_server:
-        description: 'Argo CD server address'
+        description: 'Argo CD server address without https. eg. my-argo-cd-server.com'
         required: false
       port_payload:
         required: true
@@ -179,7 +179,7 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{fromJson(env.response).metadata.uid}}
+          identifier: ${{fromJson(env.response).metadata.name}}
           title: "${{env.PROCESSED_TITLE}}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |
