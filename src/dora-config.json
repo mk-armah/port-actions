@@ -12,5 +12,19 @@
     "timeframe": 2,
     "branch": "main",
     "workflows": ["verify-docs-build.yml"]
+  },
+  {
+    "owner": "port-labs",
+    "repository": "ocean",
+    "branch": "main",
+    "timeframe": 4,
+    "workflows": []
+  },
+  {
+    "owner": "port-labs",
+    "repository": "ocean",
+    "branch": "main",
+    "timeframe": 4,
+    "workflows": []
   }
 ]
