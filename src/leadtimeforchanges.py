@@ -34,7 +34,7 @@ class LeadTimeForChanges:
     async def __call__(self):
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
         logger.info(f"Number of days: {self.number_of_days}")
-        logger.info(f"Workflows: {self.workflows}")
+        logger.info(f"Workflows: {await self.get_workflows()}")
         logger.info(f"Branch: {self.branch}")
         logger.info(
             f"Commit counting method '{self.commit_counting_method}' being used"
@@ -53,17 +53,6 @@ class LeadTimeForChanges:
             "Content-Type": "application/json",
         }
         return headers
-
-    # async def send_api_requests(self, url, params=None):
-    #     async with httpx.AsyncClient() as client:
-    #         try:
-    #             response = await client.get(url, headers=self.auth_header, params=params)
-    #             response.raise_for_status()
-    #             return response.json()
-    #         except httpx.HTTPStatusError as e:
-    #             logger.error(f"HTTP error occurred: {e.response.status_code}")
-    #         except Exception as e:
-    #             logger.error(f"An error occurred: {e}")
 
     async def send_api_requests(self, url, params=None):
         backoff_time = 1
@@ -243,7 +232,7 @@ class LeadTimeForChanges:
 if __name__ == "__main__":
     owner = os.getenv("OWNER")
     repo = os.getenv("REPOSITORY")
-    token = os.getenv("GITHUB_TOKEN")  # Your personal access token or GitHub App token
+    token = os.getenv("GITHUB_TOKEN")
     workflows = os.getenv("WORKFLOWS", "[]")
     branch = os.getenv("BRANCH", "main")
     time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
