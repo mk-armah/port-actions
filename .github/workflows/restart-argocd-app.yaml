@@ -169,12 +169,18 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Reporting the restarted application back to port ..."
-          
+
+      - name: Process Title
+        run: |
+          PROCESSED_TITLE=$(echo '${{ env.response }}' | jq -r '.metadata.name' | sed 's/[^a-zA-Z0-9-]//g' | awk 'BEGIN{OFS=FS="-"} {for(i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)) }1')
+          echo "PROCESSED_TITLE=$PROCESSED_TITLE" >> $GITHUB_ENV
+        shell: bash
+  
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
           identifier: ${{fromJson(env.response).metadata.uid}}
-          title: "${{fromJson(env.response).metadata.name}}"
+          title: "${{env.PROCESSED_TITLE}}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |
             {
