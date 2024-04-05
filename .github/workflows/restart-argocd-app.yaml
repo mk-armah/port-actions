@@ -167,7 +167,7 @@ jobs:
       #   with:
       #     url: 'https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}'
       #     method: 'GET'
-      #     customHeaders: '{ "Content-Type": "application/json" ,"Authorization": "Bearer ${{env.ARGO_CD_TOKEN}}" }'
+      #     customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{env.ARGO_CD_TOKEN}}" }'
 
       - name: Fetch Application Details
         id: app_details
@@ -188,7 +188,11 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Reporting the restarted application back to port ..."
-    
+
+      - name: Report Application Status
+        run: |
+          echo "${{ fromJson(steps.app_details.outputs.response) }}"
+          
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
