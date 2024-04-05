@@ -150,29 +150,19 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Application failed to stabilize ❌"
-          
-      # - name: Obtain Argo CD Access Token
-      #   run: |
-      #     RESPONSE=$(curl -k -sSf -X POST "https://${{inputs.application_server}}/api/v1/session" \
-      #       -d '{"username":"${{ secrets.ARGO_CD_USERNAME }}", "password":"${{ secrets.ARGO_CD_PASSWORD }}"}' \
-      #       -H 'Content-Type: application/json')
-      #     echo "ARGO_CD_TOKEN=$(echo $RESPONSE | jq -r '.token')" >> $GITHUB_ENV
-      #   env:
-      #     ARGO_CD_USERNAME: ${{ secrets.ARGO_CD_USERNAME }}
-      #     ARGO_CD_PASSWORD: ${{ secrets.ARGO_CD_PASSWORD }}
 
-      # - name: Get Application Details via API
-      #   id: get_app_details
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: 'https://${{inputs.application_server}}/api/v1/applications/${{ inputs.application_name }}'
-      #     method: 'GET'
-      #     customHeaders: '{ "Content-Type": "application/json", "Authorization": "Bearer ${{env.ARGO_CD_TOKEN}}" }'
+      # - name: Fetch Application Details
+      #   id: app_details
+      #   run: |
+      #     argocd app get ${{ inputs.application_name }} --output json
 
       - name: Fetch Application Details
         id: app_details
         run: |
-          argocd app get ${{ inputs.application_name }} --output json
+          argocd app get ${{ inputs.application_name }} --output json > app_details.json
+          echo "response<<EOF" >> $GITHUB_ENV
+          cat app_details.json >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Report Application Status
         run: |
@@ -189,9 +179,9 @@ jobs:
           runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
           logMessage: "Reporting the restarted application back to port ..."
 
-      - name: Report Application Status
+      - name: Use Application Details
         run: |
-          echo "${{ fromJson(steps.app_details.outputs.response) }}"
+          echo "Application Details: $response"
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
