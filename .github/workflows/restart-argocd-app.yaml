@@ -186,18 +186,18 @@ jobs:
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{env.response.metadata.uid}}
-          title: "${{env.response.metadata.name}}"
+          identifier: ${{fromJson(env.response).metadata.uid}}
+          title: "${{fromJson(env.response).metadata.name}}"
           blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
           properties: |
             {
-              "namespace": "${{env.response.metadata.namespace}}",
-              "gitRepo": "${{env.response.spec.source.repoURL}}",
-              "gitPath": "${{env.response.spec.source.path}}",
-              "destinationServer": "${{env.response.spec.destination.server}}",
-              "syncStatus": "${{env.response.status.sync.status}}",
-              "healthStatus": "${{env.response.status.health.status}}",
-              "createdAt": "${{env.response.metadata.creationTimestamp}}"
+              "namespace": "${{fromJson(env.response).metadata.namespace}}",
+              "gitRepo": "${{fromJson(env.response).spec.source.repoURL}}",
+              "gitPath": "${{fromJson(env.response).spec.source.path}}",
+              "destinationServer": "${{fromJson(env.response).spec.destination.server}}",
+              "syncStatus": "${{fromJson(env.response).status.sync.status}}",
+              "healthStatus": "${{fromJson(env.response).status.health.status}}",
+              "createdAt": "${{fromJson(env.response).metadata.creationTimestamp}}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
