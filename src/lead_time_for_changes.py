@@ -80,8 +80,48 @@ class LeadTimeForChanges:
         return workflow_counter, total_workflow_hours
 
     def calculate_rating(self, lead_time_for_changes_in_hours):
-        # Logic remains the same as your original script
-        ...
+        daily_deployment = 24
+        weekly_deployment = 24 * 7
+        monthly_deployment = 24 * 30
+        every_six_months_deployment = 24 * 30 * 6
+
+        if lead_time_for_changes_in_hours <= 0:
+            rating = "None"
+            color = "lightgrey"
+        elif lead_time_for_changes_in_hours < 1:
+            rating = "Elite"
+            color = "brightgreen"
+        elif lead_time_for_changes_in_hours <= daily_deployment:
+            rating = "Elite"
+            color = "brightgreen"
+        elif daily_deployment < lead_time_for_changes_in_hours <= weekly_deployment:
+            rating = "High"
+            color = "green"
+        elif weekly_deployment < lead_time_for_changes_in_hours <= monthly_deployment:
+            rating = "High"
+            color = "green"
+        elif (
+            monthly_deployment
+            < lead_time_for_changes_in_hours
+            <= every_six_months_deployment
+        ):
+            rating = "Medium"
+            color = "yellow"
+        else:
+            # lead_time_for_changes_in_hours > every_six_months_deployment
+            rating = "Low"
+            color = "red"
+
+        display_metric = round(lead_time_for_changes_in_hours, 2)
+        display_unit = "hours"
+
+        return {
+            "rating": rating,
+            "color": color,
+            "display_metric": display_metric,
+            "display_unit": display_unit,
+        }
+
 
     def evaluate_lead_time(self, pr_result, workflow_result):
         pr_counter, total_pr_hours = pr_result
