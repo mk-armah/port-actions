@@ -84,8 +84,28 @@ class LeadTimeForChanges:
         ...
 
     def evaluate_lead_time(self, pr_result, workflow_result):
-        # Logic remains the same as your original script
-        ...
+        pr_counter, total_pr_hours = pr_result
+        workflow_counter, total_workflow_hours = workflow_result
+        if pr_counter == 0:
+            pr_counter = 1
+        if workflow_counter == 0:
+            workflow_counter = 1
+        pr_average = total_pr_hours / pr_counter
+        workflow_average = total_workflow_hours / workflow_counter
+        lead_time_for_changes_in_hours = pr_average + workflow_average
+        logger.info(f"PR average time duration: {pr_average} hours")
+        logger.info(f"Workflow average time duration: {workflow_average} hours")
+        logger.info(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
+
+        report = {
+            "pr_average_time_duration": round(pr_average, 2),
+            "workflow_average_time_duration": round(workflow_average, 2),
+            "lead_time_for_changes_in_hours": round(lead_time_for_changes_in_hours, 2),
+        }
+        rating = self.calculate_rating(lead_time_for_changes_in_hours)
+        report.update(rating)
+
+        return json.dumps(report, default=str)
 
 
 if __name__ == "__main__":
