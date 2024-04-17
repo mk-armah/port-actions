@@ -1,13 +1,6 @@
 [
   {
     "owner": "port-labs",
-    "repository": "ocean",
-    "branch": "main",
-    "timeframe": 4,
-    "workflows": []
-  },
-  {
-    "owner": "port-labs",
     "repository": "port-docs",
     "timeframe": 2,
     "branch": "main",
@@ -17,14 +10,7 @@
     "owner": "port-labs",
     "repository": "ocean",
     "branch": "main",
-    "timeframe": 4,
-    "workflows": []
-  },
-  {
-    "owner": "port-labs",
-    "repository": "ocean",
-    "branch": "main",
-    "timeframe": 4,
+    "timeframe": 2,
     "workflows": []
   }
 ]
