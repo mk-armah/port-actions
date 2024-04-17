@@ -17,7 +17,7 @@ class LeadTimeForChanges:
     ):
         self.owner = owner
         self.repo = repo
-        self.workflows = json.loads(workflows)
+        self.workflows = json.loads(workflows) if workflows else None
         self.branch = branch
         self.number_of_days = number_of_days
         self.commit_counting_method = commit_counting_method
@@ -32,7 +32,7 @@ class LeadTimeForChanges:
         logger.info(f"Commit counting method '{self.commit_counting_method}' being used")
 
         pr_result = self.process_pull_requests()
-        workflow_result = self.process_workflows()
+        workflow_result = self.process_workflows() if self.workflows != None else None
 
         return self.evaluate_lead_time(pr_result, workflow_result)
 
@@ -43,8 +43,10 @@ class LeadTimeForChanges:
         prs = self.get_pull_requests()
         pr_counter = 0
         total_pr_hours = 0
+        # Ensure now is also offset-aware by using UTC
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
         for pr in prs:
-            if pr.merged and pr.merge_commit_sha and pr.merged_at > datetime.datetime.now() - datetime.timedelta(days=self.number_of_days):
+            if pr.merged and pr.merge_commit_sha and pr.merged_at > now_utc - datetime.timedelta(days=self.number_of_days):
                 pr_counter += 1
                 commits = list(pr.get_commits())
                 if commits:
@@ -125,13 +127,21 @@ class LeadTimeForChanges:
 
     def evaluate_lead_time(self, pr_result, workflow_result):
         pr_counter, total_pr_hours = pr_result
-        workflow_counter, total_workflow_hours = workflow_result
         if pr_counter == 0:
             pr_counter = 1
-        if workflow_counter == 0:
-            workflow_counter = 1
-        pr_average = total_pr_hours / pr_counter
-        workflow_average = total_workflow_hours / workflow_counter
+        pr_average = total_pr_hours / pr_counter 
+
+        if workflow_result:
+            workflow_counter, total_workflow_hours = workflow_result
+            if workflow_counter == 0:
+                workflow_counter = 1
+    
+            workflow_average = total_workflow_hours / workflow_counter
+
+        else:
+            workflow_average = 0
+            logger.info("Excluded workflows in computing metric")
+            
         lead_time_for_changes_in_hours = pr_average + workflow_average
         logger.info(f"PR average time duration: {pr_average} hours")
         logger.info(f"Workflow average time duration: {workflow_average} hours")
@@ -148,17 +158,45 @@ class LeadTimeForChanges:
         return json.dumps(report, default=str)
 
 
+# if __name__ == "__main__":
+#     owner = os.getenv("OWNER")
+#     repo = os.getenv("REPOSITORY")
+#     token = os.getenv("GITHUB_TOKEN")
+#     workflows = os.getenv("WORKFLOWS", "[]")
+#     branch = os.getenv("BRANCH", "main")
+#     time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
+
+#     lead_time_for_changes = LeadTimeForChanges(
+#         owner, repo, workflows, branch, time_frame, pat_token=token
+#     )
+#     report = lead_time_for_changes()
+#     with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+#         github_env.write(f"lead_time_for_changes_report={report}\n")
+
+
 if __name__ == "__main__":
-    owner = os.getenv("OWNER")
-    repo = os.getenv("REPOSITORY")
-    token = os.getenv("GITHUB_TOKEN")
-    workflows = os.getenv("WORKFLOWS", "[]")
-    branch = os.getenv("BRANCH", "main")
-    time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
+    parser = argparse.ArgumentParser(description='Calculate lead time for changes.')
+    parser.add_argument('--owner', required=True, help='Owner of the repository')
+    parser.add_argument('--repo', required=True, help='Repository name')
+    parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument('--workflows', required=False, default = None, help='Github workflows')
+    parser.add_argument('--branch', default='main', help='Branch name')
+    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
+    args = parser.parse_args()
+
+    owner = args.owner
+    repo = args.repo
+    token = args.token
+    branch = args.branch
+    time_frame = args.timeframe
 
     lead_time_for_changes = LeadTimeForChanges(
-        owner, repo, workflows, branch, time_frame, pat_token=token
+        owner, repo, branch, time_frame, pat_token=token
     )
     report = lead_time_for_changes()
-    with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-        github_env.write(f"lead_time_for_changes_report={report}\n")
+    print(report)
+    
+    if platform == "github-actions":
+       with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+           github_env.write(f"lead_time_for_changes_report={report}\n")
