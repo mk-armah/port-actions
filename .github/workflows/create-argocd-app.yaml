@@ -3,12 +3,17 @@ name: Manage GKE Cluster
 on:
   workflow_dispatch:
     inputs:
-      clusterName:
+      cluster_name:
         description: 'Cluster Name'
         required: true
-      repoURLforArgo: 
+      repo_ulr_for_argo: 
         description: 'The URL of the repository for Argo CD to deploy GKE'
         required: true
+      port_payload:
+        required: true
+        description: Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+        type: string
 
 jobs:
   deploy-cluster:
@@ -36,11 +41,11 @@ jobs:
 
     - name: Deploy Cluster with Argo CD
       run: |
-          argocd app create ${{ github.event.inputs.clusterName }} \
-            --repo ${{ github.event.inputs.repoURLforArgo }} \
+          argocd app create ${{ github.event.inputs.cluster_name }} \
+            --repo ${{ github.event.inputs.repo_ulr_for_argo }} \
             --path . \
             --dest-server https://kubernetes.default.svc \
-            --dest-namespace ${{ github.event.inputs.clusterName }} \
+            --dest-namespace ${{ github.event.inputs.cluster_name }} \
             --project default \
             --sync-policy automated \
             --sync-option CreateNamespace=true \
