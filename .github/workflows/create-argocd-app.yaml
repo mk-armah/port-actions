@@ -6,15 +6,6 @@ on:
       clusterName:
         description: 'Cluster Name'
         required: true
-      region:
-        description: 'Region'
-        required: true
-      machineType:
-        description: 'Machine Type'
-        required: true
-      nodeCount:
-        description: 'Node Count'
-        required: true
       repoURLforArgo: 
         description: 'The URL of the repository for Argo CD to deploy GKE'
         required: true
