@@ -66,7 +66,7 @@ jobs:
           REPOSITORY: ${{ matrix.repository }}
           OWNER: ${{ matrix.owner }}
           BRANCH: ${{ matrix.branch }}
-        run: python src/deploymentfrequency.py
+        run: python src/deployment_frequency.py
 
       - name: Lead Time For Changes
         env:
@@ -75,7 +75,7 @@ jobs:
           REPOSITORY: ${{ matrix.repository }}
           OWNER: ${{ matrix.owner }}
           BRANCH: ${{ matrix.branch }}
-        run: python src/leadtimeforchanges.py
+        run: python src/lead_time_for_changes.py
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
