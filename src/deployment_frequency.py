@@ -3,7 +3,7 @@ import os
 import json
 from github import Github
 from loguru import logger
-
+from argparse import argparse
 
 class DeploymentFrequency:
     def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
