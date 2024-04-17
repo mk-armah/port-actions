@@ -4,8 +4,6 @@ import json
 from github import Github
 from loguru import logger
 
-PAGE_SIZE = 100
-
 
 class DeploymentFrequency:
     def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
@@ -83,16 +81,38 @@ class DeploymentFrequency:
         }, default=str)
 
 
+# if __name__ == "__main__":
+#     owner = os.getenv("OWNER")
+#     repo = os.getenv("REPOSITORY")
+#     pat_token = os.getenv("GITHUB_TOKEN")
+#     workflows = os.getenv("WORKFLOWS", "[]")
+#     branch = os.getenv("BRANCH", "main")
+#     time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
+
+#     deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
+#     report = deployment_frequency()
+
+#     with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+#         github_env.write(f"deployment_frequency_report={report}\n")
+
 if __name__ == "__main__":
-    owner = os.getenv("OWNER")
-    repo = os.getenv("REPOSITORY")
-    pat_token = os.getenv("GITHUB_TOKEN")
-    workflows = os.getenv("WORKFLOWS", "[]")
-    branch = os.getenv("BRANCH", "main")
-    time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
+    parser = argparse.ArgumentParser(description='Calculate Deployment Frequency.')
+    parser.add_argument('--owner', required=True, help='Owner of the repository')
+    parser.add_argument('--repo', required=True, help='Repository name')
+    parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument('--branch', default='main', help='Branch name')
+    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--platform', default='github_actions', help = 'Platform where script is being run on')
+    args = parser.parse_args()
 
-    deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
-    report = deployment_frequency()
+    owner = args.owner
+    repo = args.repo
+    token = args.token
+    branch = args.branch
+    time_frame = args.timeframe
 
-    with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-        github_env.write(f"deployment_frequency_report={report}\n")
+    lead_time_for_changes = LeadTimeForChanges(
+        owner, repo, branch, time_frame, pat_token=token
+    )
+    report = lead_time_for_changes()
+    print(report)
