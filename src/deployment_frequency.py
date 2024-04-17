@@ -70,7 +70,7 @@ class DeploymentFrequency:
         logger.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
         logger.info(f"Rating: {rating} ({color})")
 
-        print("Unique Dates", unique_dates)
+        logger.info("Unique Deployment Dates", unique_dates)
         return json.dumps({
             "deployment_frequency": round(deployments_per_day, 2),
             "rating": rating,
@@ -80,29 +80,15 @@ class DeploymentFrequency:
             "total_deployments": len(workflow_runs_list),
         }, default=str)
 
-
-# if __name__ == "__main__":
-#     owner = os.getenv("OWNER")
-#     repo = os.getenv("REPOSITORY")
-#     pat_token = os.getenv("GITHUB_TOKEN")
-#     workflows = os.getenv("WORKFLOWS", "[]")
-#     branch = os.getenv("BRANCH", "main")
-#     time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
-
-#     deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token)
-#     report = deployment_frequency()
-
-#     with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-#         github_env.write(f"deployment_frequency_report={report}\n")
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Calculate Deployment Frequency.')
     parser.add_argument('--owner', required=True, help='Owner of the repository')
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument('--workflows', required=True, default = '[]', help='Github workflows')
     parser.add_argument('--branch', default='main', help='Branch name')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
-    parser.add_argument('--platform', default='github_actions', help = 'Platform where script is being run on')
+    parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
     owner = args.owner
@@ -110,9 +96,14 @@ if __name__ == "__main__":
     token = args.token
     branch = args.branch
     time_frame = args.timeframe
+    workflows= args.workflows
 
-    lead_time_for_changes = LeadTimeForChanges(
-        owner, repo, branch, time_frame, pat_token=token
-    )
-    report = lead_time_for_changes()
+    deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token = token)
+    report = deployment_frequency()
+    
+    report = deployment_frequency()
     print(report)
+    
+    if platform == "github-actions":
+       with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+           github_env.write(f"deployment_frequency_report={report}\n")
