@@ -158,22 +158,6 @@ class LeadTimeForChanges:
         return json.dumps(report, default=str)
 
 
-# if __name__ == "__main__":
-#     owner = os.getenv("OWNER")
-#     repo = os.getenv("REPOSITORY")
-#     token = os.getenv("GITHUB_TOKEN")
-#     workflows = os.getenv("WORKFLOWS", "[]")
-#     branch = os.getenv("BRANCH", "main")
-#     time_frame = int(os.getenv("TIMEFRAME_IN_DAYS", 30))
-
-#     lead_time_for_changes = LeadTimeForChanges(
-#         owner, repo, workflows, branch, time_frame, pat_token=token
-#     )
-#     report = lead_time_for_changes()
-#     with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-#         github_env.write(f"lead_time_for_changes_report={report}\n")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Calculate lead time for changes.')
     parser.add_argument('--owner', required=True, help='Owner of the repository')
