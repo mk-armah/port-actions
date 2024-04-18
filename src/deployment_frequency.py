@@ -12,12 +12,16 @@ SECONDS_BETWEEN_WRITES=0.5
 class DeploymentFrequency:
     def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
         self.owner, self.repo = owner, repo
-        self.workflows = json.loads(workflows)
         self.branch = branch
         self.number_of_days = number_of_days
         self.pat_token = pat_token
         self.github = Github(login_or_token = self.pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
+        try:
+            self.workflows = json.loads(workflows)
+        except JSONDecodeError:
+            logger.error("Invalid JSON format for workflows. Using an empty list.")
+            self.workflows = []
 
     def get_workflows(self):
         if not self.workflows:
