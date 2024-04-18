@@ -69,26 +69,19 @@ class LeadTimeForChanges:
         else:
             return self.workflows
 
-    def process_pull_requests(self):
-        prs = self.get_pull_requests()
-        pr_counter = 0
-        total_pr_hours = 0
-        # Ensure now is also offset-aware by using UTC
-        now_utc = datetime.datetime.now(datetime.timezone.utc)
-        for pr in prs:
-            if pr.merged and pr.merge_commit_sha and pr.merged_at > now_utc - datetime.timedelta(days=self.number_of_days):
-                pr_counter += 1
-                commits = list(pr.get_commits())
-                if commits:
-                    if self.commit_counting_method == "last":
-                        start_date = commits[-1].commit.committer.date
-                    elif self.commit_counting_method == "first":
-                        start_date = commits[0].commit.committer.date
-                    merged_at = pr.merged_at
-                    duration = merged_at - start_date
-                    total_pr_hours += duration.total_seconds() / 3600
-        return pr_counter, total_pr_hours
-
+    def process_workflows(self):
+        workflow_ids = self.get_workflows()
+        total_workflow_hours = 0
+        workflow_counter = 0
+        for workflow_id in workflow_ids:
+            runs = list(self.repo_object.get_workflow(workflow_id).get_runs())
+            for run in runs:
+                if run.head_branch == self.branch and run.created_at > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=self.number_of_days):
+                    workflow_counter += 1
+                    duration = run.updated_at - run.created_at
+                    total_workflow_hours += duration.total_seconds() / 3600
+        return workflow_counter, total_workflow_hours
+        
     def calculate_rating(self, lead_time_for_changes_in_hours):
         daily_deployment = 24
         weekly_deployment = 24 * 7
