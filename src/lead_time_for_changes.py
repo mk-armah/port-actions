@@ -28,7 +28,8 @@ class LeadTimeForChanges:
         self.branch = branch
         self.number_of_days = number_of_days
         self.commit_counting_method = commit_counting_method
-        self.github = Github(login_or_token = pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
+        # self.github = Github(login_or_token = pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
+        self.github = Github(login_or_token = pat_token)
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
         self.ignore_workflows = ignore_workflows
         try:
