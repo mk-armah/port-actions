@@ -3,6 +3,7 @@ import os
 import json
 from github import Github
 import argparse
+import logging
 
 #Throttling, set to None to restore default behavior
 SECONDS_BETWEEN_REQUESTS=0.12
