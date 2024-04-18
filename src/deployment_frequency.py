@@ -80,7 +80,6 @@ class DeploymentFrequency:
         logging.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
         logging.info(f"Rating: {rating} ({color})")
 
-        logging.info("Unique Deployment Dates", unique_dates)
         return json.dumps({
             "deployment_frequency": round(deployments_per_day, 2),
             "rating": rating,
