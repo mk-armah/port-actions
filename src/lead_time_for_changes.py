@@ -19,6 +19,7 @@ class LeadTimeForChanges:
         number_of_days,
         commit_counting_method="last",
         pat_token="",
+        ignore_workflows=True
     ):
         self.owner = owner
         self.repo = repo
@@ -32,12 +33,12 @@ class LeadTimeForChanges:
     def __call__(self):
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
         logger.info(f"Number of days: {self.number_of_days}")
-        logger.info(f"Workflows: {self.get_workflows()}")
+        logger.info(f"Workflows: {self.workflows()}")
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Commit counting method '{self.commit_counting_method}' being used")
 
         pr_result = self.process_pull_requests()
-        workflow_result = self.process_workflows() if self.workflows != None else None
+        workflow_result = self.process_workflows() if not(self.ignore_workflows) else None
 
         return self.evaluate_lead_time(pr_result, workflow_result)
 
@@ -172,10 +173,11 @@ if __name__ == "__main__":
     parser.add_argument('--branch', default='main', help='Branch name')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
+    parser.add_argument('--ignore_workflows', action='store_true', help='Exclude workflows. Default is False.')
     args = parser.parse_args()
 
     lead_time_for_changes = LeadTimeForChanges(
-        args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token=args.token
+        args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token=args.token,ignore_workflows=args.ignore_workflows
     )
     report = lead_time_for_changes()
     print(report)
