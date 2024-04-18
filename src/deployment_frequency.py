@@ -97,6 +97,7 @@ if __name__ == "__main__":
     branch = args.branch
     time_frame = args.timeframe
     workflows= args.workflows
+    platform = args.platform
 
     deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token = token)
     report = deployment_frequency()
