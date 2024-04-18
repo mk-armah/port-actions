@@ -5,7 +5,7 @@ from github import Github
 from loguru import logger
 import argparse
 
-#Throttling
+#Throttling, set to None to restore default behavior
 SECONDS_BETWEEN_REQUESTS=0.12
 SECONDS_BETWEEN_WRITES=0.5
 
