@@ -24,9 +24,10 @@ class DeploymentFrequency:
             workflows = self.repo_object.get_workflows()
             workflow_ids = [workflow.id for workflow in workflows]
             logger.info(f"Found {len(workflow_ids)} workflows in Repo")
-            return workflow_ids
         else:
-            return self.workflows
+            workflow_ids = self.workflows
+            logger.info(f"Workflows: {workflow_ids}")
+        return workflow_ids
 
     def fetch_workflow_runs(self):
         workflow_ids = self.get_workflows()
@@ -68,7 +69,6 @@ class DeploymentFrequency:
         rating, color = self.compute_rating(deployments_per_day)
 
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
-        logger.info(f"Workflows: {self.get_workflows()}")
         logger.info(f"Branch: {self.branch}")
         logger.info(f"Number of days: {self.number_of_days}")
         logger.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
