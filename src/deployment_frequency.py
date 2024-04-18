@@ -3,6 +3,7 @@ import os
 import json
 from github import Github
 import argparse
+import logging
 
 #Throttling
 SECONDS_BETWEEN_REQUESTS=0.12
