@@ -4,10 +4,11 @@ import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RepositoryMetrics:
-    def __init__(self, owner, repo, time_frame):
-        self.github_client = Github(os.getenv("GITHUB_TOKEN"))
+    def __init__(self, owner, repo, time_frame,pat_token):
+        self.github_client = Github(pat_token)
         self.repo_name = f"{owner}/{repo}"
         self.time_frame = int(time_frame)
         self.start_date = datetime.datetime.now(datetime.UTC).replace(
@@ -143,21 +144,23 @@ class RepositoryMetrics:
     def timedelta_to_decimal_hours(self, td):
         return round(td.total_seconds() / 3600, 2)
 
-
-def main():
-    owner = os.getenv("OWNER")
-    repo = os.getenv("REPOSITORY")
-    time_frame = os.getenv("TIMEFRAME_IN_DAYS")  # os.getenv('TIME_FRAME')
-    print("Repository Name:", f"{owner}/{repo}")
-    print("TimeFrame (in days):", time_frame)
-
-    repo_metrics = RepositoryMetrics(owner, repo, time_frame)
-    metrics = repo_metrics.calculate_pr_metrics()
-
-    metrics_json = json.dumps(metrics, default=str)  # Ensure proper serialization
-    with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-        github_env.write(f"metrics={metrics_json}\n")
-
-
 if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Calculate lead time for changes.')
+    parser.add_argument('--owner', required=True, help='Owner of the repository')
+    parser.add_argument('--repo', required=True, help='Repository name')
+    parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
+    args = parser.parse_args()
+
+    logging.info("Repository Name:", f"{owner}/{repo}")
+    logging.info("TimeFrame (in days):", time_frame)
+
+    repo_metrics = RepositoryMetrics(args.owner, args.repo, args.timeframe, pat_token=args.token)
+    metrics = repo_metrics.calculate_pr_metrics()
+    metrics_json = json.dumps(metrics, default=str)
+
+    if args.platform == "github-actions":
+        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+        github_env.write(f"metrics={metrics_json}\n")
