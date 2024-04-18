@@ -9,13 +9,13 @@ import argparse
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RepositoryMetrics:
-    def __init__(self, owner, repo, time_frame,pat_token):
+    def __init__(self, owner, repo, timeframe,pat_token):
         self.github_client = Github(pat_token)
         self.repo_name = f"{owner}/{repo}"
-        self.time_frame = int(time_frame)
+        self.timeframe = int(timeframe)
         self.start_date = datetime.datetime.now(datetime.UTC).replace(
             tzinfo=datetime.timezone.utc
-        ) - datetime.timedelta(days=self.time_frame)
+        ) - datetime.timedelta(days=self.timeframe)
         self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
@@ -98,7 +98,7 @@ class RepositoryMetrics:
         review_weeks = {
             review_date.isocalendar()[1] for review_date in aggregated["review_dates"]
         }
-        average_prs_reviewed_per_week = len(review_weeks) / max(1, self.time_frame)
+        average_prs_reviewed_per_week = len(review_weeks) / max(1, self.timeframe)
 
         metrics = {
             "id": self.repo.id,
@@ -119,7 +119,7 @@ class RepositoryMetrics:
             else 0,
             "prs_opened": aggregated["prs_opened"],
             "weekly_prs_merged": self.timedelta_to_decimal_hours(
-                aggregated["total_open_to_close_time"] / max(1, self.time_frame)
+                aggregated["total_open_to_close_time"] / max(1, self.timeframe)
             )
             if aggregated["prs_merged"]
             else 0,
