@@ -77,6 +77,14 @@ jobs:
       #     BRANCH: ${{ matrix.branch }}
       #   run: python src/lead_time_for_changes.py
 
+      - name: Compute PR Metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
+          REPOSITORY: ${{ matrix.repository }}
+          OWNER: ${{ matrix.owner }}
+        run: |
+          python src/calculate_pr_metrics.py
+          
       - name: Deployment Frequency
         id: deployment_frequency
         run: python src/deployment_frequency.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --branch ${{ matrix.branch }} --platform github-actions
