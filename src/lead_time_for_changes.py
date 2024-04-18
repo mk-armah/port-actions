@@ -5,6 +5,10 @@ from github import Github
 from loguru import logger
 import argparse
 
+#Throttling
+SECONDS_BETWEEN_REQUESTS=0.12
+SECONDS_BETWEEN_WRITES=0.5
+
 class LeadTimeForChanges:
     def __init__(
         self,
@@ -22,7 +26,7 @@ class LeadTimeForChanges:
         self.branch = branch
         self.number_of_days = number_of_days
         self.commit_counting_method = commit_counting_method
-        self.github = Github(login_or_token = self.pat_token,seconds_between_requests=0.12, seconds_between_writes=0.5)
+        self.github = Github(login_or_token = self.pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
 
     def __call__(self):
