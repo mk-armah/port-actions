@@ -157,7 +157,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info(f"Repository Name: {args.owner}/{args.repo}")
-    logging.info(f"TimeFrame (in days): args.timeframe)
+    logging.info(f"TimeFrame (in days): args.timeframe")
 
     repo_metrics = RepositoryMetrics(args.owner, args.repo, args.timeframe, pat_token=args.token)
     metrics = repo_metrics.calculate_pr_metrics()
