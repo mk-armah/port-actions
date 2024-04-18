@@ -57,7 +57,6 @@ jobs:
           OWNER: ${{ matrix.owner }}
         run: |
           python src/calculate_pr_metrics.py
-
       # - name: Deployment Frequency
       #   id: deployment_frequency
       #   env:
@@ -83,7 +82,7 @@ jobs:
           REPOSITORY: ${{ matrix.repository }}
           OWNER: ${{ matrix.owner }}
         run: |
-          python src/calculate_pr_metrics.py
+          python src/calculate_pr_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --platform github-actions
           
       - name: Deployment Frequency
         id: deployment_frequency
