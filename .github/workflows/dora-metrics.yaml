@@ -83,7 +83,7 @@ jobs:
       
       - name: Lead Time For Changes
         id: lead_time_for_changes
-        run: python src/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows ${{ toJson(matrix.workflows) }} --branch ${{ matrix.branch }} --platform github-actions
+        run: python src/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --branch ${{ matrix.branch }} --platform github-actions
         
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
