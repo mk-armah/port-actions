@@ -2,12 +2,13 @@ import datetime
 import os
 import json
 from github import Github
-from loguru import logger
 import argparse
 
 #Throttling
 SECONDS_BETWEEN_REQUESTS=0.12
 SECONDS_BETWEEN_WRITES=0.5
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DeploymentFrequency:
     def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
@@ -20,17 +21,17 @@ class DeploymentFrequency:
         try:
             self.workflows = json.loads(workflows)
         except JSONDecodeError:
-            logger.error("Invalid JSON format for workflows. Using an empty list.")
+            logging.error("Invalid JSON format for workflows. Using an empty list.")
             self.workflows = []
 
     def get_workflows(self):
         if not self.workflows:
             workflows = self.repo_object.get_workflows()
             workflow_ids = [workflow.id for workflow in workflows]
-            logger.info(f"Found {len(workflow_ids)} workflows in Repo")
+            logging.info(f"Found {len(workflow_ids)} workflows in Repo")
         else:
             workflow_ids = self.workflows
-            logger.info(f"Workflows: {workflow_ids}")
+            logging.info(f"Workflows: {workflow_ids}")
         return workflow_ids
 
     def fetch_workflow_runs(self):
@@ -72,13 +73,13 @@ class DeploymentFrequency:
         deployments_per_day = self.calculate_deployments_per_day(workflow_runs_list)
         rating, color = self.compute_rating(deployments_per_day)
 
-        logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
-        logger.info(f"Branch: {self.branch}")
-        logger.info(f"Number of days: {self.number_of_days}")
-        logger.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
-        logger.info(f"Rating: {rating} ({color})")
+        logging.info(f"Owner/Repo: {self.owner}/{self.repo}")
+        logging.info(f"Branch: {self.branch}")
+        logging.info(f"Number of days: {self.number_of_days}")
+        logging.info(f"Deployment frequency over the last {self.number_of_days} days is {deployments_per_day} per day")
+        logging.info(f"Rating: {rating} ({color})")
 
-        logger.info("Unique Deployment Dates", unique_dates)
+        logging.info("Unique Deployment Dates", unique_dates)
         return json.dumps({
             "deployment_frequency": round(deployments_per_day, 2),
             "rating": rating,
