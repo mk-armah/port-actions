@@ -91,20 +91,10 @@ if __name__ == "__main__":
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
-    owner = args.owner
-    repo = args.repo
-    token = args.token
-    branch = args.branch
-    time_frame = args.timeframe
-    workflows= args.workflows
-    platform = args.platform
-
-    deployment_frequency = DeploymentFrequency(owner, repo, workflows, branch, time_frame, pat_token = token)
-    report = deployment_frequency()
-    
+    deployment_frequency = DeploymentFrequency(args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token = args.token)
     report = deployment_frequency()
     print(report)
     
-    if platform == "github-actions":
+    if args.platform == "github-actions":
        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
            github_env.write(f"deployment_frequency_report={report}\n")
