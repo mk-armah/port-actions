@@ -156,8 +156,8 @@ if __name__ == "__main__":
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
-    logging.info("Repository Name:", f"{args.owner}/{args.repo}")
-    logging.info("TimeFrame (in days):", args.timeframe)
+    logging.info(f"Repository Name: {args.owner}/{args.repo}")
+    logging.info(f"TimeFrame (in days): args.timeframe)
 
     repo_metrics = RepositoryMetrics(args.owner, args.repo, args.timeframe, pat_token=args.token)
     metrics = repo_metrics.calculate_pr_metrics()
