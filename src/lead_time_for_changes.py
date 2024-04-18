@@ -2,12 +2,13 @@ import datetime
 import os
 import json
 from github import Github
-from loguru import logger
 import argparse
 
 #Throttling, set to None to restore default behavior
 SECONDS_BETWEEN_REQUESTS=0.12
 SECONDS_BETWEEN_WRITES=0.5
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class LeadTimeForChanges:
     def __init__(
@@ -32,14 +33,14 @@ class LeadTimeForChanges:
         try:
             self.workflows = json.loads(workflows) if workflows else None
         except JSONDecodeError:
-            logger.error("Invalid JSON format for workflows. Using an empty list.")
+            logging.error("Invalid JSON format for workflows. Using an empty list.")
             self.workflows = []
 
     def __call__(self):
-        logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
-        logger.info(f"Number of days: {self.number_of_days}")
-        logger.info(f"Branch: {self.branch}")
-        logger.info(f"Commit counting method '{self.commit_counting_method}' being used")
+        logging.info(f"Owner/Repo: {self.owner}/{self.repo}")
+        logging.info(f"Number of days: {self.number_of_days}")
+        logging.info(f"Branch: {self.branch}")
+        logging.info(f"Commit counting method '{self.commit_counting_method}' being used")
 
         pr_result = self.process_pull_requests()
         workflow_result = self.process_workflows() if not(self.ignore_workflows) else None
@@ -73,10 +74,10 @@ class LeadTimeForChanges:
         if not self.workflows:
             workflows = self.repo_object.get_workflows()
             workflow_ids = [workflow.id for workflow in workflows]
-            logger.info(f"Found {len(workflow_ids)} workflows in Repo")
+            logging.info(f"Found {len(workflow_ids)} workflows in Repo")
         else:
             workflow_ids = self.workflows
-            logger.info(f"Workflows: {workflow_ids}")
+            logging.info(f"Workflows: {workflow_ids}")
         return workflow_ids
 
     def process_workflows(self):
@@ -151,12 +152,12 @@ class LeadTimeForChanges:
 
         else:
             workflow_average = 0
-            logger.info("Excluded workflows in computing metric")
+            logging.info("Excluded workflows in computing metric")
             
         lead_time_for_changes_in_hours = pr_average + workflow_average
-        logger.info(f"PR average time duration: {pr_average} hours")
-        logger.info(f"Workflow average time duration: {workflow_average} hours")
-        logger.info(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
+        logging.info(f"PR average time duration: {pr_average} hours")
+        logging.info(f"Workflow average time duration: {workflow_average} hours")
+        logging.info(f"Lead time for changes in hours: {lead_time_for_changes_in_hours}")
 
         report = {
             "pr_average_time_duration": round(pr_average, 2),
