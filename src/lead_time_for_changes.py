@@ -61,7 +61,7 @@ class LeadTimeForChanges:
         return pr_counter, total_pr_hours
 
     def get_workflows(self):
-        if not self.workflows:
+        if self.workflows==[]:
             workflows = list(self.repo_object.get_workflows())
             workflow_ids = [workflow.id for workflow in workflows]
             logger.info(f"Found {len(workflow_ids)} workflows in Repo")
