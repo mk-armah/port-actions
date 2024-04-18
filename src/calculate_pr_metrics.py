@@ -145,8 +145,8 @@ class RepositoryMetrics:
         return round(td.total_seconds() / 3600, 2)
 
 if __name__ == "__main__":
-    if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Calculate lead time for changes.')
+    
+    parser = argparse.ArgumentParser(description='Calculate Pull Request Metrics.')
     parser.add_argument('--owner', required=True, help='Owner of the repository')
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
