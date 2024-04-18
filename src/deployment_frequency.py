@@ -93,7 +93,7 @@ if __name__ == "__main__":
     parser.add_argument('--owner', required=True, help='Owner of the repository')
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
-    parser.add_argument('--workflows', default='[]', help='GitHub workflows as a JSON string.')
+    parser.add_argument('--workflows', required=True, help='GitHub workflows as a JSON string.')
     parser.add_argument('--branch', default='main', help='Branch name')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
