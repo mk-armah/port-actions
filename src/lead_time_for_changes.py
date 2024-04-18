@@ -23,12 +23,16 @@ class LeadTimeForChanges:
     ):
         self.owner = owner
         self.repo = repo
-        self.workflows = json.loads(workflows) if workflows else None
         self.branch = branch
         self.number_of_days = number_of_days
         self.commit_counting_method = commit_counting_method
         self.github = Github(login_or_token = pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
+        try:
+            self.workflows = json.loads(workflows) if workflows else None
+        except JSONDecodeError:
+            logger.error("Invalid JSON format for workflows. Using an empty list.")
+            self.workflows = []
 
     def __call__(self):
         logger.info(f"Owner/Repo: {self.owner}/{self.repo}")
