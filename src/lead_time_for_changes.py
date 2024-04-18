@@ -170,18 +170,12 @@ if __name__ == "__main__":
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
-    owner = args.owner
-    repo = args.repo
-    token = args.token
-    branch = args.branch
-    time_frame = args.timeframe
-
     lead_time_for_changes = LeadTimeForChanges(
-        owner, repo, branch, time_frame, pat_token=token
+        args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token=args.token
     )
     report = lead_time_for_changes()
     print(report)
     
-    if platform == "github-actions":
+    if args.platform == "github-actions":
        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
            github_env.write(f"lead_time_for_changes_report={report}\n")
