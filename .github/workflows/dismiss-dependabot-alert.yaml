@@ -28,7 +28,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
+      - name: Log Before Dismissing Dependabot
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to dismiss alert ${{inputs.alert_number}} ..."
+
+      - name: Get Incident Object from Response
+        id: incident
+        run: |
+          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
+
       - name: Dismiss Specific Dependabot Alert
         uses: actions/github-script@v5
         with:
@@ -39,7 +54,6 @@ jobs:
             const alertNumber = ${{ github.event.inputs.alert_number }};
             const dismissalReason = ${{ github.event.inputs.dismissal_reason }};
 
-            // Dismiss the specific Dependabot alert
             await github.rest.codeScanning.updateAlert({
               owner,
               repo,
@@ -48,3 +62,13 @@ jobs:
               dismissed_reason: dismissalReason
             });
             console.log(`Dismissed alert ${alertNumber} in ${owner}/${repo} for reason: ${dismissalReason}`);
+            
+      - name: Log After Dismissing Dependabot
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Dismissed alert ${{inputs.alertNumber}} in ${{inputs.owner}}/${{inputs.repo}} for reason: ${{inputs.dismissalReason}}"
