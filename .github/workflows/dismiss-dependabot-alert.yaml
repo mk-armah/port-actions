@@ -4,18 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       repository_owner:
-        description: 'GitHub username or organization of the repository owner'
+        description: GitHub username or organization of the repository owner
         required: true
       repository_name:
-        description: 'Name of the repository'
+        description: Name of the repository
         required: true
       alert_number:
-        description: 'Alert number to dismiss'
+        description: Alert number to dismiss
         required: true
       dismissal_reason:
-        description: 'Reason for dismissing the alert (e.g., "false positive", "won't fix")'
+        description: Reason for dismissing the alert (e.g., "false positive", "won't fix")
         required: true
-        default: 'won't fix'
+        default: won't fix
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
 
 jobs:
   dismiss-alert:
