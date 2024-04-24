@@ -1,0 +1,45 @@
+name: Dismiss Dependabot Alert
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository_owner:
+        description: 'GitHub username or organization of the repository owner'
+        required: true
+      repository_name:
+        description: 'Name of the repository'
+        required: true
+      alert_number:
+        description: 'Alert number to dismiss'
+        required: true
+      dismissal_reason:
+        description: 'Reason for dismissing the alert (e.g., "false positive", "won't fix")'
+        required: true
+        default: 'won't fix'
+
+jobs:
+  dismiss-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Dismiss Specific Dependabot Alert
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = '${{ github.event.inputs.repository_owner }}';
+            const repo = '${{ github.event.inputs.repository_name }}';
+            const alertNumber = ${{ github.event.inputs.alert_number }};
+            const dismissalReason = ${{ github.event.inputs.dismissal_reason }};
+
+            // Dismiss the specific Dependabot alert
+            await github.rest.codeScanning.updateAlert({
+              owner,
+              repo,
+              alert_number: alertNumber,
+              state: 'dismissed',
+              dismissed_reason: dismissalReason
+            });
+            console.log(`Dismissed alert ${alertNumber} in ${owner}/${repo} for reason: ${dismissalReason}`);
