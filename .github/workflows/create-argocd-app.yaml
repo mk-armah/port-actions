@@ -31,7 +31,7 @@ jobs:
       run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --grpc-web
 
     - name: Register Repository in Argo CD
-      run: argocd repo add ${{ github.event.inputs.repo_ulr_for_argo }} --username mk-armah --password ${{ secrets.MYGITHUB_TOKEN }}
+      run: argocd repo add ${{ github.event.inputs.repo_ulr_for_argo }} --username mk-armah --password ${{ secrets.PATTOKEN }}
 
     - name: Check Directory
       run: |
