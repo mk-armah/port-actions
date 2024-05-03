@@ -70,13 +70,17 @@ jobs:
       #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
       #     logMessage: |
       #       User not found 😭 Skipping assignment... ⛴️
-            
+
+      - name: Get Entity ID
+        id: get_entity_id
+        run: echo "entity_id=${{fromJson(github.event.inputs.port_payload).context.entity}}" >> $GITHUB_ENV
+  
       - name: Change Who is On-Call in PagerDuty
         if: steps.user_id_from_search.outputs.user_id != 'empty'
         id: change_on_call_user
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "https://api.pagerduty.com/schedules/${{fromJson(github.event.inputs.port_payload).context.entity}}/overrides"
+          url: "https://api.pagerduty.com/schedules/${{ env.entity_id }}/overrides"
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
           data: >-
