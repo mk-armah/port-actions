@@ -25,15 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
-      # - name: Inform searching of user in user list
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Searching for user in organization user list... ⛴️"
+      - name: Inform searching of user in user list
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Searching for user in organization user list... ⛴️"
 
       - name: Search for user id among user list
         id: search_for_user_id
@@ -50,31 +50,27 @@ jobs:
           user_id=$(echo '${{ steps.search_for_user_id.outputs.response }}' | jq -r '.users | if length > 0 then .[0].id else "empty" end')
           echo "user_id=${user_id}" >> $GITHUB_OUTPUT
 
-      # - name: Inform user existence
-      #   if: steps.user_id_from_search.outputs.user_id != 'empty'
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     operation: PATCH_RUN
-      #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
-      #     logMessage: |
-      #       User found 🥹, Changing On-Call to ${{ inputs.new_on_call_user }}... ⛴️
+      - name: Inform user existence
+        if: steps.user_id_from_search.outputs.user_id != 'empty'
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          logMessage: |
+            User found 🥹, Changing On-Call to ${{ inputs.new_on_call_user }}... ⛴️
       
-      # - name: Inform user inexistence
-      #   if: steps.user_list_from_search.outputs.selected_user_id == 'empty'
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     operation: PATCH_RUN
-      #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
-      #     logMessage: |
-      #       User not found 😭 Skipping assignment... ⛴️
-
-      - name: Get Entity ID
-        id: get_entity_id
-        run: echo "entity_id=${{fromJson(github.event.inputs.port_payload).context.entity}}" >> $GITHUB_ENV
+      - name: Inform user inexistence
+        if: steps.user_list_from_search.outputs.selected_user_id == 'empty'
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          logMessage: |
+            User not found 😭 Skipping assignment... ⛴️
   
       - name: Change Who is On-Call in PagerDuty
         if: steps.user_id_from_search.outputs.user_id != 'empty'
@@ -99,15 +95,15 @@ jobs:
               ]
             }
 
-      # - name: Log Before Requesting for Updated Schedule
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Getting updated schedule from pagerduty ..."
+      - name: Log Before Requesting for Updated Schedule
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Getting updated schedule from pagerduty ..."
 
       - name: Request For Changed Schedule
         id: new_schedule
@@ -124,15 +120,15 @@ jobs:
           echo "user_summaries=$USERS_JSON" >> $GITHUB_ENV
         shell: bash
   
-      # - name: Log Before Upserting Schedule to Port
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Ingesting updated schedule to port..."
+      - name: Log Before Upserting Schedule to Port
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Ingesting updated schedule to port..."
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -153,12 +149,12 @@ jobs:
           operation: UPSERT
           # runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
-      # - name: Log After Upserting Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Entity upserting was successful ✅"
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
