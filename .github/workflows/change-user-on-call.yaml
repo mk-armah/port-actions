@@ -81,7 +81,7 @@ jobs:
         id: change_on_call_user
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "https://api.pagerduty.com/schedules/${{ env.entity_id }}/overrides"
+          url: "https://api.pagerduty.com/schedules/${{fromJson(github.event.inputs.port_payload).context.entity}}/overrides"
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
           data: >-
