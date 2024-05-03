@@ -37,7 +37,6 @@ jobs:
 
       - name: Search for user id among user list
         id: search_for_user_id
-        if: steps.inform_skip_assignee.outcome == 'skipped'
         uses: fjogeleit/http-request-action@v1
         with:
           url: "https://api.pagerduty.com/users?query=${{ github.event.inputs.new_on_call_user }}"
