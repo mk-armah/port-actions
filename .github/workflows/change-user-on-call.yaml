@@ -80,7 +80,7 @@ jobs:
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
           data: >-
-            '{
+            {
               "overrides": [
                 {
                   "start": "${{ github.event.inputs.start_time }}",
@@ -92,7 +92,7 @@ jobs:
                   "time_zone": "UTC"
                 }
               ]
-            }'
+            }
 
       # - name: Log Before Requesting for Updated Schedule
       #   uses: port-labs/port-github-action@v1
