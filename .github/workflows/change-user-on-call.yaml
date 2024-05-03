@@ -10,8 +10,8 @@ on:
         description: The end time for the override, in ISO 8601 format (e.g., 2023-01-01T01:00:00Z).
         required: true
         type: string
-      new_on_call_user_id:
-        description: The ID of the user who will be taking over the on-call duty
+      new_on_call_user:
+        description: The email of the user who will be taking over the on-call duty
         required: true
         type: string
       port_payload:
@@ -40,7 +40,7 @@ jobs:
         if: steps.inform_skip_assignee.outcome == 'skipped'
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "https://api.pagerduty.com/users?query=${{ github.event.inputs.assignee }}"
+          url: "https://api.pagerduty.com/users?query=${{ github.event.inputs.new_on_call_user }}"
           method: "GET"
           customHeaders: '{"Content-Type": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
@@ -59,7 +59,7 @@ jobs:
       #     operation: PATCH_RUN
       #     runId: ${{ fromJson(inputs.port_payload).context.runId }}
       #     logMessage: |
-      #       User found 🥹, Changing On-Call to ${{ steps.user_list_from_search.outputs.selected_user_name }}... ⛴️
+      #       User found 🥹, Changing On-Call to ${{ inputs.new_on_call_user }}... ⛴️
       
       # - name: Inform user inexistence
       #   if: steps.user_list_from_search.outputs.selected_user_id == 'empty'
