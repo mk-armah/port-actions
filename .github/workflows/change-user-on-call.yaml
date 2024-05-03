@@ -48,6 +48,7 @@ jobs:
         if: steps.search_for_user_id.outcome == 'success'
         run: |
           user_id=$(echo '${{ steps.search_for_user_id.outputs.response }}' | jq -r '.users | if length > 0 then .[0].id else "empty" end')
+          echo "user_id=${user_id}" >> $GITHUB_OUTPUT
 
       # - name: Inform user existence
       #   if: steps.user_id_from_search.outputs.user_id != 'empty'
@@ -90,8 +91,8 @@ jobs:
                   "start": "${{ github.event.inputs.start_time }}",
                   "end": "${{ github.event.inputs.end_time }}",
                   "user": {
-                    "id": "${{ github.event.inputs.new_on_call_user_id }}",
-                    "type": "user_reference"
+                    "id": "${{ steps.user_id_from_search.outputs.user_id }}",
+                    "type": "user_reference" 
                   },
                   "time_zone": "UTC"
                 }
