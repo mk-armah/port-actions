@@ -34,12 +34,11 @@ jobs:
           url: 'https://api.pagerduty.com/incidents'
           method: 'PUT'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}", "From": "${{ github.event.inputs.from }}"}'
-
           data: >-
               {
                 "incidents": [
                   {
-                    "id": "${{ fromJson(inputs.port_payload).context.entity }}",
+                    "id": ${{ fromJson(inputs.port_payload).context.entity }},
                     "type": "incident_reference",
                     "status": "acknowledged"
                   }
