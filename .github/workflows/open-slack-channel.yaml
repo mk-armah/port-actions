@@ -18,9 +18,9 @@ on:
         description: Add members manually to the channel.
         type: array
         required: false
-      port_payload:
-        description: Port's payload, including details for who triggered the action and general context (blueprint, run ID, etc...).
+      run_id:
         required: true
+        type: string
 
 jobs:
   open-slack-channel:
