@@ -9,11 +9,14 @@ on:
       run_id:
         required: true
         type: string
-      port_payload:
+      entity_identifier:
         required: true
-        description: >-
-          Port's payload, including details for who triggered the action and
-          general context (blueprint, run id, etc...)
+        type: string
+        description: The unique identifier of the triggered entity in port
+      blueprint:
+        required: true
+        type: string
+        description: The blueprint identifier of the action
 
 jobs:
   acknowledge_incident:
@@ -26,7 +29,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ inputs.run_id }}
           logMessage: "About to make a request to pagerduty..."
 
       - name: Request to Acknowledge Incident
@@ -55,7 +58,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ inputs.run_id }}
           logMessage: "Request to acknowledge incident failed ..."
 
       - name: Log Before Upserting Entity
@@ -65,7 +68,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ inputs.run_id }}
           logMessage: "Reporting the updated incident back to port ..."
 
       - name: UPSERT Entity
@@ -88,7 +91,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: UPSERT
-          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          runId: ${{ inputs.run_id }}
 
       - name: Log Upsert Entity Failure 
         if: failure()
@@ -98,7 +101,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ inputs.run_id }}
           logMessage: "Failed to upsert pagerduty incident to port ..."
 
       - name: Log After Upserting Entity
@@ -108,5 +111,5 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{ inputs.run_id }}
           logMessage: "Entity upserting was successful ✅"
