@@ -6,6 +6,9 @@ on:
         description: The email address of a valid user associated with the account making the request.
         required: true
         type: string
+      run_id:
+        required: true
+        type: string
       port_payload:
         required: true
         description: >-
