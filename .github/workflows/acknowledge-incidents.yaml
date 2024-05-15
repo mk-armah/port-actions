@@ -13,19 +13,18 @@ on:
           general context (blueprint, run id, etc...)
 
 jobs:
-  change-incident-owner:
+  acknowledge_incident:
     runs-on: ubuntu-latest
     steps:
-      
-      # - name: Log Executing Request to Change Owner
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "About to make a request to pagerduty..."
+      - name: Log Executing Request to Acknowledge Incident
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to make a request to pagerduty..."
 
       - name: Request to Acknowledge Incident
         id: acknowledge_incident
@@ -33,60 +32,38 @@ jobs:
         with:
           url: 'https://api.pagerduty.com/incidents'
           method: 'PUT'
-          customHeaders: >
-            {
-              "Content-Type": "application/json",
-              "Accept": "application/vnd.pagerduty+json;version=2",
-              "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}",
-              "From": "${{ github.event.inputs.from }}"
-            }
-          data: >
-            {
-              "incidents": [
-                {
-                  "id": "${{ fromJson(inputs.port_payload).context.entity }}",
-                  "type": "incident_reference",
-                  "status": "acknowledged"
-                }
-              ]
-            }
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}", "From": "${{ github.event.inputs.from }}"}'
+          data: >-
+              {
+                "incidents": [
+                  {
+                    "id": "${{ fromJson(inputs.port_payload).context.entity }}",
+                    "type": "incident_reference",
+                    "status": "acknowledged"
+                  }
+                ]
+              }
 
+      - name: Log Acknowledge Incident Request Failure 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Request to acknowledge incident failed ..."
 
-      # - name: Log If Request Fails 
-      #   if: failure()
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Request to acknowledge incident failed ..."
-          
-      # - name: Log Before Processing Incident Response
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Getting incident object from response received ..."
-
-      - name: Get Incident Object from Response
-        id: incident
-        run: |
-          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
-
-      # - name: Log Before Upserting Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Reporting the updated incident back to port ..."
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Reporting the updated incident back to port ..."
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
@@ -108,25 +85,25 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: UPSERT
-          # runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          runId: ${{ fromJson(inputs.port_payload).context.runId }}
 
-      # - name: Log If Upsetting Entity Fails 
-      #   if: failure()
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Failed to upsert pagerduty incident to port ..."
-          
-      # - name: Log After Upserting Entity
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
-      #     logMessage: "Entity upserting was successful ✅"
+      - name: Log Upsert Entity Failure 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Failed to upsert pagerduty incident to port ..."
+
+      - name: Log After Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Entity upserting was successful ✅"
