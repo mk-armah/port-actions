@@ -76,7 +76,7 @@ jobs:
         with:
           identifier: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].id }}"
           title: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].title }}"
-          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          blueprint: ${{ inputs.blueprint }}
           properties: |-
             {
               "status": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].status }}",
