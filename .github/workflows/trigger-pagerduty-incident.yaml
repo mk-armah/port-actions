@@ -55,7 +55,33 @@ jobs:
           url: 'https://api.pagerduty.com/incidents/${{fromJson(inputs.port_context).entity}}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
-    
+
+      - name: UPSERT Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: some_identifier
+          title: Some Title
+          team: "[]"
+          icon: DefaultBlueprint
+          blueprint: pagerdutyIncident
+          properties: |-
+            {
+              "status": "${{ fromJson(steps.get_incident.outputs.response).incident.status }}",
+              "url": "${{ fromJson(steps.get_incident.outputs.response).incident.html_url }}",
+              "urgency": "${{ fromJson(steps.get_incident.outputs.response).incident.urgency }}",
+              "responder": "${{ fromJson(steps.get_incident.outputs.response).incident.responder }}",
+              "escalation_policy": "${{ fromJson(steps.get_incident.outputs.response).incident.escalation_policy }}"
+              "created_at": "${{ fromJson(steps.get_incident.outputs.response).incident.created_at }}",
+              "updated_at": "${{ fromJson(steps.get_incident.outputs.response).incident.updated_at }}",
+             
+            }
+          relations: ${{fromJson(inputs.port_context).relations}}
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{fromJson(inputs.port_context).run_id}}
+      
       - name: Inform Entity upsert failure
         if: steps.upsert_entity.outcome == 'failure'
         uses: port-labs/port-github-action@v1
