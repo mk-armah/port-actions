@@ -1,17 +1,27 @@
+name: Create PagerDuty Incident
+
 on:
   workflow_dispatch:
     inputs:
-      port_payload:
+      title:
+        description: The title of the incident to create
         required: true
-        description: "Port's payload, including details for who triggered the action and general context (blueprint, run id, etc...)"
         type: string
-    secrets: 
-      PAGER_TOKEN: 
+      extra_details:
+        description: Extra details about the incident to create
+        required: false
+      service:
+        description: The service id to correlate the incident to
         required: true
-      PORT_CLIENT_ID:
+      urgency:
+        description: The urgency of the incident
+        required: false
+      from:
+        description: The email address of a valid user associated with the account making the request.
         required: true
-      PORT_CLIENT_SECRET:
+      port_context:
         required: true
+        description: includes blueprint, run ID, and entity identifier from Port.
 jobs: 
   trigger:
     runs-on: ubuntu-latest
@@ -20,10 +30,11 @@ jobs:
         with:
           portClientId: ${{ secrets.PORT_CLIENT_ID }}
           portClientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          token: ${{ secrets.PAGER_TOKEN }}
-          portRunId: ${{ fromJson(inputs.port_payload).context.runId }}
-          incidentTitle: ${{ fromJson(inputs.port_payload).payload.properties.title }}
-          extraDetails: ${{ fromJson(inputs.port_payload).payload.properties.extra_details }}
-          urgency: ${{ fromJson(inputs.port_payload).payload.properties.urgency }}
-          service: ${{ fromJson(inputs.port_payload).context.entity }}
+          token: ${{ secrets.PAGERDUTY_API_KEY }}
+          portRunId: ${{fromJson(inputs.port_context).run_id}}
+          incidentTitle: ${{ inputs.title }}
+          extraDetails: ${{ inputs.extra_details }}
+          urgency: ${{ inputs.urgency }}
+          actorEmail: ${{ inputs.from }}
+          service: ${{fromJson(inputs.port_context).entity}}
           blueprintIdentifier: 'pagerdutyIncident'
