@@ -67,7 +67,7 @@ jobs:
           properties: |-
             {
               "status": "${{ fromJson(steps.get_incident.outputs.response).incident.status }}",
-              "url": "${{ fromJson(steps.get_incident.outputs.response).incident.html_url }}",
+              "url": "${{ fromJson(steps.get_incident.outputs.response).incident.self }}",
               "urgency": "${{ fromJson(steps.get_incident.outputs.response).incident.urgency }}",
               "responder": "${{ fromJson(steps.get_incident.outputs.response).incident.assignments[0].assignee.summary }}",
               "escalation_policy": "${{ fromJson(steps.get_incident.outputs.response).incident.escalation_policy.summary }}",
