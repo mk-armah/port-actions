@@ -56,11 +56,15 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      - name: Log Incident Details
-        if: steps.get_incident.outcome == 'success'
-        run: |
-          echo "Incident details fetched successfully!"
-          echo "Response: $(echo '${{ steps.get_incident.outputs.response }}' | jq '.')"
+      - name: Log Before Upserting Entity
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Reporting the updated incident back to port ..."
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
