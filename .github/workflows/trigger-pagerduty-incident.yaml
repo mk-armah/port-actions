@@ -48,8 +48,26 @@ jobs:
               "event_action": "${{ github.event.inputs.event_action }}",
               "routing_key": "${{ github.event.inputs.routing_key }}"
             }
-            
-      - name: Create a log message
+      - name: Get PagerDuty Incident Details
+        id: get_incident
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.pagerduty.com/incidents/${{fromJson(inputs.port_context).entity}}'
+          method: 'GET'
+          customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
+    
+      - name: Inform Entity upsert failure
+        if: steps.upsert_entity.outcome == 'failure'
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Failed to report the triggered incident back to Port ..."
+
+      - name: Log After Upserting Entity
         id: log-response
         uses: port-labs/port-github-action@v1
         with:
@@ -60,4 +78,3 @@ jobs:
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: |
              PagerDuty incident triggered! ✅
-             "The incident id is: ${{ steps.trigger.outputs}}"
