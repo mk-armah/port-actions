@@ -1,4 +1,4 @@
-name: Acknowledge Incident In PagerDuty
+name: Resolve Incident In PagerDuty
 on:
   workflow_dispatch:
     inputs:
