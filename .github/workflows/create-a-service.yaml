@@ -115,7 +115,7 @@ jobs:
             {
               "status": "${{ fromJson(steps.create_service_request.outputs.response).service.status }}",
               "url": "${{ fromJson(steps.create_service_request.outputs.response).service.html_url }}",
-              "oncall": "${{ env.user_email }}"
+              "oncall": ${{ env.user_emails }}
             }
           relations: "{}"
           clientId: ${{ secrets.PORT_CLIENT_ID }}
