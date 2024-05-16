@@ -41,7 +41,12 @@ jobs:
                   }
                 }
               }
-
+      - name: Log Create Service Request Success
+        if: success()
+        run: |
+          echo "PagerDuty service created successfully!"
+          echo "Response: ${{ steps.create_service_request.outputs.response }}"
+          
       - name: Log Create Service Request Failure 
         if: failure()
         uses: port-labs/port-github-action@v1
@@ -72,7 +77,13 @@ jobs:
           url: 'https://api.pagerduty.com/oncalls?include[]=users&escalation_policy_ids[]=${{ inputs.escalation_policy }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
-
+      
+      - name: Log Fetch Oncalls Request Success
+        if: success()
+        run: |
+          echo "Oncalls fetched successfully!"
+          echo "Response: ${{ steps.fetch_oncalls.outputs.response }}"
+          
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
