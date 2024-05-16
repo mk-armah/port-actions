@@ -41,38 +41,17 @@ jobs:
                   }
                 ]
               }
-        env:
-          ERROR_MESSAGE: ${{ steps.acknowledge_incident.outputs.response }}
 
-      # - name: Log Acknowledge Incident Request Failure 
-      #   if: failure()
-      #   uses: port-labs/port-github-action@v1
-      #   with:
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: PATCH_RUN
-      #     runId: ${{fromJson(inputs.port_context).run_id}}
-      #     logMessage: "Request to acknowledge incident failed ..."
-
-      - name: Extract Error Message
+      - name: Log Acknowledge Incident Request Failure 
         if: failure()
-        id: extract_error_message
-        run: |
-          echo "Extracting error message..."
-          ERROR_MESSAGE=$(echo '${{ steps.acknowledge_incident.outputs.response }}' | jq -r '.message.error.errors[]')
-          echo "error_message=${ERROR_MESSAGE}" >> $GITHUB_ENV
-
-      - name: Log Acknowledge Incident Request Failure
-        if: steps.acknowledge_incident.outcome == 'failure'
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{ fromJson(github.event.inputs.port_context).run_id }}
-          logMessage: "Request to acknowledge incident failed: ${{ env.error_message }}"
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Request to acknowledge incident failed ..."
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
