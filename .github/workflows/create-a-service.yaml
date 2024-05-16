@@ -41,11 +41,6 @@ jobs:
                   }
                 }
               }
-      - name: Log Create Service Request Success
-        if: success()
-        run: |
-          echo "PagerDuty service created successfully!"
-          echo "Response: ${{ steps.create_service_request.outputs.response }}"
           
       - name: Log Create Service Request Failure 
         if: failure()
@@ -68,7 +63,7 @@ jobs:
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: |
              PagerDuty service created! ✅
-             Requesting for oncalls
+             Requesting for on-calls
     
       - name: Request for oncalls for Escalation Policy
         id: fetch_oncalls
@@ -78,12 +73,23 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      - name: Extract User Email
+      - name: Extract User Emails
         if: steps.fetch_oncalls.outcome == 'success'
-        id: extract_user_email
+        id: extract_user_emails
         run: |
-          EMAIL=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '.oncalls[0].user.email')
-          echo "user_email=${EMAIL}" >> $GITHUB_ENV
+          EMAILS=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '.oncalls[].user.email')
+          echo "user_emails=${EMAILS}" >> $GITHUB_ENV
+
+      - name: Log Fetch Oncalls Request Failure
+        if: steps.fetch_oncalls.outcome == 'failure'
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: Failed to fetch on-calls ❌
           
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
