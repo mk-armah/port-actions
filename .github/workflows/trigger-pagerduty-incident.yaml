@@ -74,7 +74,7 @@ jobs:
               "created_at": "${{ fromJson(steps.get_incident.outputs.response).incident.created_at }}",
               "updated_at": "${{ fromJson(steps.get_incident.outputs.response).incident.updated_at }}"
             }
-          relations: "${{fromJson(inputs.port_context).relations}}"
+          relations: "{}"
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
