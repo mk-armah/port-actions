@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch:
+    inputs:
+      port_payload:
+        required: true
+        description: "Port's payload, including details for who triggered the action and general context (blueprint, run id, etc...)"
+        type: string
+    secrets: 
+      PAGER_TOKEN: 
+        required: true
+      PORT_CLIENT_ID:
+        required: true
+      PORT_CLIENT_SECRET:
+        required: true
+jobs: 
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: port-labs/pagerduty-incident-gha@v1
+        with:
+          portClientId: ${{ secrets.PORT_CLIENT_ID }}
+          portClientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          token: ${{ secrets.PAGER_TOKEN }}
+          portRunId: ${{ fromJson(inputs.port_payload).context.runId }}
+          incidentTitle: ${{ fromJson(inputs.port_payload).payload.properties.title }}
+          extraDetails: ${{ fromJson(inputs.port_payload).payload.properties.extra_details }}
+          urgency: ${{ fromJson(inputs.port_payload).payload.properties.urgency }}
+          service: ${{ fromJson(inputs.port_payload).context.entity }}
+          blueprintIdentifier: 'pagerdutyIncident'
