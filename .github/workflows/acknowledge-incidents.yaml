@@ -35,13 +35,13 @@ jobs:
               {
                 "incidents": [
                   {
-                    "id": "${{ fromJson(inputs.port_payload.port_context).entity.identifier }}",
+                    "id": "${{ fromJson(github.event.inputs.port_context).entity.identifier }}",
                     "type": "incident_reference",
                     "status": "acknowledged"
                   }
                 ]
               }
-
+              
       - name: Log Acknowledge Incident Request Failure 
         if: failure()
         uses: port-labs/port-github-action@v1
