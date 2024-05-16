@@ -70,11 +70,11 @@ jobs:
               "url": "${{ fromJson(steps.get_incident.outputs.response).incident.html_url }}",
               "urgency": "${{ fromJson(steps.get_incident.outputs.response).incident.urgency }}",
               "responder": "${{ fromJson(steps.get_incident.outputs.response).incident.assignments[0].assignee.summary }}",
-              "escalation_policy": "${{ fromJson(steps.get_incident.outputs.response).incident.escalation_policy }}"
+              "escalation_policy": "${{ fromJson(steps.get_incident.outputs.response).incident.escalation_policy.summary }}",
               "created_at": "${{ fromJson(steps.get_incident.outputs.response).incident.created_at }}",
               "updated_at": "${{ fromJson(steps.get_incident.outputs.response).incident.updated_at }}"
             }
-          relations: ${{fromJson(inputs.port_context).relations}}
+          relations: "${{fromJson(inputs.port_context).relations}}"
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
