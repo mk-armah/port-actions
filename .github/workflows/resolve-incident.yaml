@@ -6,29 +6,27 @@ on:
         description: The email address of a valid user associated with the account making the request.
         required: true
         type: string
-      port_payload:
+      port_context:
         required: true
-        description: >-
-          Port's payload, including details for who triggered the action and
-          general context (blueprint, run id, etc...)
+        description: includes blueprint, run ID, and entity identifier from Port.
 
 jobs:
-  change-incident-owner:
+  resolve_incident:
     runs-on: ubuntu-latest
     steps:
       
-      - name: Log Executing Request to Change Owner
+      - name: Log Executing Request to Resolve Incident
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "About to make a request to pagerduty..."
 
-      - name: Request to Acknowledge Incident
-        id: acknowledge_incident
+      - name: Request to Resolve Incident
+        id: resolve_incident
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.pagerduty.com/incidents'
@@ -38,7 +36,7 @@ jobs:
               {
                 "incidents": [
                   {
-                    "id": "${{ fromJson(inputs.port_payload).context.entity }}",
+                    "id": ${{fromJson(inputs.port_context).entity}},
                     "type": "incident_reference",
                     "status": "resolved"
                   }
@@ -52,13 +50,8 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Getting incident object from response received ..."
-
-      - name: Get Incident Object from Response
-        id: incident
-        run: |
-          echo "incidents=${{ toJson(steps.acknowledge_incident.outputs.response)}}" >> $GITHUB_ENV
 
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -67,30 +60,30 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Reporting the updated incident back to port ..."
 
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
-          identifier: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].id }}"
-          title: "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].title }}"
-          blueprint: ${{ fromJson(inputs.port_payload).context.blueprint }}
+          identifier: "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].id }}"
+          title: "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].title }}"
+          blueprint: ${{fromJson(inputs.port_context).blueprint}}
           properties: |-
             {
-              "status": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].status }}",
-              "url": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].self }}",
-              "urgency": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].urgency }}",
-              "responder": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].assignments[0].assignee.summary}}",
-              "escalation_policy": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].escalation_policy.summary }}",
-              "created_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].created_at }}",
-              "updated_at": "${{ fromJson(steps.acknowledge_incident.outputs.response).incidents[0].updated_at }}"
+              "status": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].status }}",
+              "url": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].self }}",
+              "urgency": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].urgency }}",
+              "responder": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].assignments[0].assignee.summary}}",
+              "escalation_policy": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].escalation_policy.summary }}",
+              "created_at": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].created_at }}",
+              "updated_at": "${{ fromJson(steps.resolve_incident.outputs.response).incidents[0].updated_at }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: UPSERT
-          runId: ${{ fromJson(inputs.port_payload).context.runId }}
+          runId: ${{fromJson(inputs.port_context).run_id}}
 
       - name: Log After Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -99,5 +92,5 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Entity upserting was successful ✅"
