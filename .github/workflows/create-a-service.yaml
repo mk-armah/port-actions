@@ -78,7 +78,7 @@ jobs:
         id: extract_user_emails
         run: |
           echo "Extracting user emails..."
-          EMAILS=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '[.oncalls[].user.email]')
+          EMAILS=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -c '[.oncalls[].user.email]')
           echo "Extracted emails: $EMAILS"
           echo "user_emails=${EMAILS}" >> $GITHUB_ENV
 
