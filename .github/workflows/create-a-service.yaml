@@ -34,9 +34,14 @@ jobs:
               "service": {
                 "name": "${{ github.event.inputs.name }}",
                 "description": "${{ github.event.inputs.description }}",
-                "escalation_policy": ${{ github.event.inputs.escalation_policy }}
+                "status": "active",
+                "escalation_policy": {
+                  "id": "${{ github.event.inputs.escalation_policy }}",
+                  "type": "escalation_policy_reference"
+                  }
+                }
               }
-            } 
+
       - name: Log Create Service Request Failure 
         if: failure()
         uses: port-labs/port-github-action@v1
