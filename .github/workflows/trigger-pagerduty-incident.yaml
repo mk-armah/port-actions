@@ -43,7 +43,7 @@ jobs:
               "payload": {
                 "summary": "${{ github.event.inputs.summary }}",
                 "source": "${{ github.event.inputs.source }}",
-                "severity": "${{ github.event.inputs.severity }}", 
+                "severity": "${{ github.event.inputs.severity }}"
               },
               "event_action": "${{ github.event.inputs.event_action }}",
               "routing_key": "${{ github.event.inputs.routing_key }}"
