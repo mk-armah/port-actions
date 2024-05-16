@@ -37,8 +37,18 @@ jobs:
                 "escalation_policy": ${{ github.event.inputs.escalation_policy }}
               }
             } 
-
-      - name: Create a log message
+      - name: Log Create Service Request Failure 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Request to create service failed ..."
+          
+      - name: Log Request Success
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -50,7 +60,7 @@ jobs:
              PagerDuty service created! ✅
              Requesting for oncalls
     
-      - name: Request for oncalls for escalation_policy
+      - name: Request for oncalls for Escalation Policy
         id: fetch_oncalls
         uses: fjogeleit/http-request-action@v1
         with:
@@ -58,7 +68,7 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      - name: Create a log message
+      - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -73,8 +83,7 @@ jobs:
         uses: port-labs/port-github-action@v1
         with:
           identifier: "${{ fromJson(steps.create_service_request.outputs.response).service.id }}" 
-          title: "${{ fromJson(steps.create_service_request.outputs.response).service.summary }}" 
-          team: "[]"
+          title: "${{ fromJson(steps.create_service_request.outputs.response).service.summary }}"
           icon: pagerduty
           blueprint: ${{fromJson(inputs.port_context).blueprint}}
           properties: |-
@@ -90,7 +99,7 @@ jobs:
           operation: UPSERT
           runId: ${{fromJson(inputs.port_context).run_id}}
 
-      - name: Create a log message
+      - name: Log After Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -99,4 +108,4 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: |
-              Upsert was successful ✅
+              Upserting was successful ✅
