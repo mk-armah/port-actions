@@ -69,7 +69,7 @@ jobs:
         id: fetch_oncalls
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.pagerduty.com/oncalls?include[]=users&escalation_policy_ids[]=${{ fromJson(github.event.inputs.escalation_policy).id }}'
+          url: 'https://api.pagerduty.com/oncalls?include[]=users&escalation_policy_ids[]=${{ inputs.escalation_policy }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
