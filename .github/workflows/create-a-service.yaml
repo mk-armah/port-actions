@@ -77,12 +77,13 @@ jobs:
           url: 'https://api.pagerduty.com/oncalls?include[]=users&escalation_policy_ids[]=${{ inputs.escalation_policy }}'
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
-      
-      - name: Log Fetch Oncalls Request Success
-        if: success()
+
+      - name: Extract User Email
+        if: steps.fetch_oncalls.outcome == 'success'
+        id: extract_user_email
         run: |
-          echo "Oncalls fetched successfully!"
-          echo "Response: ${{ steps.fetch_oncalls.outputs.response }}"
+          EMAIL=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '.oncalls[0].user.email')
+          echo "user_email=${EMAIL}" >> $GITHUB_ENV
           
       - name: Log Before Upserting Entity
         uses: port-labs/port-github-action@v1
@@ -106,7 +107,7 @@ jobs:
             {
               "status": "${{ fromJson(steps.create_service_request.outputs.response).service.status }}",
               "url": "${{ fromJson(steps.create_service_request.outputs.response).service.html_url }}",
-              "oncall": "${{ fromJson(steps.fetch_oncalls).oncalls }}"
+              "oncall": "${{ env.user_email }}"
             }
           relations: "{}"
           clientId: ${{ secrets.PORT_CLIENT_ID }}
