@@ -56,11 +56,11 @@ jobs:
           method: 'GET'
           customHeaders: '{"Content-Type": "application/json", "Accept": "application/vnd.pagerduty+json;version=2", "Authorization": "Token token=${{ secrets.PAGERDUTY_API_KEY }}"}'
 
-      - name: Log Incident Details Failure
-        if: steps.get_incident.outcome == 'failure'
+      - name: Log Incident Details
+        if: steps.get_incident.outcome == 'success'
         run: |
-          echo "Request to get incident details failed..."
-          echo "Response: $(echo '${{ steps.get_incident.outputs.response }}' | jq .')"
+          echo "Incident details fetched successfully!"
+          echo "Response: $(echo '${{ steps.get_incident.outputs.response }}' | jq '.')"
           
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
