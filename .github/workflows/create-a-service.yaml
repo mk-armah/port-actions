@@ -77,7 +77,7 @@ jobs:
         if: steps.fetch_oncalls.outcome == 'success'
         id: extract_user_emails
         run: |
-          EMAILS=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '.oncalls[].user.email')
+          EMAILS=$(echo '${{ steps.fetch_oncalls.outputs.response }}' | jq -r '[.oncalls[].user.email]')
           echo "user_emails=${EMAILS}" >> $GITHUB_ENV
 
       - name: Log Fetch Oncalls Request Failure
