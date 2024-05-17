@@ -10,9 +10,6 @@ on:
       extra_details:
         description: Extra details about the incident to create
         required: false
-      service:
-        description: The service id to correlate the incident to
-        required: true
       urgency:
         description: The urgency of the incident
         required: false
