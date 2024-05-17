@@ -10,17 +10,13 @@ on:
         description: Create a private channel instead of a public one.
         required: false
         type: boolean
-      team_id:
-        description: Encoded team ID to create the channel in, required if org token is used.
-        type: string
-        required: false
       members:
         description: Add members manually to the channel.
         type: array
         required: false
-      run_id:
+      port_context:
         required: true
-        type: string
+        description: includes blueprint, run ID, and entity identifier from Port.
 
 jobs:
   open-slack-channel:
@@ -33,7 +29,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{ inputs.run_id }}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "About to create a conversation channel in slack..."
 
       - name: Create Slack Channel
@@ -45,14 +41,14 @@ jobs:
             -H "Authorization: Bearer $SLACK_TOKEN" \
             -H "Content-Type: application/json" \
             --data "{\"name\": \"${{ github.event.inputs.channel_name }}\",\"is_private\": ${{ github.event.inputs.is_private }} }")
-          
+
           echo "API Response: $response"
-          
+
           if [[ "$(echo $response | jq -r '.ok')" == "true" ]]; then
             channel_id=$(echo $response | jq -r '.channel.id')
             echo "Channel ID: $channel_id"
             echo "CHANNEL_ID=$channel_id" >> $GITHUB_ENV
-      
+
           else
             echo "Failed to create Slack channel. Channel ID is null."
             error=$(echo $response | jq -r '.error')
@@ -70,7 +66,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{ inputs.run_id }}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Failed to create slack channel: ${{env.CREATE_CHANNEL_ERROR}} ❌"
 
       - name: Log If Create Channel Request is Successful
@@ -80,12 +76,12 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{ inputs.run_id }}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Channel created successfully, channel Id: ${{env.CHANNEL_ID}} ✅"
-  
+
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
       - name: Add Members to Slack Channel
         id: add_members
         if: success()
@@ -94,10 +90,10 @@ jobs:
           CHANNEL_ID: ${{env.CHANNEL_ID}}
           CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
-          RUN_ID: ${{ inputs.run_id }}
+          RUN_ID: ${{ fromJson(github.event.inputs.port_payload).context.runId }}
           MEMBER_EMAILS: ${{ toJSON(github.event.inputs.members) }}
         run: |
-          cd src
+          cd slack
           chmod +x add-members-to-channel.sh
           bash add-members-to-channel.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
 
@@ -108,5 +104,5 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
-          runId: ${{ inputs.run_id }}
+          runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Successfully opened slack channel: ${{env.CHANNEL_ID}} ✅"
