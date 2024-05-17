@@ -98,6 +98,7 @@ jobs:
           bash add-members-to-channel.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
 
       - name: Log Successful Action
+        if: steps.add_members.outcome == 'failure'
         uses: port-labs/port-github-action@v1
         with:
           clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -105,4 +106,4 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_context).run_id}}
-          logMessage: "Successfully opened slack channel: ${{env.CHANNEL_ID}} ✅"
+          logMessage: "Failed to add members to channel ❌ "
