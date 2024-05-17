@@ -93,7 +93,7 @@ jobs:
           RUN_ID: ${{fromJson(inputs.port_context).run_id}}
           MEMBER_EMAILS: ${{ toJSON(github.event.inputs.members) }}
         run: |
-          cd slack
+          cd src
           chmod +x add-members-to-channel.sh
           bash add-members-to-channel.sh "$SLACK_TOKEN" "$CHANNEL_ID" "$CLIENT_ID" "$CLIENT_SECRET" "$RUN_ID" "$MEMBER_EMAILS"
 
