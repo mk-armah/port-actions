@@ -29,9 +29,9 @@ jobs:
           portClientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           token: ${{ secrets.PAGERDUTY_API_KEY }}
           portRunId: ${{fromJson(inputs.port_context).run_id}}
-          incidentTitle: ${{ inputs.title }}
-          extraDetails: ${{ inputs.extra_details }}
-          urgency: ${{ inputs.urgency }}
-          actorEmail: ${{ inputs.from }}
-          service: ${{fromJson(inputs.port_context).entity}}
+          incidentTitle: "${{ inputs.title }}"
+          extraDetails: "${{ inputs.extra_details }}"
+          urgency: "${{ inputs.urgency }}"
+          actorEmail: "${{ inputs.from }}"
+          service: "${{fromJson(inputs.port_context).entity}}"
           blueprintIdentifier: 'pagerdutyIncident'
