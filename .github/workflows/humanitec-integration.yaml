@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-  ingest-humanitec-resources:
+  ingest-humanitec-resources: 
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -32,6 +32,11 @@ jobs:
       
       - name: Ingest Entities to Port
         env:
-          
+            PORT_CLIENT_ID: ${{ toJson(matrix.workflows) }}
+            PORT_CLIENT_SECRET: ${{ secrets.PATTOKEN }}
+            HUMANITEC_API_TOKEN: ${{ secrets.HUMANITEC_API_TOKEN }}
+            HUMANITEC_BASE_URL: ${{ secrets.HUMANITEC_BASE_URL }}
+            HUMANITEC_ORG_ID: ${{secrets.HUMANITEC_ORG_ID }}
+            
         run: |
           python src/humanitec-exporter.py
