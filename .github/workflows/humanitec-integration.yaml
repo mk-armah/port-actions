@@ -31,5 +31,7 @@ jobs:
           pip install -r src/requirements.txt
       
       - name: Ingest Entities to Port
-        id: lead_time_for_changes
-        run: python src/humanitec-exporter.py
+        env:
+          
+        run: |
+          python src/humanitec-exporter.py
