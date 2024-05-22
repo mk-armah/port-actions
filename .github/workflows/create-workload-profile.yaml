@@ -63,16 +63,7 @@ jobs:
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: |
              Humanitech workload profile created! ✅
-          
-      - name: Log Before Upserting Entity
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(inputs.port_context).run_id}}
-          logMessage: |
+             Reporting created entity to port ... 🚴‍♂️
 
       - name: UPSERT Humanitec Workload Profile
         uses: port-labs/port-github-action@v1
@@ -86,7 +77,6 @@ jobs:
               "description": "${{ fromJson(steps.create_workload_profile.outputs.response).description }}",
               "version": "${{ fromJson(steps.create_workload_profile.outputs.response).version }}",
               "createdAt": "${{ fromJson(steps.create_workload_profile.outputs.response).created_at }}",
-              "updatedAt": "${{ fromJson(steps.create_workload_profile.outputs.response).updated_at }}",
               "specDefinition": "${{ fromJson(steps.create_workload_profile.outputs.response).spec_definition }}"
             }
           relations: "{}"
