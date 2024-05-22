@@ -35,7 +35,7 @@ jobs:
           data: >-
             {
               "id": "${{ github.event.inputs.id }}",
-              "spec_definition": ${{ fromJson(github.event.inputs.spec_definition) }},
+              "spec_definition": ${{ github.event.inputs.spec_definition }},
               "workload_profile_chart": {
                 "id": "${{ github.event.inputs.workload_profile_chart_id }}",
                 "version": "${{ github.event.inputs.workload_profile_chart_version }}"
