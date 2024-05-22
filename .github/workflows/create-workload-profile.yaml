@@ -77,7 +77,7 @@ jobs:
               "description": "${{ fromJson(steps.create_workload_profile.outputs.response).description }}",
               "version": "${{ fromJson(steps.create_workload_profile.outputs.response).version }}",
               "createdAt": "${{ fromJson(steps.create_workload_profile.outputs.response).created_at }}",
-              "specDefinition": "${{ fromJson(steps.create_workload_profile.outputs.response).spec_definition }}"
+              "specDefinition": ${{ toJson(fromJson(steps.create_workload_profile.outputs.response).spec_definition) }}
             }
           relations: "{}"
           clientId: ${{ secrets.PORT_CLIENT_ID }}
