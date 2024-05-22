@@ -48,9 +48,9 @@ jobs:
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json"}'
           data: >-
-            '{
-              "clientId": ${{secrets.PORT_CLIENT_ID}},
-              "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
+            {
+              "clientId": '${{secrets.PORT_CLIENT_ID}}',
+              "clientSecret": '${{secrets.PORT_CLIENT_SECRET}}'
             }'
           
       - name: Delete Application From Port
