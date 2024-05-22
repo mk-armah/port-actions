@@ -48,10 +48,10 @@ jobs:
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json"}'
           data: >-
-            {
+            '{
               "clientId": ${{secrets.PORT_CLIENT_ID}},
               "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
-            }
+            }'
           
       - name: Delete Application From Port
         uses: fjogeleit/http-request-action@v1
