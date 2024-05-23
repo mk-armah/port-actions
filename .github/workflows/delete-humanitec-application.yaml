@@ -80,4 +80,4 @@ jobs:
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: |
-              Upserting was successful ✅
+              Application has been successfully deleted from port ✅
