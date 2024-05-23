@@ -47,11 +47,11 @@ jobs:
           url: 'https://api.getport.io/v1/auth/access_token'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "accept": "application/json"}'
-          data: >-
-              { 
-                "clientId": ${{secrets.PORT_CLIENT_ID}},
-                "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
-              }
+          data: |
+            {
+              "clientId": "${{ secrets.PORT_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.PORT_CLIENT_SECRET }}"
+            }
           
       - name: Delete Application From Port
         uses: fjogeleit/http-request-action@v1
