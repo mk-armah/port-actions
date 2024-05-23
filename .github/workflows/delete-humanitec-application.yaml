@@ -59,10 +59,20 @@ jobs:
           CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
         run: |
-          response=$(curl -X DELETE "https://api.getport.io/v1/auth/access_token" \
-            -H "Content-Type: application/json" \
-            -d '{"clientId": "'"${CLIENT_ID}"'", "clientSecret": "'"${CLIENT_SECRET}"'"}')
-          echo "delete_resource_response=$response" >> $GITHUB_ENV
+          response=$(curl -X 'POST' \
+            'https://api.getport.io/v1/auth/access_token' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -d '{
+            "clientId": "'"${CLIENT_ID}"'",
+            "clientSecret": "'"${CLIENT_SECRET}"'" }')
+          if [[ "$http_code" -ne 200 ]]; then
+            echo "Error: HTTP $http_code"
+            exit 1
+          else
+            response_body=$(head -n -1 response.txt)
+            echo "delete_resource_response=$response_body" >> $GITHUB_ENV
+          fi
           
       - name: Delete Application From Port
         uses: fjogeleit/http-request-action@v1
