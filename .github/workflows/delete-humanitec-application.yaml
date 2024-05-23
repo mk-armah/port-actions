@@ -40,46 +40,25 @@ jobs:
              Humanitech application has been successfully deleted! ✅
              Deleting entity from port
 
-      # - name: Get Port Token
-      #   id: port_access_token
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: 'https://api.getport.io/v1/auth/access_token'
-      #     method: 'POST'
-      #     customHeaders: '{"Content-Type": "application/json"}'
-      #     data: >-
-      #         { 
-      #           "clientId": ${{secrets.PORT_CLIENT_ID}},
-      #           "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
-      #         }
-
-      - name: Make DELETE request to getport.io
-        id: delete_request
-        env:
-          CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
-        run: |
-          response=$(curl -X 'POST' \
-            'https://api.getport.io/v1/auth/access_token' \
-            -H 'accept: application/json' \
-            -H 'Content-Type: application/json' \
-            -d '{
-            "clientId": "'"${CLIENT_ID}"'",
-            "clientSecret": "'"${CLIENT_SECRET}"'" }')
-          response_body=$(head -n -1 response.txt)
-          if [[ "$http_code" -ne 200 ]]; then
-            echo "Error: $response_body"
-            exit 1
-          else
-            echo "delete_resource_response=$response_body" >> $GITHUB_ENV
-          fi
+      - name: Get Port Token
+        id: port_access_token
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.getport.io/v1/auth/access_token'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: >-
+              { 
+                "clientId": ${{secrets.PORT_CLIENT_ID}},
+                "clientSecret": ${{secrets.PORT_CLIENT_SECRET}}
+              }
           
       - name: Delete Application From Port
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.getport.io/v1/blueprints/${{fromJson(inputs.port_context).blueprint}}/entities/${{fromJson(inputs.port_context).entity}}?delete_dependents=false'
           method: 'DELETE'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ fromJson(env.delete_resource_response).accessToken }}"}'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ fromJson(steps.port_access_token.outputs.response).accessToken }}"}'
   
       - name: Log Delete Application From Port Request Failure 
         if: failure()
