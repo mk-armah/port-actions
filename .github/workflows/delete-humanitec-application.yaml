@@ -66,11 +66,11 @@ jobs:
             -d '{
             "clientId": "'"${CLIENT_ID}"'",
             "clientSecret": "'"${CLIENT_SECRET}"'" }')
+          response_body=$(head -n -1 response.txt)
           if [[ "$http_code" -ne 200 ]]; then
-            echo "Error: HTTP $http_code"
+            echo "Error: $response_body"
             exit 1
           else
-            response_body=$(head -n -1 response.txt)
             echo "delete_resource_response=$response_body" >> $GITHUB_ENV
           fi
           
