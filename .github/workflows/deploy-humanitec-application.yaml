@@ -2,6 +2,18 @@ name: Deploy Humanitec Application
 on:
   workflow_dispatch:
     inputs:
+      delta_id:
+        type: string
+        description: The Delta ID
+        required: true
+      comment:
+        type: string
+        description: An optional comment to help communicate the purpose of the Deployment.
+        required: false
+      environment:
+        type: string
+        description: The Environment ID
+        required: true
       port_context:
         required: true
         description: includes blueprint, run ID, and entity identifier from Port.
@@ -10,7 +22,7 @@ jobs:
   deploy-application:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Application
+      - name: Deploy Application
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.humanitec.io/orgs/${{secrets.HUMANITEC_ORG_ID}}/apps/${{fromJson(inputs.port_context).entity}}/envs/${{inputs.environment}}/deploys'
