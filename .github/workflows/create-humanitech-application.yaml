@@ -1,1 +1,66 @@
+name: Create Humanitec Application
+on:
+  workflow_dispatch:
+    inputs:
+      application_name:
+        type: string
+        required: true
+        description: The Human-friendly name for the Application. 
+      environment:
+        description: The ID the Environment is referenced as.
+        required: true
+        type: string
+      environment_name:
+        type: string
+        description: The Human-friendly name for the Environment
+        required: true
+      environment_type:
+        required: true
+        type: string
+        description: The Environment Type. This is used for organizing and managing Environments.
+      port_context:
+        required: true
+        description: includes blueprint, run ID, and entity identifier from Port.
 
+jobs:
+  create-application:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Application
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.humanitec.io/orgs/${{secrets.HUMANITEC_ORG_ID}}/apps'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.HUMANITEC_API_TOKEN }}"}'
+          data: >-
+            {
+              "env": {
+              "id": ${{inputs.environment}},
+              "name": ${{inputs.environment_name}},
+              "type": ${{inputs.environment_type}}
+              },
+              "id": ${{fromJson(inputs.port_context).entity}},
+              "name": ${{inputs.applicatioin_name}}
+            }
+
+      - name: Log Create Application Request Failure 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Failed to create application ..."
+
+      - name: Log Create Application Request Success
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: |
+             Humanitech application has been successfully created! ✅
