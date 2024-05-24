@@ -26,7 +26,8 @@ jobs:
   create-application:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Application
+      - name: Create Application
+        id: create_application
         uses: fjogeleit/http-request-action@v1
         with:
           url: 'https://api.humanitec.io/orgs/${{secrets.HUMANITEC_ORG_ID}}/apps'
@@ -54,6 +55,24 @@ jobs:
           runId: ${{fromJson(inputs.port_context).run_id}}
           logMessage: "Failed to create application ..."
 
+      - name: UPSERT Humanitec Application to Port
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(steps.create_application.outputs.response).id }}" 
+          title: "${{ fromJson(steps.create_application.outputs.response).id }}"
+          icon: Microservice
+          blueprint: "${{fromJson(inputs.port_context).blueprint}}"
+          properties: |-
+            {
+              "createdAt": "${{ fromJson(steps.create_application.outputs.response).created_at }}"
+            }
+          relations: "{}"
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          
       - name: Log Create Application Request Success
         uses: port-labs/port-github-action@v1
         with:
