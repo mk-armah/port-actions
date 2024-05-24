@@ -1,1 +1,40 @@
+name: Deploy Humanitec Application
+on:
+  workflow_dispatch:
+    inputs:
+      port_context:
+        required: true
+        description: includes blueprint, run ID, and entity identifier from Port.
 
+jobs:
+  deploy-application:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Application
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://api.humanitec.io/orgs/${{secrets.HUMANITEC_ORG_ID}}/apps/${{fromJson(inputs.port_context).entity}}/envs/${{inputs.environment}}/deploys'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.HUMANITEC_API_TOKEN }}"}'
+
+      - name: Log Deploy Application Request Failure 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: "Failed to deploy application ..."
+
+      - name: Log Deploy Application Request Success
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(inputs.port_context).run_id}}
+          logMessage: |
+             Application has been successfully deployed ! ✅
