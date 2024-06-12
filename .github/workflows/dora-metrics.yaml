@@ -53,7 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r dora/requirements.txt
 
-      - name: Compute PR Metrics
+      - name: Compute Team Metrics
         run: |
           python dora/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "Meirav"
 
