@@ -14,10 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install jq
+        run: sudo apt-get install jq
+
       - name: Read Config and Output Matrix
         id: set-matrix
         run: |
-          CONFIG_JSON=$(jq -c . src/dora-config.json)
+          CONFIG_JSON=$(jq -c . dora/dora-config.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .}')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
@@ -48,47 +51,25 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r src/requirements.txt
-
-      # - name: Compute PR Metrics
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-      #     REPOSITORY: ${{ matrix.repository }}
-      #     OWNER: ${{ matrix.owner }}
-      #   run: |
-      #     python src/calculate_pr_metrics.py
-      
-      # - name: Deployment Frequency
-      #   id: deployment_frequency
-      #   env:
-      #     WORKFLOWS: ${{ toJson(matrix.workflows) }}
-      #     GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-      #     REPOSITORY: ${{ matrix.repository }}
-      #     OWNER: ${{ matrix.owner }}
-      #     BRANCH: ${{ matrix.branch }}
-      #   run: python src/deployment_frequency.py
-
-      # - name: Lead Time For Changes
-      #   env:
-      #     WORKFLOWS: ${{ toJson(matrix.workflows) }}
-      #     GITHUB_TOKEN: ${{ secrets.PATTOKEN }}
-      #     REPOSITORY: ${{ matrix.repository }}
-      #     OWNER: ${{ matrix.owner }}
-      #     BRANCH: ${{ matrix.branch }}
-      #   run: python src/lead_time_for_changes.py
+          pip install -r dora/requirements.txt
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions
+          python dora/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "Meirav"
+
+      - name: Compute PR Metrics
+        run: |
+          python dora/calculate_pr_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions
           
       - name: Deployment Frequency
         id: deployment_frequency
-        run: python src/deployment_frequency.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
+        run: python dora/deployment_frequency.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions --ignore_workflows
       
       - name: Lead Time For Changes
         id: lead_time_for_changes
-        run: python src/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions --ignore_workflows
+        run: python dora/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
         
+
       - name: UPSERT Entity
         uses: port-labs/port-github-action@v1
         with:
