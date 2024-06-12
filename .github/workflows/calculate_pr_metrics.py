@@ -1,78 +1,169 @@
 import os
 from github import Github
-from datetime import datetime, timedelta
+import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
+import logging
+import argparse
 
-# Initialize GitHub client with your PAT
-g = Github(os.getenv('GITHUB_TOKEN'))
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Get input variables from the environment
-repo_name = os.getenv('REPOSITORY')
-time_frame = int(os.getenv('TIME_FRAME'))
+class RepositoryMetrics:
+    def __init__(self, owner, repo, timeframe,pat_token):
+        self.github_client = Github(pat_token)
+        self.repo_name = f"{owner}/{repo}"
+        self.timeframe = int(timeframe)
+        self.start_date = datetime.datetime.now(datetime.UTC).replace(
+            tzinfo=datetime.timezone.utc
+        ) - datetime.timedelta(days=self.timeframe)
+        self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
-# Fetch the repository
-repo = g.get_repo(repo_name)
+    def calculate_pr_metrics(self):
+        prs = self.repo.get_pulls(state="all", sort="created", direction="desc")
+        results = []
 
-# Calculate the start date for the time frame
-start_date = datetime.now() - timedelta(weeks=time_frame)
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self.process_pr, pr)
+                for pr in prs
+                if pr.created_at >= self.start_date
+            ]
+            for future in as_completed(futures):
+                results.append(future.result())
 
-def calculate_pr_metrics():
-    prs = repo.get_pulls(state='all', sort='updated', direction='desc')
-    
-    # Initialize metric counters
-    total_open_to_close_time = timedelta(0)
-    total_time_to_first_review = timedelta(0)
-    total_time_to_approval = timedelta(0)
-    prs_opened = 0
-    prs_merged = 0
-    total_reviews = 0
-    total_commits = 0
-    total_loc_changed = 0
+        metrics = self.aggregate_results(results)
+        return metrics
 
-    for pr in prs:
-        if pr.created_at < start_date:
-            break  # Stop iterating once we are outside the time frame
+    def process_pr(self, pr):
+        pr_metrics = {
+            "open_to_close_time": datetime.timedelta(0),
+            "time_to_first_review": datetime.timedelta(0),
+            "time_to_approval": datetime.timedelta(0),
+            "prs_opened": 1,
+            "prs_merged": int(pr.merged),
+            "total_reviews": 0,
+            "total_commits": 0,
+            "total_loc_changed": 0,
+            "review_dates": [],
+        }
 
-        prs_opened += 1
         if pr.merged:
-            prs_merged += 1
-            total_open_to_close_time += pr.merged_at - pr.created_at
+            pr_metrics["open_to_close_time"] = pr.merged_at - pr.created_at
             commits = pr.get_commits()
-            total_commits += commits.totalCount
+            pr_metrics["total_commits"] = commits.totalCount
             for file in pr.get_files():
-                total_loc_changed += file.additions + file.deletions
+                pr_metrics["total_loc_changed"] += file.additions + file.deletions
 
-            reviews = pr.get_reviews()
-            for review in reviews:
-                if review.state == "APPROVED":
-                    total_time_to_approval += review.submitted_at - pr.created_at
-                    break  # Only consider the time to the first approval
+        reviews = pr.get_reviews()
+        for review in reviews:
+            if review.state in ["APPROVED", "CHANGES_REQUESTED", "COMMENTED"]:
+                pr_metrics["review_dates"].append(review.submitted_at)
+                pr_metrics["total_reviews"] += 1
+                if pr_metrics["time_to_first_review"] == datetime.timedelta(0):
+                    pr_metrics["time_to_first_review"] = (
+                        review.submitted_at - pr.created_at
+                    )
+                if review.state == "APPROVED" and pr_metrics[
+                    "time_to_approval"
+                ] == datetime.timedelta(0):
+                    pr_metrics["time_to_approval"] = review.submitted_at - pr.created_at
 
-            if reviews.totalCount > 0:
-                first_review = reviews[0]
-                total_time_to_first_review += first_review.submitted_at - pr.created_at
-                total_reviews += reviews.totalCount
+        return pr_metrics
 
-    # Calculate averages
-    avg_open_to_close_time = total_open_to_close_time / prs_opened if prs_opened else timedelta(0)
-    avg_time_to_first_review = total_time_to_first_review / prs_opened if prs_opened else timedelta(0)
-    avg_time_to_approval = total_time_to_approval / prs_opened if prs_opened else timedelta(0)
-    avg_reviews_per_week = total_reviews / time_frame if time_frame else 0
-    avg_commits_per_pr = total_commits / prs_opened if prs_opened else 0
-    avg_loc_per_pr = total_loc_changed / prs_opened if prs_opened else 0
+    def aggregate_results(self, results):
+        aggregated = {
+            "total_open_to_close_time": datetime.timedelta(0),
+            "total_time_to_first_review": datetime.timedelta(0),
+            "total_time_to_approval": datetime.timedelta(0),
+            "prs_opened": 0,
+            "prs_merged": 0,
+            "total_reviews": 0,
+            "total_commits": 0,
+            "total_loc_changed": 0,
+            "review_dates": [],
+        }
 
-    # Output metrics
-    print(f"Repository: {repo_name}")
-    print(f"Average PR open to close time: {avg_open_to_close_time}")
-    print(f"Average time to first review: {avg_time_to_first_review}")
-    print(f"Average time to approval: {avg_time_to_approval}")
-    print(f"PRs opened: {prs_opened}")
-    print(f"Weekly PRs merged: {prs_merged / time_frame}")
-    print(f"Average PRs reviewed/week: {avg_reviews_per_week}")
-    print(f"Average commits per PR: {avg_commits_per_pr}")
-    print(f"Avg LOC changed per PR: {avg_loc_per_pr}")
+        for result in results:
+            aggregated["total_open_to_close_time"] += result["open_to_close_time"]
+            aggregated["total_time_to_first_review"] += result["time_to_first_review"]
+            aggregated["total_time_to_approval"] += result["time_to_approval"]
+            aggregated["prs_opened"] += result["prs_opened"]
+            aggregated["prs_merged"] += result["prs_merged"]
+            aggregated["total_reviews"] += result["total_reviews"]
+            aggregated["total_commits"] += result["total_commits"]
+            aggregated["total_loc_changed"] += result["total_loc_changed"]
+            aggregated["review_dates"].extend(result["review_dates"])
 
-def main():
-    calculate_pr_metrics()
+        # Calculate average PRs reviewed per week
+        review_weeks = {
+            review_date.isocalendar()[1] for review_date in aggregated["review_dates"]
+        }
+        average_prs_reviewed_per_week = len(review_weeks) / max(1, self.timeframe)
+
+        metrics = {
+            "id": self.repo.id,
+            "average_open_to_close_time": self.timedelta_to_decimal_hours(
+                aggregated["total_open_to_close_time"] / aggregated["prs_merged"]
+            )
+            if aggregated["prs_merged"]
+            else 0,
+            "average_time_to_first_review": self.timedelta_to_decimal_hours(
+                aggregated["total_time_to_first_review"] / aggregated["prs_opened"]
+            )
+            if aggregated["prs_opened"]
+            else 0,
+            "average_time_to_approval": self.timedelta_to_decimal_hours(
+                aggregated["total_time_to_approval"] / aggregated["prs_opened"]
+            )
+            if aggregated["prs_opened"]
+            else 0,
+            "prs_opened": aggregated["prs_opened"],
+            "weekly_prs_merged": self.timedelta_to_decimal_hours(
+                aggregated["total_open_to_close_time"] / max(1, self.timeframe)
+            )
+            if aggregated["prs_merged"]
+            else 0,
+            "average_reviews_per_pr": round(
+                aggregated["total_reviews"] / aggregated["prs_opened"], 2
+            )
+            if aggregated["prs_opened"]
+            else 0,
+            "average_commits_per_pr": round(
+                aggregated["total_commits"] / aggregated["prs_opened"], 2
+            )
+            if aggregated["prs_opened"]
+            else 0,
+            "average_loc_changed_per_pr": round(
+                aggregated["total_loc_changed"] / aggregated["prs_opened"], 2
+            )
+            if aggregated["prs_opened"]
+            else 0,
+            "average_prs_reviewed_per_week": round(average_prs_reviewed_per_week, 2),
+        }
+
+        return metrics
+
+    def timedelta_to_decimal_hours(self, td):
+        return round(td.total_seconds() / 3600, 2)
 
 if __name__ == "__main__":
-    main()
+    
+    parser = argparse.ArgumentParser(description='Calculate Pull Request Metrics.')
+    parser.add_argument('--owner', required=True, help='Owner of the repository')
+    parser.add_argument('--repo', required=True, help='Repository name')
+    parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
+    args = parser.parse_args()
+
+    logging.info(f"Repository Name: {args.owner}/{args.repo}")
+    logging.info(f"TimeFrame (in days): {args.timeframe}")
+
+    repo_metrics = RepositoryMetrics(args.owner, args.repo, args.timeframe, pat_token=args.token)
+    metrics = repo_metrics.calculate_pr_metrics()
+    metrics_json = json.dumps(metrics, default=str)
+    print(metrics_json)
+    
+    if args.platform == "github-actions":
+        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
+            github_env.write(f"metrics={metrics_json}\n")
