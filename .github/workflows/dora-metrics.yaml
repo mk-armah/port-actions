@@ -54,7 +54,7 @@ jobs:
           pip install -r src/requirements.txt
 
       - name: Compute Team Metrics
-        if: ${{ matrix.team_name != null }}
+        if: ${{ matrix.team != null }}
         run: |
           python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team ${{ matrix.team }}
 
@@ -72,7 +72,7 @@ jobs:
 
 
       - name: UPSERT Team DORA Metrics
-        if: ${{ matrix.team_name != null }}
+        if: ${{ matrix.team != null }}
         uses: port-labs/port-github-action@v1
         with:
           identifier: ${{ fromJson(env.team_metrics).id }}
