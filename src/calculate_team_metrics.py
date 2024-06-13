@@ -12,13 +12,18 @@ class TeamMetrics:
         self.github_client = Github(pat_token)
         self.owner = owner
         self.repo_name = f"{owner}/{repo}"
-        self.team_name = team_name
+        self.team_slug = self.convert_to_slug(team_name)
         self.timeframe = int(timeframe)
         self.start_date = datetime.datetime.now(datetime.UTC).replace(
             tzinfo=datetime.timezone.utc
         ) - datetime.timedelta(days=self.timeframe)
         self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
+    def convert_to_slug(self, name):
+        """Convert a team name to a slug by replacing spaces with hyphens and lowercasing."""
+        slug = re.sub(r'\s+', '-', name.strip()).lower()
+        return slug
+        
     def calculate_metrics(self):
         prs = self.repo.get_pulls(state="all", sort="created", direction="desc")
         response_rate = self.calculate_response_rate(prs)
@@ -28,8 +33,8 @@ class TeamMetrics:
         return metrics
 
     def get_team_info(self):
-        org = self.github_client.get_organization(owner)
-        team = org.get_team_by_slug(team_slug)
+        org = self.github_client.get_organization(self.owner)
+        team = org.get_team_by_slug(self.team_slug)
         return {
             "id": team.id,
             "name": team.name,
