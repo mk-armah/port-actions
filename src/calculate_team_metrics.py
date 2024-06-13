@@ -84,7 +84,6 @@ class TeamMetrics:
     def timedelta_to_decimal_hours(self, td):
         return round(td.total_seconds() / 3600, 2)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Calculate Team Metrics for Pull Requests.')
     parser.add_argument('--owner', required=True, help='Owner of the repository')
