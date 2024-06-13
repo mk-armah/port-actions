@@ -13,7 +13,8 @@ class TeamMetrics:
         self.github_client = Github(pat_token)
         self.owner = owner
         self.repo_name = f"{owner}/{repo}"
-        self.team_slug = self.convert_to_slug(team_name)
+        self.team_name = team_name
+        self.team_slug = self.convert_to_slug(self.team_name)
         self.timeframe = int(timeframe)
         self.start_date = datetime.datetime.now(datetime.UTC).replace(
             tzinfo=datetime.timezone.utc
