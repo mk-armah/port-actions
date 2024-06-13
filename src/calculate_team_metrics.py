@@ -35,6 +35,7 @@ class TeamMetrics:
         return metrics
 
     def get_team_info(self):
+        print("TEAM SLUG", team_slug)
         org = self.github_client.get_organization(self.owner)
         team = org.get_team_by_slug(self.team_slug)
         return {
