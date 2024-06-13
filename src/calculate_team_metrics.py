@@ -30,7 +30,7 @@ class TeamMetrics:
         prs = self.repo.get_pulls(state="all", sort="created", direction="desc")
         response_rate = self.calculate_response_rate(prs)
         response_time = self.calculate_response_time(prs)
-        team_info = get_team_info()
+        team_info = self.get_team_info()
         metrics = {**response_rate, **response_time, **team_info}
         return metrics
 
