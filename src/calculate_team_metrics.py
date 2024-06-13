@@ -105,4 +105,4 @@ if __name__ == "__main__":
 
     if args.platform == "github-actions":
         with open(os.getenv("GITHUB_ENV"), "a") as github_env:
-            github_env.write(f"metrics={metrics_json}\n")
+            github_env.write(f"team_metrics={metrics_json}\n")
