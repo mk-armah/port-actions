@@ -73,18 +73,18 @@ jobs:
       - name: UPSERT Team DORA Metrics
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{ fromJson(env.metrics).id }}
-          title: "${{ fromJson(env.metrics).slug }}"
+          identifier: ${{ fromJson(env.team_metrics).id }}
+          title: "${{ fromJson(env.team_metrics).name }}"
           blueprint: githubTeam
           properties: |-
             {
-              "slug": "${{ fromJson(env.metrics).slug }}",
-              "description": ""${{ fromJson(env.metrics).description }}"",
-              "permission": "${{ fromJson(env.metrics).permission }}",
-              "link": "${{ fromJson(env.metrics).link }}",
-              "notificationSetting": "${{ fromJson(env.metrics).notification_setting }}",
-              "responseRate": "${{ fromJson(env.deployment_frequency_report).response_rate }}",
-              "responseTime": "${{ fromJson(env.metrics).response_time }}",
+              "slug": "${{ fromJson(env.team_metrics).slug }}",
+              "description": ""${{ fromJson(env.team_metrics).description }}"",
+              "permission": "${{ fromJson(env.team_metrics).permission }}",
+              "link": "${{ fromJson(env.team_metrics).link }}",
+              "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
+              "responseRate": "${{ fromJson(env.team_metrics).response_rate }}",
+              "responseTime": "${{ fromJson(env.team_metrics).response_time }}",
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
