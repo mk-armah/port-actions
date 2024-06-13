@@ -4,8 +4,7 @@
     "repository": "port-docs",
     "timeframe": 2,
     "branch": "main",
-    "workflows": ["verify-docs-build.yml"],
-    "team": "Team Isaac"
+    "workflows": ["verify-docs-build.yml"]
   },
   {
     "owner": "port-labs",
