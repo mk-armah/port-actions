@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class TeamMetrics:
     def __init__(self, owner, repo, timeframe, team_name, pat_token):
         self.github_client = Github(pat_token)
+        self.owner = owner
         self.repo_name = f"{owner}/{repo}"
         self.team_name = team_name
         self.timeframe = int(timeframe)
@@ -22,9 +23,25 @@ class TeamMetrics:
         prs = self.repo.get_pulls(state="all", sort="created", direction="desc")
         response_rate = self.calculate_response_rate(prs)
         response_time = self.calculate_response_time(prs)
-        metrics = {**response_rate, **response_time}
+        team_info = get_team_info()
+        metrics = {**response_rate, **response_time, **team_info}
         return metrics
 
+    def get_team_info(self):
+        org = self.github_client.get_organization(owner)
+        team = org.get_team_by_slug(team_slug)
+        return {
+            "id": team.id,
+            "name": team.name,
+            "description": team.description,
+            "members_count": team.members_count,
+            "repos_count": team.repos_count,
+            "slug": team.slug,
+            "link": team.html_url,
+            permission: team.persmission,
+            notification_settting: team.notification_setting,
+        }
+        
     def calculate_response_rate(self, prs):
         total_requests = 0
         responded_requests = 0
@@ -37,7 +54,7 @@ class TeamMetrics:
 
         response_rate = (responded_requests / total_requests) * 100 if total_requests else 0
 
-        return {f"{self.team_name}_response_rate": round(response_rate, 2)}
+        return {f"response_rate": round(response_rate, 2)}
 
     def calculate_response_time(self, prs):
         total_response_time = datetime.timedelta(0)
@@ -57,7 +74,7 @@ class TeamMetrics:
             total_response_time / total_responses
         ) if total_responses else 0
 
-        return {f"{self.team_name}_average_response_time": average_response_time}
+        return {f"{average_response_time": average_response_time}
 
     def timedelta_to_decimal_hours(self, td):
         return round(td.total_seconds() / 3600, 2)
@@ -69,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
-    parser.add_argument('--team', required=True, help='Team name to calculate metrics for')
+    parser.add_argument('--team', required=True, help='Team slug to calculate metrics for')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
