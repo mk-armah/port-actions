@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 import argparse
+import re
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
