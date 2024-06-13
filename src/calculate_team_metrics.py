@@ -43,8 +43,8 @@ class TeamMetrics:
             "repos_count": team.repos_count,
             "slug": team.slug,
             "link": team.html_url,
-            permission: team.persmission,
-            notification_settting: team.notification_setting,
+            "permission": team.persmission,
+            "notification_settting": team.notification_setting,
         }
         
     def calculate_response_rate(self, prs):
