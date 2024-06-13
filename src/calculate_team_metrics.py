@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
-    parser.add_argument('--team', required=True, help='Team slug to calculate metrics for')
+    parser.add_argument('--team', required=True, help='Team name to calculate metrics for')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
