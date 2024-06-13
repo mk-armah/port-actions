@@ -68,9 +68,31 @@ jobs:
       - name: Lead Time For Changes
         id: lead_time_for_changes
         run: python src/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
-        
 
-      - name: UPSERT Entity
+
+      - name: UPSERT Team DORA Metrics
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: ${{ fromJson(env.metrics).id }}
+          title: "${{ fromJson(env.metrics).slug }}"
+          blueprint: githubTeam
+          properties: |-
+            {
+              "slug": "${{ fromJson(env.metrics).slug }}",
+              "description": ""${{ fromJson(env.metrics).description }}"",
+              "permission": "${{ fromJson(env.metrics).permission }}",
+              "link": "${{ fromJson(env.metrics).link }}",
+              "notificationSetting": "${{ fromJson(env.metrics).notification_setting }}",
+              "responseRate": "${{ fromJson(env.deployment_frequency_report).response_rate }}",
+              "responseTime": "${{ fromJson(env.metrics).response_time }}",
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          
+
+      - name: UPSERT Repository DORA Metrics
         uses: port-labs/port-github-action@v1
         with:
           identifier: ${{ fromJson(env.metrics).id }}
