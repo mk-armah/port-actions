@@ -55,7 +55,7 @@ jobs:
 
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "Meirav"
+          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "Team Isaac"
 
       - name: Compute PR Metrics
         run: |
