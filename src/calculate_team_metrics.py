@@ -59,7 +59,7 @@ class TeamMetrics:
 
         response_rate = (responded_requests / total_requests) * 100 if total_requests else 0
 
-        return {f"response_rate": round(response_rate, 2)}
+        return {"response_rate": round(response_rate, 2)}
 
     def calculate_response_time(self, prs):
         total_response_time = datetime.timedelta(0)
@@ -79,7 +79,7 @@ class TeamMetrics:
             total_response_time / total_responses
         ) if total_responses else 0
 
-        return {f"{average_response_time": average_response_time}
+        return {"average_response_time": average_response_time}
 
     def timedelta_to_decimal_hours(self, td):
         return round(td.total_seconds() / 3600, 2)
