@@ -15,5 +15,5 @@ jobs:
                 port_client_id: ${{ secrets.PORT_CLIENT_ID }}
                 port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
                 config: |
-                    launchdarkly_host: "https://launchdarkly.com"
+                    launchdarkly_host: "https://app.launchdarkly.com"
                     launchdarkly_token: {{ secrets.LAUNCHDARKLY_ACCESS_TOKEN }}
