@@ -56,19 +56,19 @@ jobs:
       - name: Compute Team Metrics
         if: ${{ matrix.team != null }}
         run: |
-          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team ${{ matrix.team }}
+          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "${{ matrix.team }}"
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
           
       - name: Deployment Frequency
         id: deployment_frequency
-        run: python src/deployment_frequency.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
+        run: python src/deployment_frequency.py --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --branch "${{ matrix.branch }}" --platform github-actions
       
       - name: Lead Time For Changes
         id: lead_time_for_changes
-        run: python src/lead_time_for_changes.py --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.PATTOKEN }} --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
+        run: python src/lead_time_for_changes.py --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
 
 
       - name: UPSERT Team DORA Metrics
