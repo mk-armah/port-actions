@@ -60,7 +60,7 @@ jobs:
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
           
       - name: Deployment Frequency
         id: deployment_frequency
