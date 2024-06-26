@@ -21,7 +21,7 @@ jobs:
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config.json)
-          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .[] | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, teams: .teams[]}}')
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, teams: .teams} ] | map(.teams[] as $team | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, team: $team})')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
   compute-dora-metrics:
