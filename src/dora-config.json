@@ -12,6 +12,6 @@
     "branch": "main",
     "timeframe": 2,
     "workflows": [],
-    "team": "Team Isaac"
+    "team": ["Team Isaac","Product"]
   }
 ]
