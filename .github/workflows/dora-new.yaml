@@ -21,7 +21,7 @@ jobs:
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config.json)
-          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, teams: .teams} ] | map(.teams[] as $team | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, team: $team})')
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, teams: .teams}] | map(.teams[] as $team | {owner: .owner, repository: .repository, branch: .branch, timeframe: .timeframe, workflows: .workflows, team: $team})')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
   compute-dora-metrics:
@@ -54,8 +54,9 @@ jobs:
           pip install -r src/requirements.txt
 
       - name: Compute Team Metrics
+        if: ${{ matrix.team != null }}
         run: |
-          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.GH_TEAM_ACCESS_TOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "${{ matrix.teams }}"
+          python src/calculate_team_metrics.py  --owner ${{ matrix.owner }} --repo ${{ matrix.repository }} --token ${{ secrets.GH_TEAM_ACCESS_TOKEN }} --timeframe ${{env.TIMEFRAME_IN_DAYS}} --platform github-actions --team "${{ matrix.team }}"
 
       # - name: Compute PR Metrics
       #   run: |
@@ -70,6 +71,7 @@ jobs:
       #   run: python src/lead_time_for_changes.py --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
 
       - name: UPSERT Team DORA Metrics
+        if: ${{ matrix.team != null }}
         uses: port-labs/port-github-action@v1
         with:
           identifier: "${{ fromJson(env.team_metrics).id }}"
@@ -111,16 +113,4 @@ jobs:
       #         "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
       #         "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
       #         "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
-      #         "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
-      #         "prsOpened": "${{ fromJson(env.metrics).prs_opened }}",
-      #         "weeklyPrsMerged": "${{ fromJson(env.metrics).weekly_prs_merged }}",
-      #         "averageReviewsPerPr": "${{ fromJson(env.metrics).average_reviews_per_pr }}",
-      #         "averageCommitsPerPr": "${{ fromJson(env.metrics).average_commits_per_pr }}",
-      #         "averageLocChangedPerPr": "${{ fromJson(env.metrics).average_loc_changed_per_pr }}",
-      #         "averagePrsReviewedPerWeek": "${{ fromJson(env.metrics).average_prs_reviewed_per_week }}"
-      #       }
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: UPSERT
+      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).avera
