@@ -85,8 +85,9 @@ jobs:
               "permission": "${{ fromJson(env.team_metrics).permission }}",
               "link": "${{ fromJson(env.team_metrics).link }}",
               "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
-              "responseRate": "${{ fromJson(env.team_metrics).response_rate }}",
-              "averageResponseTime": "${{ fromJson(env.team_metrics).average_response_time }}",
+              "responseRate": ${{ fromJson(env.team_metrics).response_rate }},
+              "averageResponseTime": ${{ fromJson(env.team_metrics).average_response_time }},
+              "timeFrameInWeeks": ${{ matrix.timeframe }},
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
