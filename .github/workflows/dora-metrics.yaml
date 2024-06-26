@@ -75,9 +75,9 @@ jobs:
         if: ${{ matrix.team != null }}
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{ fromJson(env.team_metrics).id }}
+          identifier: "${{ fromJson(env.team_metrics).id }}"
           title: "${{ fromJson(env.team_metrics).name }}"
-          blueprint: githubTeam
+          blueprint: "githubTeam"
           properties: |-
             {
               "slug": "${{ fromJson(env.team_metrics).slug }}",
