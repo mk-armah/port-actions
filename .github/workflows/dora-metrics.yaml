@@ -87,7 +87,7 @@ jobs:
               "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
               "responseRate": ${{ fromJson(env.team_metrics).response_rate }},
               "averageResponseTime": ${{ fromJson(env.team_metrics).average_response_time }},
-              "timeFrameInWeeks": ${{ matrix.timeframe }},
+              "timeFrameInWeeks": ${{ matrix.timeframe }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
