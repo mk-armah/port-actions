@@ -23,6 +23,13 @@ jobs:
           CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | . + {owner: .owner}]' --argjson config "$CONFIG_JSON")
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+          
+      - name: Transform Workflow Parameters
+        run: |
+          echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
+          cleaned_name=$(echo "${{ matrix.repository }}" | tr -c '[:alnum:]' ' ')
+          TITLE=$(echo "${cleaned_name}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+          echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
 
   compute-team-metrics:
     needs: setup
@@ -35,7 +42,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          
       - name: Compute Team Metrics
         run: |
           python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
@@ -73,13 +85,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ matrix.repository }}
-
-      - name: Transform Workflow Parameters
-        run: |
-          echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
-          cleaned_name=$(echo "${{ matrix.repository }}" | tr -c '[:alnum:]' ' ')
-          TITLE=$(echo "${cleaned_name}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-          echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
