@@ -36,11 +36,6 @@ jobs:
           echo "doraBlueprint=$DORABLUEPRINT" >> $GITHUB_OUTPUT
           echo "teamBlueprint=$TEAMBLUEPRINT" >> $GITHUB_OUTPUT
 
-      - name: Debug Owner and Matrix
-        run: |
-          echo "Owner: $OWNER"
-          echo "Matrix: $MATRIX_JSON"
-
   compute-team-metrics:
     needs: setup
     runs-on: ubuntu-latest
@@ -52,11 +47,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-
-      - name: Debug Owner
-        run: |
-          echo "Owner from setup: ${{ needs.setup.outputs.owner }}"
-          echo "Owner from env: ${{ env.owner }}"
           
       - name: Compute Team Metrics
         run: |
