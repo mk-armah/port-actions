@@ -1,0 +1,28 @@
+
+[
+ {
+  "identifier": "doraMetrics",
+  "title": "Dora Metrics",
+  "owner": "port-labs",
+  "items": [
+    {
+      "repository": "port-docs",
+      "timeframe": 2,
+      "branch": "main",
+      "workflows": ["verify-docs-build.yml"]
+    },
+    {
+      "repository": "ocean",
+      "branch": "main",
+      "timeframe": 2,
+      "workflows": []
+    }
+  ]
+},
+{
+    "identifier": "githubTeam",
+    "title": "Github Team",
+    "owner": "port-labs",
+    "items": []
+  }
+]
