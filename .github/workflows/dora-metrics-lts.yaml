@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      owner: ${{ steps.set-matrix.outputs.owner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,14 +25,7 @@ jobs:
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[]]')
           OWNER=$(echo $CONFIG_JSON | jq -r '.[0].owner')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
-          echo "owner=${OWNER}" >> $GITHUB_OUTPUT
-          
-      - name: Transform Workflow Parameters
-        run: |
-          echo "TIMEFRAME_IN_DAYS=$(( ${{ matrix.timeframe }} * 7 ))" >> $GITHUB_ENV
-          cleaned_name=$(echo "${{ matrix.repository }}" | tr -c '[:alnum:]' ' ')
-          TITLE=$(echo "${cleaned_name}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
-          echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
+          echo "owner=${OWNER}" >> $GITHUB_ENV
 
   compute-team-metrics:
     needs: setup
@@ -47,7 +41,7 @@ jobs:
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
+          python src/calculate_team_metrics.py --owner "${{ env.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
 
   compute-repo-metrics:
     needs: setup
@@ -64,7 +58,7 @@ jobs:
       - name: Debug Repository and Owner
         run: |
           echo "Repository: ${{ matrix.repository }}"
-          echo "Owner: ${{ matrix.owner }}"
+          echo "Owner: ${{ env.owner }}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -78,15 +72,15 @@ jobs:
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --platform github-actions
           
       # - name: Deployment Frequency
       #   id: deployment_frequency
-      #   run: python src/deployment_frequency.py --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --branch "${{ matrix.branch }}" --platform github-actions
+      #   run: python src/deployment_frequency.py --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --branch "${{ matrix.branch }}" --platform github-actions
       
       # - name: Lead Time For Changes
       #   id: lead_time_for_changes
-      #   run: python src/lead_time_for_changes.py --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{env.TIMEFRAME_IN_DAYS}} --branch ${{ matrix.branch }} --platform github-actions
+      #   run: python src/lead_time_for_changes.py --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{ env.TIMEFRAME_IN_DAYS }} --branch ${{ matrix.branch }} --platform github-actions
 
       # - name: UPSERT Repository DORA Metrics
       #   uses: port-labs/port-github-action@v1
@@ -108,4 +102,10 @@ jobs:
       #         "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
       #         "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
       #         "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-      #         "
+      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
+      #         "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}"
+      #       }
+          #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+          #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          #     baseUrl: https://api.getport.io
+          #     operation: UPSERT
