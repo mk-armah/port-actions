@@ -21,11 +21,11 @@ jobs:
       - name: Read Config and Output Matrix
         id: set-matrix
         run: |
-          CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
+          CONFIG_JSON=$(cat src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[]]')
           OWNER=$(echo $CONFIG_JSON | jq -r '.[0].owner')
-          echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
-          echo "owner=${OWNER}" >> $GITHUB_ENV
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
 
       - name: Debug Owner and Matrix
         run: |
@@ -96,4 +96,26 @@ jobs:
       #   uses: port-labs/port-github-action@v1
       #   with:
       #     identifier: ${{ fromJson(env.metrics).id }}
-      #     title:
+      #     title: ${{ env.ENTITY_TITLE }}
+      #     blueprint: doraMetrics
+      #     properties: |-
+      #       {
+      #         "timeFrameInWeeks": ${{ matrix.timeframe }},
+      #         "totalDeployments": "${{ fromJson(env.deployment_frequency_report).total_deployments }}",
+      #         "deploymentRating": "${{ fromJson(env.deployment_frequency_report).rating }}",
+      #         "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
+      #         "numberOfUniqueDeploymentWeeks": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_weeks }}",
+      #         "numberOfUniqueDeploymentMonths": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_months }}",
+      #         "deploymentFrequency": "${{ fromJson(env.deployment_frequency_report).deployment_frequency }}",
+      #         "leadTimeForChangesInHours": "${{ fromJson(env.lead_time_for_changes_report).lead_time_for_changes_in_hours }}",
+      #         "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).rating }}",
+      #         "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
+      #         "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
+      #         "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
+      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
+      #         "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}"
+      #       }
+          #     clientId: ${{ secrets.PORT_CLIENT_ID }}
+          #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          #     baseUrl: https://api.getport.io
+          #     operation: UPSERT
