@@ -198,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument('--ignore_workflows', action='store_true', help='Exclude workflows. Default is False.')
     parser.add_argument(
             "--github-host",
-            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com)",
+            help="Base URL for self-hosted GitHub instance (e.g., https://api.example-github.com)",
             default=None,
         )
     args = parser.parse_args()
