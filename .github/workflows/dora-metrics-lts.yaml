@@ -52,7 +52,7 @@ jobs:
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
+          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}" --github-host "${{ needs.setup.outputs.githubHost }}"
 
   compute-repo-metrics:
     needs: setup
@@ -84,15 +84,15 @@ jobs:
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --platform github-actions --github-host "${{ needs.setup.outputs.githubHost }}"
           
       - name: Deployment Frequency
         id: deployment_frequency
-        run: python src/deployment_frequency.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --branch "${{ matrix.branch }}" --platform github-actions
+        run: python src/deployment_frequency.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --branch "${{ matrix.branch }}" --platform github-actions --github-host "${{ needs.setup.outputs.githubHost }}"
       
       - name: Lead Time For Changes
         id: lead_time_for_changes
-        run: python src/lead_time_for_changes.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --branch ${{ matrix.branch }} --platform github-actions
+        run: python src/lead_time_for_changes.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --branch ${{ matrix.branch }} --platform github-actions --github-host "${{ needs.setup.outputs.githubHost }}"
 
       - name: UPSERT Repository DORA Metrics
         uses: port-labs/port-github-action@v1
