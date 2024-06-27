@@ -2,17 +2,16 @@
   "identifier": "doraMetrics",
   "title": "Dora Metrics",
   "owner": "port-labs",
+  "doraTimeFrame": 2 
   "items": [
     {
       "repository": "port-docs",
-      "timeframe": 2,
       "branch": "main",
       "workflows": ["verify-docs-build.yml"]
     },
     {
       "repository": "ocean",
       "branch": "main",
-      "timeframe": 2,
       "workflows": []
     }
   ]
