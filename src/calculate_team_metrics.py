@@ -251,13 +251,10 @@ class TeamEntityProcessor:
 
 if __name__ == "__main__":
 
-    import time
-    start_time = time.time()
-
     try:
         parser = argparse.ArgumentParser(description="Calculate Team Metrics.")
-        parser.add_argument("--owner", required=True, help="Owner of the organization", required = True)
-        parser.add_argument("--token", required=True, help="GitHub token", required = True)
+        parser.add_argument("--owner", required=True, help="Owner of the organization")
+        parser.add_argument("--token", required=True, help="GitHub token")
         parser.add_argument("--time-frame", type=int, default=30, help="Time Frame in days")
         parser.add_argument(
             "--base-url",
@@ -283,7 +280,6 @@ if __name__ == "__main__":
         processor = TeamEntityProcessor(port_api=port_api)
         asyncio.run(processor.process_team_entities(metrics))
         
-        logging.info(f"Execution time: {time.time() - start_time}")
     except Exception as e:
         logging.error(f"Failed to execute script: {e}")
         raise
