@@ -22,7 +22,7 @@ jobs:
         id: set-matrix
         run: |
           CONFIG_JSON=$(cat src/dora-config-v2.json)
-          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[]]')
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .items}')
           OWNER=$(echo $CONFIG_JSON | jq -r '.[0].owner')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: ${{ matrix.repository }}
+          repository: ${{ matrix.include.repository }}
 
       - name: Debug Repository and Owner
         run: |
