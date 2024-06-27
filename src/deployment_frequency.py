@@ -12,15 +12,15 @@ SECONDS_BETWEEN_WRITES=0.5
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DeploymentFrequency:
-    def __init__(self, owner, repo, workflows, branch, number_of_days, token, base_url):
+    def __init__(self, owner, repo, workflows, branch, number_of_days, token, github_host):
         self.owner, self.repo = owner, repo
         self.branch = branch
         self.number_of_days = number_of_days
         self.token = token
         try:
             self.github = (
-                Github(login_or_token=token, base_url=base_url)
-                if base_url
+                Github(login_or_token=token, base_url=github_host)
+                if github_host
                 else Github(token)
             )
             self.owner = owner
@@ -109,8 +109,8 @@ if __name__ == "__main__":
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
     parser.add_argument(
-            "--base-url",
-            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com/api/v3)",
+            "--github-host",
+            help="Base URL for self-hosted GitHub instance (e.g., https://api.example-github.com)",
             default=None,
         )
     parser.add_argument('--workflows', required=True, help='GitHub workflows as a JSON string.')
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
-    deployment_frequency = DeploymentFrequency(args.owner, args.repo, args.workflows, args.branch, args.time_frame, token = args.token, base_url = args.base_url)
+    deployment_frequency = DeploymentFrequency(args.owner, args.repo, args.workflows, args.branch, args.time_frame, token = args.token, github_host = args.github_host)
     report = deployment_frequency()
     print(report)
     
