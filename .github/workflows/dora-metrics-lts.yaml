@@ -63,7 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: ${{ matrix.repository }}
+          repository: ${{ matrix.include.repository }}
 
       - name: Debug Repository and Owner
         run: |
