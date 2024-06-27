@@ -21,13 +21,10 @@ jobs:
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
-          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | . + {owner: .owner}]' --argjson config "$CONFIG_JSON")
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[]]')
           OWNER=$(echo $CONFIG_JSON | jq -r '.[0].owner')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
           echo "owner=${OWNER}" >> $GITHUB_OUTPUT
-
-      - name: Debug Matrix Output
-        run: echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
           
       - name: Transform Workflow Parameters
         run: |
@@ -39,11 +36,6 @@ jobs:
   compute-team-metrics:
     needs: setup
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - owner: port-labs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,7 +47,7 @@ jobs:
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
+          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
 
   compute-repo-metrics:
     needs: setup
