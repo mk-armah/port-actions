@@ -12,12 +12,26 @@ SECONDS_BETWEEN_WRITES=0.5
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DeploymentFrequency:
-    def __init__(self, owner, repo, workflows, branch, number_of_days, pat_token=""):
+    def __init__(self, owner, repo, workflows, branch, number_of_days, token, base_url):
         self.owner, self.repo = owner, repo
         self.branch = branch
         self.number_of_days = number_of_days
-        self.pat_token = pat_token
-        self.github = Github(login_or_token = self.pat_token) #,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
+        self.token = token
+        try:
+            self.github = (
+                Github(login_or_token=token, base_url=base_url)
+                if base_url
+                else Github(token)
+            )
+            self.owner = owner
+        except GithubException as e:
+            logging.error(f"Failed to initialize GitHub client: {e}")
+            raise
+        except Exception as e:
+            logging.error(
+                f"Unexpected error during initialization: {e} - verify that your github credentials are valid"
+            )
+            raise
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
         try:
             self.workflows = json.loads(workflows)
@@ -94,13 +108,18 @@ if __name__ == "__main__":
     parser.add_argument('--owner', required=True, help='Owner of the repository')
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
+    parser.add_argument(
+            "--base-url",
+            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com/api/v3)",
+            default=None,
+        )
     parser.add_argument('--workflows', required=True, help='GitHub workflows as a JSON string.')
     parser.add_argument('--branch', default='main', help='Branch name')
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     args = parser.parse_args()
 
-    deployment_frequency = DeploymentFrequency(args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token = args.token)
+    deployment_frequency = DeploymentFrequency(args.owner, args.repo, args.workflows, args.branch, args.timeframe, token = args.token, base_url = args.base_url)
     report = deployment_frequency()
     print(report)
     
