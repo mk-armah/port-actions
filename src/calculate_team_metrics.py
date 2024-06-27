@@ -258,7 +258,7 @@ if __name__ == "__main__":
         parser.add_argument("--time-frame", type=int, default=30, help="Time Frame in days")
         parser.add_argument(
             "--github-host",
-            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com)",
+            help="Base URL for self-hosted GitHub instance (e.g., https://api.github-example.com)",
             default=None,
         )
         parser.add_argument("--port-client-id", help="Port Client ID", required=True)
