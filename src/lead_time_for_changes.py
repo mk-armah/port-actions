@@ -19,9 +19,9 @@ class LeadTimeForChanges:
         workflows,
         branch,
         number_of_days,
-        commit_counting_method="last",
         token,
         github_host,
+        commit_counting_method="last",
         ignore_workflows=True
     ):
         self.owner = owner
