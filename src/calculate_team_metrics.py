@@ -52,7 +52,7 @@ class TeamMetrics:
             logging.info(f"Fetching teams for organization {self.owner}")
             org = self.github_client.get_organization(self.owner)
             teams:List[Team.Team] = [team for team in org.get_teams()]
-            logging.info(f"Found {len(teams)} in {self.owner} >> {teams}")
+            logging.info(f"Found {len(teams)} teams in {self.owner} >> {teams}")
             return [team for team in teams]
         except GithubException as e:
             logging.error(f"Failed to fetch teams: {e}")
