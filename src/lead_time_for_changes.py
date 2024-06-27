@@ -21,7 +21,7 @@ class LeadTimeForChanges:
         number_of_days,
         commit_counting_method="last",
         token,
-        base_url,
+        github_host,
         ignore_workflows=True
     ):
         self.owner = owner
@@ -31,8 +31,8 @@ class LeadTimeForChanges:
         self.commit_counting_method = commit_counting_method
         try:
             self.github = (
-                Github(login_or_token=token, base_url=base_url)
-                if base_url
+                Github(login_or_token=token, base_url=github_host)
+                if github_host
                 else Github(token)
             )
             self.owner = owner
@@ -197,14 +197,14 @@ if __name__ == "__main__":
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     parser.add_argument('--ignore_workflows', action='store_true', help='Exclude workflows. Default is False.')
     parser.add_argument(
-            "--base-url",
-            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com/api/v3)",
+            "--github-host",
+            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com)",
             default=None,
         )
     args = parser.parse_args()
 
     lead_time_for_changes = LeadTimeForChanges(
-        args.owner, args.repo, args.workflows, args.branch, args.time_frame, token=args.token,base_url= args.base_url, ignore_workflows=args.ignore_workflows
+        args.owner, args.repo, args.workflows, args.branch, args.time_frame, token=args.token,github_host= args.github_host, ignore_workflows=args.ignore_workflows
     )
     report = lead_time_for_changes()
     logging.info(f"{"Lead Time for Changes >> "report}")
