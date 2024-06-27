@@ -18,11 +18,5 @@
       "workflows": []
     }
   ]
-},
-{
-    "identifier": "githubTeam",
-    "title": "Github Team",
-    "owner": "port-labs",
-    "items": []
-  }
+}
 ]
