@@ -1,6 +1,7 @@
 {
   "owner": "port-labs",
   "doraTimeFrame": 2,
+  "githubHost": "https://api.github.com",
   "port": {
     "blueprints":{
       "dora": "doraMetrics",
