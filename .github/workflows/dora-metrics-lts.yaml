@@ -34,7 +34,7 @@ jobs:
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
           echo "githubHost=$GITHUB_HOST" >> $GITHUB_OUTPUT
-          echo "doraTimeFrame=$(( DORA_TIMEFRAME * 7 ))" >> $GITHUB_OUTPUT
+          echo "doraTimeFrame=$(( DORA_TIME_FRAME * 7 ))" >> $GITHUB_OUTPUT
           echo "doraBlueprint=$DORA_BLUEPRINT" >> $GITHUB_OUTPUT
           echo "teamBlueprint=$TEAM_BLUEPRINT" >> $GITHUB_OUTPUT
 
