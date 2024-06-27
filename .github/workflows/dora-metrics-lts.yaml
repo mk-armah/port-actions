@@ -11,6 +11,9 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       owner: ${{ steps.set-matrix.outputs.owner }}
+      doraTimeFrame: ${{steps.set-matrix.outputs.doraTimeFrame}}
+      doraBlueprint: ${{steps.set-matrix.outputs.doraBlueprintID}}
+      teamBlueprint: ${{steps.set-matrix.outputs.teamBlueprintID}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,8 +27,14 @@ jobs:
           CONFIG_JSON=$(cat src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .items}')
           OWNER=$(echo $CONFIG_JSON | jq -r '.owner')
+          "DORATIMEFRAME"=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
+          "DORABLUEPRINT"=$(echo $CONFIG_JSON | jq -r '.doraBlueprint')
+          "TEAMBLUEPRINT"=$(echo $CONFIG_JSON | jq -r '.teamBlueprint')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
+          echo "doraTimeFrame=$DORATIMEFRAME" >> $GITHUB_OUTPUT
+          echo "doraBlueprint=$DORABLUEPRINT" >> $GITHUB_OUTPUT
+          echo "teamBlueprint=$TEAMBLUEPRINT" >> $GITHUB_OUTPUT
 
       - name: Debug Owner and Matrix
         run: |
