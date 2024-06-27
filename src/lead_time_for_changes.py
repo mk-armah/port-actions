@@ -193,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument('--token', required=True, help='GitHub token')
     parser.add_argument('--workflows', default='[]', help='GitHub workflows as a JSON string.')
     parser.add_argument('--branch', default='main', help='Branch name')
-    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--time-frame', type=int, default=30, help='Time Frame in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     parser.add_argument('--ignore_workflows', action='store_true', help='Exclude workflows. Default is False.')
     parser.add_argument(
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     lead_time_for_changes = LeadTimeForChanges(
-        args.owner, args.repo, args.workflows, args.branch, args.timeframe, token=args.token,base_url= args.base_url, ignore_workflows=args.ignore_workflows
+        args.owner, args.repo, args.workflows, args.branch, args.time_frame, token=args.token,base_url= args.base_url, ignore_workflows=args.ignore_workflows
     )
     report = lead_time_for_changes()
     logging.info(f"{"Lead Time for Changes >> "report}")
