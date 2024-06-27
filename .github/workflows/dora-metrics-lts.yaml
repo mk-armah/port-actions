@@ -21,10 +21,45 @@ jobs:
         id: set-matrix
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
-          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | .owner = input[].owner]' --argjson input "$CONFIG_JSON")
+          MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | . + {owner: .owner}]' --argjson config "$CONFIG_JSON")
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
-  compute-dora-metrics:
+  compute-team-metrics:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - owner: port-labs
+    steps:
+      - name: Compute Team Metrics
+        run: |
+          python src/calculate_team_metrics2.py --owner "${{ matrix.owner }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame 14
+
+      - name: UPSERT Team DORA Metrics
+        uses: port-labs/port-github-action@v1
+        with:
+          identifier: "${{ fromJson(env.team_metrics).id }}"
+          title: "${{ fromJson(env.team_metrics).name }}"
+          blueprint: "githubTeam"
+          properties: |-
+            {
+              "slug": "${{ fromJson(env.team_metrics).slug }}",
+              "description": "${{ fromJson(env.team_metrics).description }}",
+              "permission": "${{ fromJson(env.team_metrics).permission }}",
+              "link": "${{ fromJson(env.team_metrics).link }}",
+              "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
+              "responseRate": ${{ fromJson(env.team_metrics).response_rate }},
+              "averageResponseTime": ${{ fromJson(env.team_metrics).average_response_time }},
+              "timeFrameInWeeks": ${{ matrix.timeframe }}
+            }
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+
+  compute-repo-metrics:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -53,38 +88,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
 
-      - name: Compute Team Metrics
-        if: ${{ matrix.team != null }}
+      - name: Compute PR Metrics
         run: |
-          python src/calculate_team_metrics2.py --owner "${{ matrix.owner }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame 14
-
-      - name: UPSERT Team DORA Metrics
-        if: ${{ matrix.team != null }}
-        uses: port-labs/port-github-action@v1
-        with:
-          identifier: "${{ fromJson(env.team_metrics).id }}"
-          title: "${{ fromJson(env.team_metrics).name }}"
-          blueprint: "githubTeam"
-          properties: |-
-            {
-              "slug": "${{ fromJson(env.team_metrics).slug }}",
-              "description": "${{ fromJson(env.team_metrics).description }}",
-              "permission": "${{ fromJson(env.team_metrics).permission }}",
-              "link": "${{ fromJson(env.team_metrics).link }}",
-              "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
-              "responseRate": ${{ fromJson(env.team_metrics).response_rate }},
-              "averageResponseTime": ${{ fromJson(env.team_metrics).average_response_time }},
-              "timeFrameInWeeks": ${{ matrix.timeframe }}
-            }
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: UPSERT
-
-      # Uncomment the following steps and complete their implementation as needed
-      # - name: Compute PR Metrics
-      #   run: |
-      #     python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ matrix.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{env.TIMEFRAME_IN_DAYS}}" --platform github-actions
           
       # - name: Deployment Frequency
       #   id: deployment_frequency
@@ -114,16 +120,4 @@ jobs:
       #         "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
       #         "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
       #         "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
-      #         "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}",
-      #         "prsOpened": "${{ fromJson(env.metrics).prs_opened }}",
-      #         "weeklyPrsMerged": "${{ fromJson(env.metrics).weekly_prs_merged }}",
-      #         "averageReviewsPerPr": "${{ fromJson(env.metrics).average_reviews_per_pr }}",
-      #         "averageCommitsPerPr": "${{ fromJson(env.metrics).average_commits_per_pr }}",
-      #         "averageLocChangedPerPr": "${{ fromJson(env.metrics).average_loc_changed_per_pr }}",
-      #         "averagePrsReviewedPerWeek": "${{ fromJson(env.metrics).average_prs_reviewed_per_week }}"
-      #       }
-      #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-      #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-      #     baseUrl: https://api.getport.io
-      #     operation: UPSERT
+      #         "
