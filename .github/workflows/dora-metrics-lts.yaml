@@ -4,16 +4,15 @@ on:
   schedule:
     - cron: '0 2 * * 1'
   workflow_dispatch:
-
 jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       owner: ${{ steps.set-matrix.outputs.owner }}
-      doraTimeFrame: ${{steps.set-matrix.outputs.doraTimeFrame}}
-      doraBlueprint: ${{steps.set-matrix.outputs.doraBlueprintID}}
-      teamBlueprint: ${{steps.set-matrix.outputs.teamBlueprintID}}
+      doraTimeFrame: ${{ steps.set-matrix.outputs.doraTimeFrame }}
+      doraBlueprint: ${{ steps.set-matrix.outputs.doraBlueprintID }}
+      teamBlueprint: ${{ steps.set-matrix.outputs.teamBlueprintID }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,8 +31,7 @@ jobs:
           TEAMBLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.team')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
-          # echo "doraTimeFrame=$DORATIMEFRAME" >> $GITHUB_OUTPUT
-          echo "doraTimeFrame=$(( $DORATIMEFRAME * 7 ))" >> $$GITHUB_OUTPUT
+          echo "doraTimeFrame=$(( DORATIMEFRAME * 7 ))" >> $GITHUB_OUTPUT
           echo "doraBlueprint=$DORABLUEPRINT" >> $GITHUB_OUTPUT
           echo "teamBlueprint=$TEAMBLUEPRINT" >> $GITHUB_OUTPUT
 
