@@ -1,12 +1,12 @@
 {
   "owner": "port-labs",
-  "doraTimeFrame": 2
+  "doraTimeFrame": 2,
   "port": {
     "blueprints":{
       "dora": "doraMetrics",
       "team": "githubTeam"
     }
-  }
+  },
   "items": [
     {
       "repository": "port-docs",
