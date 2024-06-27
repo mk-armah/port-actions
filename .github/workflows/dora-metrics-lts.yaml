@@ -13,6 +13,7 @@ jobs:
       doraTimeFrame: ${{ steps.set-matrix.outputs.doraTimeFrame }}
       doraBlueprint: ${{ steps.set-matrix.outputs.doraBlueprintID }}
       teamBlueprint: ${{ steps.set-matrix.outputs.teamBlueprintID }}
+      githubHost: ${{ steps.set-matrix.outputs.githubHost }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,14 +27,16 @@ jobs:
           CONFIG_JSON=$(cat src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '{include: .items}')
           OWNER=$(echo $CONFIG_JSON | jq -r '.owner')
-          DORATIMEFRAME=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
-          DORABLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.dora')
-          TEAMBLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.team')
+          GITHUB_HOST=$(echo $CONFIG_JSON | jq -r '.githubHost')
+          DORA_TIME_FRAME=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
+          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.dora')
+          TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.team')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
-          echo "doraTimeFrame=$(( DORATIMEFRAME * 7 ))" >> $GITHUB_OUTPUT
-          echo "doraBlueprint=$DORABLUEPRINT" >> $GITHUB_OUTPUT
-          echo "teamBlueprint=$TEAMBLUEPRINT" >> $GITHUB_OUTPUT
+          echo "githubHost=$GITHUB_HOST" >> $GITHUB_OUTPUT
+          echo "doraTimeFrame=$(( DORA_TIMEFRAME * 7 ))" >> $GITHUB_OUTPUT
+          echo "doraBlueprint=$DORA_BLUEPRINT" >> $GITHUB_OUTPUT
+          echo "teamBlueprint=$TEAM_BLUEPRINT" >> $GITHUB_OUTPUT
 
   compute-team-metrics:
     needs: setup
