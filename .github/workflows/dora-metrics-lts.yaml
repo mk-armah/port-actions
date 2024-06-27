@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics2.py --owner "${{ matrix.owner }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame 14
+          python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame 14
 
       - name: UPSERT Team DORA Metrics
         uses: port-labs/port-github-action@v1
