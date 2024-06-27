@@ -27,6 +27,11 @@ jobs:
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
           echo "owner=${OWNER}" >> $GITHUB_ENV
 
+      - name: Debug Owner and Matrix
+        run: |
+          echo "Owner: $OWNER"
+          echo "Matrix: $MATRIX_JSON"
+
   compute-team-metrics:
     needs: setup
     runs-on: ubuntu-latest
@@ -38,10 +43,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
+
+      - name: Debug Owner
+        run: |
+          echo "Owner from setup: ${{ needs.setup.outputs.owner }}"
+          echo "Owner from env: ${{ env.owner }}"
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ env.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
+          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
 
   compute-repo-metrics:
     needs: setup
@@ -58,7 +68,7 @@ jobs:
       - name: Debug Repository and Owner
         run: |
           echo "Repository: ${{ matrix.repository }}"
-          echo "Owner: ${{ env.owner }}"
+          echo "Owner: ${{ needs.setup.outputs.owner }}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -72,40 +82,18 @@ jobs:
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --platform github-actions
           
       # - name: Deployment Frequency
       #   id: deployment_frequency
-      #   run: python src/deployment_frequency.py --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --branch "${{ matrix.branch }}" --platform github-actions
+      #   run: python src/deployment_frequency.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --branch "${{ matrix.branch }}" --platform github-actions
       
       # - name: Lead Time For Changes
       #   id: lead_time_for_changes
-      #   run: python src/lead_time_for_changes.py --owner "${{ env.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{ env.TIMEFRAME_IN_DAYS }} --branch ${{ matrix.branch }} --platform github-actions
+      #   run: python src/lead_time_for_changes.py --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.PATTOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --timeframe ${{ env.TIMEFRAME_IN_DAYS }} --branch ${{ matrix.branch }} --platform github-actions
 
       # - name: UPSERT Repository DORA Metrics
       #   uses: port-labs/port-github-action@v1
       #   with:
       #     identifier: ${{ fromJson(env.metrics).id }}
-      #     title: ${{ env.ENTITY_TITLE }}
-      #     blueprint: doraMetrics
-      #     properties: |-
-      #       {
-      #         "timeFrameInWeeks": ${{ matrix.timeframe }},
-      #         "totalDeployments": "${{ fromJson(env.deployment_frequency_report).total_deployments }}",
-      #         "deploymentRating": "${{ fromJson(env.deployment_frequency_report).rating }}",
-      #         "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
-      #         "numberOfUniqueDeploymentWeeks": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_weeks }}",
-      #         "numberOfUniqueDeploymentMonths": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_months }}",
-      #         "deploymentFrequency": "${{ fromJson(env.deployment_frequency_report).deployment_frequency }}",
-      #         "leadTimeForChangesInHours": "${{ fromJson(env.lead_time_for_changes_report).lead_time_for_changes_in_hours }}",
-      #         "leadTimeRating": "${{ fromJson(env.lead_time_for_changes_report).rating }}",
-      #         "workflowAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).workflow_average_time_duration }}",
-      #         "prAverageTimeDuration": "${{ fromJson(env.lead_time_for_changes_report).pr_average_time_duration }}",
-      #         "averageOpenToCloseTime": "${{ fromJson(env.metrics).average_open_to_close_time }}",
-      #         "averageTimeToFirstReview": "${{ fromJson(env.metrics).average_time_to_first_review }}",
-      #         "averageTimeToApproval": "${{ fromJson(env.metrics).average_time_to_approval }}"
-      #       }
-          #     clientId: ${{ secrets.PORT_CLIENT_ID }}
-          #     clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          #     baseUrl: https://api.getport.io
-          #     operation: UPSERT
+      #     title:
