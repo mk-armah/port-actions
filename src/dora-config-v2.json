@@ -1,6 +1,4 @@
-
-[
- {
+{
   "identifier": "doraMetrics",
   "title": "Dora Metrics",
   "owner": "port-labs",
@@ -19,4 +17,3 @@
     }
   ]
 }
-]
