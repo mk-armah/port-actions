@@ -22,7 +22,9 @@ jobs:
         run: |
           CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | . + {owner: .owner}]' --argjson config "$CONFIG_JSON")
+          OWNER=$(echo $CONFIG_JSON | jq -r '.[0].owner')
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+          echo "owner=${OWNER}" >> $GITHUB_OUTPUT
 
       - name: Debug Matrix Output
         run: echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
@@ -54,28 +56,6 @@ jobs:
       - name: Compute Team Metrics
         run: |
           python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
-
-      - name: UPSERT Team DORA Metrics
-        uses: port-labs/port-github-action@v1
-        with:
-          identifier: "${{ fromJson(env.team_metrics).id }}"
-          title: "${{ fromJson(env.team_metrics).name }}"
-          blueprint: "githubTeam"
-          properties: |-
-            {
-              "slug": "${{ fromJson(env.team_metrics).slug }}",
-              "description": "${{ fromJson(env.team_metrics).description }}",
-              "permission": "${{ fromJson(env.team_metrics).permission }}",
-              "link": "${{ fromJson(env.team_metrics).link }}",
-              "notificationSetting": "${{ fromJson(env.team_metrics).notification_setting }}",
-              "responseRate": ${{ fromJson(env.team_metrics).response_rate }},
-              "averageResponseTime": ${{ fromJson(env.team_metrics).average_response_time }},
-              "timeFrameInWeeks": ${{ matrix.timeframe }}
-            }
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: UPSERT
 
   compute-repo-metrics:
     needs: setup
