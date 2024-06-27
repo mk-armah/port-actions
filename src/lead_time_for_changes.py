@@ -20,7 +20,8 @@ class LeadTimeForChanges:
         branch,
         number_of_days,
         commit_counting_method="last",
-        pat_token="",
+        token,
+        base_url,
         ignore_workflows=True
     ):
         self.owner = owner
@@ -28,8 +29,21 @@ class LeadTimeForChanges:
         self.branch = branch
         self.number_of_days = number_of_days
         self.commit_counting_method = commit_counting_method
-        # self.github = Github(login_or_token = pat_token,seconds_between_requests=SECONDS_BETWEEN_REQUESTS, seconds_between_writes=SECONDS_BETWEEN_WRITES)
-        self.github = Github(login_or_token = pat_token)
+        try:
+            self.github = (
+                Github(login_or_token=token, base_url=base_url)
+                if base_url
+                else Github(token)
+            )
+            self.owner = owner
+        except GithubException as e:
+            logging.error(f"Failed to initialize GitHub client: {e}")
+            raise
+        except Exception as e:
+            logging.error(
+                f"Unexpected error during initialization: {e} - verify that your github credentials are valid"
+            )
+            raise
         self.repo_object = self.github.get_repo(f"{self.owner}/{self.repo}")
         self.ignore_workflows = ignore_workflows
         try:
@@ -182,13 +196,18 @@ if __name__ == "__main__":
     parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
     parser.add_argument('--ignore_workflows', action='store_true', help='Exclude workflows. Default is False.')
+    parser.add_argument(
+            "--base-url",
+            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com/api/v3)",
+            default=None,
+        )
     args = parser.parse_args()
 
     lead_time_for_changes = LeadTimeForChanges(
-        args.owner, args.repo, args.workflows, args.branch, args.timeframe, pat_token=args.token,ignore_workflows=args.ignore_workflows
+        args.owner, args.repo, args.workflows, args.branch, args.timeframe, token=args.token,base_url= args.base_url, ignore_workflows=args.ignore_workflows
     )
     report = lead_time_for_changes()
-    print(report)
+    logging.info(f"{"Lead Time for Changes >> "report}")
     
     if args.platform == "github-actions":
        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
