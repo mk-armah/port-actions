@@ -20,7 +20,7 @@ jobs:
       - name: Read Config and Output Matrix
         id: set-matrix
         run: |
-          CONFIG_JSON=$(jq -c . src/dora-config.json)
+          CONFIG_JSON=$(jq -c . src/dora-config-v2.json)
           MATRIX_JSON=$(echo $CONFIG_JSON | jq -c '[.[] | .items[] | .owner = input[].owner]' --argjson input "$CONFIG_JSON")
           echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
 
