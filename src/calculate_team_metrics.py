@@ -51,7 +51,8 @@ class TeamMetrics:
         try:
             logging.info(f"Fetching teams for organization {self.owner}")
             org = self.github_client.get_organization(self.owner)
-            teams = org.get_teams()
+            teams:List[Team.Team] = [team for team in org.get_teams()]
+            logging.info(f"Found {len(teams)} in {self.owner} >> {teams}")
             return [team for team in teams]
         except GithubException as e:
             logging.error(f"Failed to fetch teams: {e}")
@@ -250,6 +251,9 @@ class TeamEntityProcessor:
 
 if __name__ == "__main__":
 
+    import time
+    start_time = time.time()
+
     try:
         parser = argparse.ArgumentParser(description="Calculate Team Metrics.")
         parser.add_argument("--owner", required=True, help="Owner of the organization")
@@ -279,6 +283,7 @@ if __name__ == "__main__":
         processor = TeamEntityProcessor(port_api=port_api)
         asyncio.run(processor.process_team_entities(metrics))
         
+        logging.info(f"Execution time: {time.time() - start_time}")
     except Exception as e:
         logging.error(f"Failed to execute script: {e}")
         raise
