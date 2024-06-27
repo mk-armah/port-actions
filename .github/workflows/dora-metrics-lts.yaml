@@ -33,9 +33,12 @@ jobs:
         include:
           - owner: port-labs
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --time-frame 14
+          python src/calculate_team_metrics.py --owner "${{ matrix.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
 
       - name: UPSERT Team DORA Metrics
         uses: port-labs/port-github-action@v1
