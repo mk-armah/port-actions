@@ -207,7 +207,7 @@ if __name__ == "__main__":
         args.owner, args.repo, args.workflows, args.branch, args.time_frame, token=args.token,github_host= args.github_host, ignore_workflows=args.ignore_workflows
     )
     report = lead_time_for_changes()
-    logging.info(f"{"Lead Time for Changes >> "report}")
+    logging.info(f"Lead Time for Changes >> {report}")
     
     if args.platform == "github-actions":
        with open(os.getenv("GITHUB_ENV"), "a") as github_env:
