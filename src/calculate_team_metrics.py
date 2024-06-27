@@ -18,12 +18,12 @@ logging.basicConfig(
 
 class TeamMetrics:
     def __init__(
-        self, owner: str, time_frame: int, token: str, base_url: str | None
+        self, owner: str, time_frame: int, token: str, github_host: str | None
     ) -> None:
         try:
             self.github_client = (
-                Github(login_or_token=token, base_url=base_url)
-                if base_url
+                Github(login_or_token=token, base_url=github_host)
+                if github_host
                 else Github(token)
             )
             self.owner = owner
@@ -257,8 +257,8 @@ if __name__ == "__main__":
         parser.add_argument("--token", required=True, help="GitHub token")
         parser.add_argument("--time-frame", type=int, default=30, help="Time Frame in days")
         parser.add_argument(
-            "--base-url",
-            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com/api/v3)",
+            "--github-host",
+            help="Base URL for self-hosted GitHub instance (e.g., https://github.example.com)",
             default=None,
         )
         parser.add_argument("--port-client-id", help="Port Client ID", required=True)
@@ -271,7 +271,7 @@ if __name__ == "__main__":
         logging.info(f"Time Frame (in days): {args.time_frame}")
 
         team_metrics = TeamMetrics(
-            args.owner, args.time_frame, token=args.token, base_url=args.base_url
+            args.owner, args.time_frame, token=args.token, github_host=args.github_host
         )
 
         loop = asyncio.get_event_loop()
