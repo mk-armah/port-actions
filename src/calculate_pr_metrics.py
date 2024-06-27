@@ -9,13 +9,27 @@ import argparse
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RepositoryMetrics:
-    def __init__(self, owner, repo, timeframe,pat_token):
-        self.github_client = Github(pat_token)
+    def __init__(self, owner, repo, time_frame,token,github_host):
+        try:
+            self.github_client = (
+                Github(login_or_token=token, base_url=github_host)
+                if github_host
+                else Github(token)
+            )
+            self.owner = owner
+        except GithubException as e:
+            logging.error(f"Failed to initialize GitHub client: {e}")
+            raise
+        except Exception as e:
+            logging.error(
+                f"Unexpected error during initialization: {e} - verify that your github credentials are valid"
+            )
+            raise
         self.repo_name = f"{owner}/{repo}"
-        self.timeframe = int(timeframe)
+        self.time_frame = int(time_frame)
         self.start_date = datetime.datetime.now(datetime.UTC).replace(
             tzinfo=datetime.timezone.utc
-        ) - datetime.timedelta(days=self.timeframe)
+        ) - datetime.timedelta(days=self.time_frame)
         self.repo = self.github_client.get_repo(f"{self.repo_name}")
 
     def calculate_pr_metrics(self):
@@ -98,7 +112,7 @@ class RepositoryMetrics:
         review_weeks = {
             review_date.isocalendar()[1] for review_date in aggregated["review_dates"]
         }
-        average_prs_reviewed_per_week = len(review_weeks) / max(1, self.timeframe)
+        average_prs_reviewed_per_week = len(review_weeks) / max(1, self.time_frame)
 
         metrics = {
             "id": self.repo.id,
@@ -119,7 +133,7 @@ class RepositoryMetrics:
             else 0,
             "prs_opened": aggregated["prs_opened"],
             "weekly_prs_merged": self.timedelta_to_decimal_hours(
-                aggregated["total_open_to_close_time"] / max(1, self.timeframe)
+                aggregated["total_open_to_close_time"] / max(1, self.time_frame)
             )
             if aggregated["prs_merged"]
             else 0,
@@ -152,14 +166,19 @@ if __name__ == "__main__":
     parser.add_argument('--owner', required=True, help='Owner of the repository')
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--token', required=True, help='GitHub token')
-    parser.add_argument('--timeframe', type=int, default=30, help='Timeframe in days')
+    parser.add_argument('--time-frame', type=int, default=30, help='Time Frame in days')
     parser.add_argument('--platform', default='github-actions', choices=['github-actions', 'self-hosted'], help='CI/CD platform type')
+    parser.add_argument(
+            "--github-host",
+            help="Base URL for self-hosted GitHub instance (e.g., https://api.github-example.com)",
+            default=None,
+        )
     args = parser.parse_args()
 
     logging.info(f"Repository Name: {args.owner}/{args.repo}")
-    logging.info(f"TimeFrame (in days): {args.timeframe}")
+    logging.info(f"TimeFrame (in days): {args.time_frame}")
 
-    repo_metrics = RepositoryMetrics(args.owner, args.repo, args.timeframe, pat_token=args.token)
+    repo_metrics = RepositoryMetrics(args.owner, args.repo, args.time_frame, token=args.token,github_host = args.github_host)
     metrics = repo_metrics.calculate_pr_metrics()
     metrics_json = json.dumps(metrics, default=str)
     print(metrics_json)
