@@ -32,7 +32,8 @@ jobs:
           "TEAMBLUEPRINT"=$(echo $CONFIG_JSON | jq -r '.port.blueprint.team')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
-          echo "doraTimeFrame=$DORATIMEFRAME" >> $GITHUB_OUTPUT
+          # echo "doraTimeFrame=$DORATIMEFRAME" >> $GITHUB_OUTPUT
+          echo "doraTimeFrame=$(( $DORATIMEFRAME * 7 ))" >> $$GITHUB_OUTPUT
           echo "doraBlueprint=$DORABLUEPRINT" >> $GITHUB_OUTPUT
           echo "teamBlueprint=$TEAMBLUEPRINT" >> $GITHUB_OUTPUT
 
@@ -50,7 +51,7 @@ jobs:
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame 14 --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
+          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}"
 
   compute-repo-metrics:
     needs: setup
@@ -64,10 +65,11 @@ jobs:
         with:
           repository: ${{ matrix.include.repository }}
 
-      - name: Debug Repository and Owner
+      - name: Transform Workflow Parameters
         run: |
-          echo "Repository: ${{ matrix.repository }}"
-          echo "Owner: ${{ needs.setup.outputs.owner }}"
+          cleaned_name=$(echo "${{ matrix.repository }}" | tr -c '[:alnum:]' ' ')
+          TITLE=$(echo "${cleaned_name}" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+          echo "ENTITY_TITLE=$TITLE" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -81,7 +83,7 @@ jobs:
 
       - name: Compute PR Metrics
         run: |
-          python src/calculate_pr_metrics.py  --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{ env.TIMEFRAME_IN_DAYS }}" --platform github-actions
+          python src/calculate_pr_metrics.py  --owner "${{ needs.setup.outputs.owner }}" --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --timeframe "${{ needs.setup.outputs.doraTimeFrame }}" --platform github-actions
           
       # - name: Deployment Frequency
       #   id: deployment_frequency
