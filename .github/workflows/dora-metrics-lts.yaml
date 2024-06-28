@@ -40,8 +40,8 @@ jobs:
           echo "teamBlueprint=$TEAM_BLUEPRINT" >> $GITHUB_OUTPUT
       - name: Debug Outputs
         run: |
-          echo "dora_present=${{ steps.set-matrix.outputs.dora_present }}"
-          echo "team_present=${{ steps.set-matrix.outputs.team_present }}"
+          echo "dora_present=${{ steps.set-matrix.outputs.doraBlueprint }}"
+          echo "team_present=${{ steps.set-matrix.outputs.teamBlueprint }}"
 
   compute-team-metrics:
     needs: setup
