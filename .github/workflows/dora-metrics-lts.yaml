@@ -102,7 +102,7 @@ jobs:
           blueprint: doraMetrics
           properties: |-
             {
-              "timeFrameInWeeks": ${{ matrix.timeframe }},
+              "timeFrameInWeeks": "${{ needs.setup.outputs.doraTimeFrame }}",
               "totalDeployments": "${{ fromJson(env.deployment_frequency_report).total_deployments }}",
               "deploymentRating": "${{ fromJson(env.deployment_frequency_report).rating }}",
               "numberOfUniqueDeploymentDays": "${{ fromJson(env.deployment_frequency_report).number_of_unique_deployment_days }}",
