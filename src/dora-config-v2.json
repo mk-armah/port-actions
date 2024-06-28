@@ -4,7 +4,6 @@
   "githubHost": "https://api.github.com",
   "port": {
     "blueprints":{
-      "dora": "doraMetrics",
       "team": "githubTeam"
     }
   },
