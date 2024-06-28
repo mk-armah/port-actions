@@ -30,8 +30,8 @@ jobs:
           OWNER=$(echo $CONFIG_JSON | jq -r '.owner')
           GITHUB_HOST=$(echo $CONFIG_JSON | jq -r '.githubHost')
           DORA_TIME_FRAME=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
-          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.dora')
-          TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.team')
+          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.dora // empty')
+          TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.team // empty')
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
           echo "githubHost=$GITHUB_HOST" >> $GITHUB_OUTPUT
