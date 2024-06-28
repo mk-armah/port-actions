@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 2 * * 1'
   workflow_dispatch:
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -14,6 +15,8 @@ jobs:
       doraBlueprint: ${{ steps.set-matrix.outputs.doraBlueprintID }}
       teamBlueprint: ${{ steps.set-matrix.outputs.teamBlueprintID }}
       githubHost: ${{ steps.set-matrix.outputs.githubHost }}
+      dora_present: ${{ steps.set-matrix.outputs.dora_present }}
+      team_present: ${{ steps.set-matrix.outputs.team_present }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,18 +32,23 @@ jobs:
           OWNER=$(echo $CONFIG_JSON | jq -r '.owner')
           GITHUB_HOST=$(echo $CONFIG_JSON | jq -r '.githubHost')
           DORA_TIME_FRAME=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
-          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.dora')
-          TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprint.team')
+          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.dora')
+          TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.team')
+          DORA_PRESENT=$([ -n "$DORA_BLUEPRINT" ] && echo "true" || echo "false")
+          TEAM_PRESENT=$([ -n "$TEAM_BLUEPRINT" ] && echo "true" || echo "false")
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
           echo "owner=$OWNER" >> $GITHUB_OUTPUT
           echo "githubHost=$GITHUB_HOST" >> $GITHUB_OUTPUT
           echo "doraTimeFrame=$(( DORA_TIME_FRAME * 7 ))" >> $GITHUB_OUTPUT
           echo "doraBlueprint=$DORA_BLUEPRINT" >> $GITHUB_OUTPUT
           echo "teamBlueprint=$TEAM_BLUEPRINT" >> $GITHUB_OUTPUT
+          echo "dora_present=$DORA_PRESENT" >> $GITHUB_OUTPUT
+          echo "team_present=$TEAM_PRESENT" >> $GITHUB_OUTPUT
 
   compute-team-metrics:
     needs: setup
     runs-on: ubuntu-latest
+    if: needs.setup.outputs.team_present == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,6 +65,7 @@ jobs:
   compute-repo-metrics:
     needs: setup
     runs-on: ubuntu-latest
+    if: needs.setup.outputs.dora_present == 'true'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
