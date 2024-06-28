@@ -46,7 +46,7 @@ jobs:
   compute-team-metrics:
     needs: setup
     runs-on: ubuntu-latest
-    if: needs.setup.outputs.teamBlueprint != null
+    if: ${{ needs.setup.outputs.teamBlueprint != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
   compute-repo-metrics:
     needs: setup
     runs-on: ubuntu-latest
-    if: needs.setup.outputs.doraBlueprint != null
+    if: ${{ needs.setup.outputs.doraBlueprint != '' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
