@@ -108,7 +108,7 @@ jobs:
         with:
           identifier: "${{ matrix.repository }}-${{ needs.setup.outputs.doraTimeFrame }}"
           title: ${{ env.ENTITY_TITLE }}
-          blueprint: ${{ steps.set-matrix.outputs.doraBlueprintID }}
+          blueprint: "${{ needs.setup.outputs.doraBlueprint }}"
           properties: |-
             {
               "timeFrameInWeeks": ${{ needs.setup.outputs.doraTimeFrame }},
