@@ -12,11 +12,6 @@
       "repository": "port-docs",
       "branch": "main",
       "workflows": ["verify-docs-build.yml"]
-    },
-    {
-      "repository": "ocean",
-      "branch": "main",
-      "workflows": []
     }
   ]
 }
