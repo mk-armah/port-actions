@@ -32,7 +32,7 @@ jobs:
           OWNER=$(echo $CONFIG_JSON | jq -r '.owner')
           GITHUB_HOST=$(echo $CONFIG_JSON | jq -r '.githubHost')
           DORA_TIME_FRAME=$(echo $CONFIG_JSON | jq -r '.doraTimeFrame')
-          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.dora // empty')
+          DORA_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.service // empty')
           TEAM_BLUEPRINT=$(echo $CONFIG_JSON | jq -r '.port.blueprints.team // empty')
           DORA_PRESENT=$([[ -n "$DORA_BLUEPRINT" ]] && echo "true" || echo "false")
           TEAM_PRESENT=$([[ -n "$TEAM_BLUEPRINT" ]] && echo "true" || echo "false")
@@ -108,7 +108,7 @@ jobs:
         with:
           identifier: "${{ matrix.repository }}-${{ needs.setup.outputs.doraTimeFrame }}"
           title: ${{ env.ENTITY_TITLE }}
-          blueprint: "doraMetrics"
+          blueprint: "${{ needs.setup.outputs.doraBlueprint }}"
           properties: |-
             {
               "timeFrameInWeeks": ${{ needs.setup.outputs.doraTimeFrame }},
