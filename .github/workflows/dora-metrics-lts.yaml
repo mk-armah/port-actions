@@ -106,7 +106,7 @@ jobs:
       - name: UPSERT Repository DORA Metrics
         uses: port-labs/port-github-action@v1
         with:
-          identifier: ${{ fromJson(env.metrics).id }}
+          identifier: "${{ matrix.repository }}-${{ needs.setup.outputs.doraTimeFrame }}"
           title: ${{ env.ENTITY_TITLE }}
           blueprint: doraMetrics
           properties: |-
@@ -132,9 +132,9 @@ jobs:
               "averageLocChangedPerPr": "${{ fromJson(env.metrics).average_loc_changed_per_pr }}",
               "averagePrsReviewedPerWeek": "${{ fromJson(env.metrics).average_prs_reviewed_per_week }}"
             }
-          relation : |- 
+          relation: |- 
             {
-            "service": "${{ needs.setup.outputs.owner }}/${{ matrix.repository }}-${{timeFrameInWeeks}}"
+            "service": "${{ matrix.repository }}"
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
