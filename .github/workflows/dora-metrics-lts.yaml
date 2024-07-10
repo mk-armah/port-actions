@@ -132,7 +132,7 @@ jobs:
               "averageLocChangedPerPr": ${{ fromJson(env.metrics).average_loc_changed_per_pr }},
               "averagePrsReviewedPerWeek": ${{ fromJson(env.metrics).average_prs_reviewed_per_week }}
             }
-          relation: |- 
+          relations: |- 
             {
             "service": "${{ matrix.repository }}"
             }
