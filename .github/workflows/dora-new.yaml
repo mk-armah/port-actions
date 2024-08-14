@@ -59,7 +59,7 @@ jobs:
           
       - name: Deployment Frequency
         id: deployment_frequency
-        run:  python src/deployment_frequency.py --owner ${{ matrix.owner }} --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame ${{env.TIMEFRAME_IN_DAYS}}" --branch "${{ matrix.branch }}" --platform github-actions
+        run:  python src/deployment_frequency.py --owner ${{ matrix.owner }} --repo "${{ matrix.repository }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --workflows '${{ toJson(matrix.workflows) }}' --time-frame ${{env.TIMEFRAME_IN_DAYS}} --branch "${{ matrix.branch }}" --platform github-actions
 
       - name: Lead Time For Changes
         id: lead_time_for_changes
