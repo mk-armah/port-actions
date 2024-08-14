@@ -254,6 +254,7 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="Calculate Team Metrics.")
         parser.add_argument("--owner", required=True, help="Owner of the organization")
+        parser.add_argument("--team-blueprint", required=True, help="Github Team Blueprint ID in port")
         parser.add_argument("--token", required=True, help="GitHub token")
         parser.add_argument("--time-frame", type=int, default=30, help="Time Frame in days")
         parser.add_argument(
@@ -278,7 +279,7 @@ if __name__ == "__main__":
         metrics = loop.run_until_complete(team_metrics.calculate_metrics_for_all_teams())
         port_api = PortAPI(args.port_client_id, args.port_client_secret)
         processor = TeamEntityProcessor(port_api=port_api)
-        asyncio.run(processor.process_team_entities(metrics))
+        asyncio.run(processor.process_team_entities(metrics, args.team_blueprint))
         
     except Exception as e:
         logging.error(f"Failed to execute script: {e}")
