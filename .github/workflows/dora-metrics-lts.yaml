@@ -60,7 +60,7 @@ jobs:
           
       - name: Compute Team Metrics
         run: |
-          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}" --github-host "${{ needs.setup.outputs.githubHost }}"
+          python src/calculate_team_metrics.py --owner "${{ needs.setup.outputs.owner }}" --team-blueprint "${{ needs.setup.outputs.teamBlueprint }}" --time-frame "${{ needs.setup.outputs.doraTimeFrame }}" --token "${{ secrets.GH_TEAM_ACCESS_TOKEN }}" --port-client-id "${{ secrets.PORT_CLIENT_ID }}" --port-client-secret "${{ secrets.PORT_CLIENT_SECRET }}" --github-host "${{ needs.setup.outputs.githubHost }}"
 
   compute-repo-metrics:
     needs: setup
