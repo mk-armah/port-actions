@@ -12,8 +12,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       owner: ${{ steps.set-matrix.outputs.owner }}
       doraTimeFrame: ${{ steps.set-matrix.outputs.doraTimeFrame }}
-      doraBlueprint: ${{ steps.set-matrix.outputs.doraBlueprintID }}
-      teamBlueprint: ${{ steps.set-matrix.outputs.teamBlueprintID }}
+      doraBlueprint: ${{ steps.set-matrix.outputs.doraBlueprint }}
+      teamBlueprint: ${{ steps.set-matrix.outputs.teamBlueprint }}
       githubHost: ${{ steps.set-matrix.outputs.githubHost }}
       dora_present: ${{ steps.set-matrix.outputs.dora_present }}
       team_present: ${{ steps.set-matrix.outputs.team_present }}
