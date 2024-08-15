@@ -97,7 +97,7 @@ jobs:
             }
           relations: |- 
             {
-            "service": "${{ matrix.repository }}"
+            "service": ${{ matrix.repository }}
             }
           clientId: ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
