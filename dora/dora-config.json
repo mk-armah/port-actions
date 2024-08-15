@@ -1,0 +1,9 @@
+[
+  {
+    "owner": "<GITHUB-ORG>",
+    "repository": "<GITHUB-REPO-NAME>",
+    "branch": "<REPO-BRANCH>",
+    "timeframe": 4,
+    "workflows": ["ci.yaml","cd.yaml"]
+  }
+]
