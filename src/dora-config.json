@@ -6,13 +6,5 @@
     "branch": "main",
     "workflows": ["verify-docs-build.yml"],
     "teams": []
-  },
-  {
-    "owner": "port-labs",
-    "repository": "ocean",
-    "branch": "main",
-    "timeframe": 2,
-    "workflows": [],
-    "teams": ["Team Isaac","Product"]
   }
 ]
