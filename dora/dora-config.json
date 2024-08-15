@@ -1,9 +1,9 @@
 [
   {
-    "owner": "<GITHUB-ORG>",
-    "repository": "<GITHUB-REPO-NAME>",
-    "branch": "<REPO-BRANCH>",
+    "owner": "port-labs",
+    "repository": "port-docs",
+    "branch": "main",
     "timeframe": 4,
-    "workflows": ["ci.yaml","cd.yaml"]
+    "workflows": ["verify-docs-build.yml"]
   }
 ]
