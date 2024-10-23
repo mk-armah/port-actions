@@ -1,7 +1,7 @@
 on:
     workflow_dispatch:
-    # schedule:
-    #     - cron: '0 */1 * * *' # Determines the scheduled interval for this workflow. This example runs every hour.
+    schedule:
+        - cron: '*/5 * * * *'
 
 jobs:
     run-integration:
