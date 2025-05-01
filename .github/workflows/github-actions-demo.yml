@@ -18,16 +18,6 @@ jobs:
   acknowledge_incident:
     runs-on: ubuntu-latest
     steps:
-      - name: Log Executing Request to Acknowledge Incident
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId: ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl: https://api.getport.io
-          operation: PATCH_RUN
-          runId: ${{fromJson(inputs.port_context).run_id}}
-          logMessage: "About to make a request to pagerduty..."
-
       - name: Log After Upserting Entity
         uses: port-labs/port-github-action@v1
         with:
