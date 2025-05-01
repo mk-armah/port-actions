@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       name_demo:
-        description: ref.
+        description: Name Demo
         required: true
         type: string
       ref:
