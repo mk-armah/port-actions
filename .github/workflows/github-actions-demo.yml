@@ -6,10 +6,6 @@ on:
         description: Name Demo
         required: true
         type: string
-      port_context:
-        required: true
-        description: includes blueprint, run ID, and entity identifier from Port.
-
 jobs:
   acknowledge_incident:
     runs-on: ubuntu-latest
