@@ -8,7 +8,7 @@ on:
         type: string
       ref:
         description: ref.
-        required: true
+        required: false
         type: string
       port_context:
         required: true
